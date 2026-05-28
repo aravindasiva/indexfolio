@@ -1,13 +1,10 @@
-name: CI
+name: Checks
 
 on:
-  pull_request:
-    branches: [main, dev]
-  push:
-    branches: [dev, main]
+  workflow_call:
 
 jobs:
-  ci:
+  checks:
     name: Lint, Typecheck, Test, Build
     runs-on: ubuntu-latest
 

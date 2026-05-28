@@ -1,4 +1,4 @@
 {
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@indexfolio/web",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile"
+  "installCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm turbo run build --filter=@indexfolio/web^...",
+  "buildCommand": "next build"
 }

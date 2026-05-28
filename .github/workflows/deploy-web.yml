@@ -45,6 +45,18 @@ jobs:
         working-directory: apps/web
         run: npx vercel build ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Debug build output
+        working-directory: apps/web
+        run: |
+          echo "=== .vercel/output size ==="
+          du -sh .vercel/output/ 2>/dev/null || echo "NOT FOUND"
+          echo "=== .vercel/output top-level ==="
+          ls -la .vercel/output/ 2>/dev/null || echo "empty or missing"
+          echo "=== config.json ==="
+          cat .vercel/output/config.json 2>/dev/null || echo "no config.json"
+          echo "=== static dir ==="
+          ls .vercel/output/static/ 2>/dev/null | head -10 || echo "no static dir"
+
       - name: Deploy
         working-directory: apps/web
         run: npx vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

@@ -14,12 +14,11 @@ out/
 dist/
 build/
 
-# Environment files
+# Environment files — no real secrets should ever be committed.
+# .env.example is explicitly allowed (placeholder values only, no secrets).
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # Logs
 *.log

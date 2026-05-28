@@ -35,28 +35,55 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build workspace packages
-        run: pnpm turbo run build --filter=@indexfolio/knowledge-graph --filter=@indexfolio/tax-engine --filter=@indexfolio/etf-types
+        run: pnpm turbo run build --force --filter=@indexfolio/knowledge-graph --filter=@indexfolio/tax-engine --filter=@indexfolio/etf-types
+
+      - name: Verify workspace package dist
+        run: |
+          echo "=== knowledge-graph ==="
+          ls packages/knowledge-graph/dist/ 2>/dev/null || echo "NOT FOUND"
+          echo "=== tax-engine ==="
+          ls packages/tax-engine/dist/ 2>/dev/null || echo "NOT FOUND"
+          echo "=== etf-types ==="
+          ls packages/etf-types/dist/ 2>/dev/null || echo "NOT FOUND"
 
       - name: Pull Vercel project settings
-        working-directory: apps/web
         run: npx vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Verify Vercel project config
+        run: |
+          echo "=== .vercel/project.json ==="
+          cat .vercel/project.json 2>/dev/null || echo "NOT FOUND at repo root"
+          echo "=== apps/web/.vercel/project.json ==="
+          cat apps/web/.vercel/project.json 2>/dev/null || echo "NOT FOUND at apps/web"
+
       - name: Build
-        working-directory: apps/web
         run: npx vercel build ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Debug build output
-        working-directory: apps/web
+      - name: Inspect build output
         run: |
-          echo "=== .vercel/output size ==="
-          du -sh .vercel/output/ 2>/dev/null || echo "NOT FOUND"
-          echo "=== .vercel/output top-level ==="
-          ls -la .vercel/output/ 2>/dev/null || echo "empty or missing"
-          echo "=== config.json ==="
-          cat .vercel/output/config.json 2>/dev/null || echo "no config.json"
-          echo "=== static dir ==="
-          ls .vercel/output/static/ 2>/dev/null | head -10 || echo "no static dir"
+          echo "=== apps/web/.next/ size ==="
+          du -sh apps/web/.next/ 2>/dev/null || echo "NOT FOUND"
+          echo "=== .vercel/output/ at repo root ==="
+          du -sh .vercel/output/ 2>/dev/null || echo "NOT FOUND at repo root"
+          echo "=== apps/web/.vercel/output/ ==="
+          du -sh apps/web/.vercel/output/ 2>/dev/null || echo "NOT FOUND at apps/web"
+          echo "=== which .vercel/output is being used ==="
+          ls -la .vercel/output/ 2>/dev/null || echo "repo root .vercel/output is empty or missing"
+          ls -la apps/web/.vercel/output/ 2>/dev/null || echo "apps/web .vercel/output is empty or missing"
+          echo "=== all files in repo-root .vercel/output (up to 40) ==="
+          find .vercel/output -type f 2>/dev/null | head -40 || echo "none"
+          echo "=== all files in apps/web .vercel/output (up to 40) ==="
+          find apps/web/.vercel/output -type f 2>/dev/null | head -40 || echo "none"
+          echo "=== config.json (repo root) ==="
+          cat .vercel/output/config.json 2>/dev/null || echo "none"
+          echo "=== builds.json (repo root) ==="
+          cat .vercel/output/builds.json 2>/dev/null || echo "none"
+          echo "=== builds.json (apps/web) ==="
+          cat apps/web/.vercel/output/builds.json 2>/dev/null || echo "none"
+          echo "=== diagnostics (repo root) ==="
+          find .vercel/output/diagnostics -type f 2>/dev/null | xargs cat 2>/dev/null || echo "none"
+          echo "=== diagnostics (apps/web) ==="
+          find apps/web/.vercel/output/diagnostics -type f 2>/dev/null | xargs cat 2>/dev/null || echo "none"
 
       - name: Deploy
-        working-directory: apps/web
         run: npx vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

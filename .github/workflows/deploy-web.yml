@@ -38,10 +38,13 @@ jobs:
         run: pnpm turbo run build --filter=@indexfolio/knowledge-graph --filter=@indexfolio/tax-engine --filter=@indexfolio/etf-types
 
       - name: Pull Vercel project settings
+        working-directory: apps/web
         run: npx vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build
+        working-directory: apps/web
         run: npx vercel build ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy
+        working-directory: apps/web
         run: npx vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

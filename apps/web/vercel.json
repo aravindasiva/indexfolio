@@ -1,3 +1,4 @@
 {
+  "outputDirectory": "out",
   "installCommand": "echo 'dependencies already installed'"
 }

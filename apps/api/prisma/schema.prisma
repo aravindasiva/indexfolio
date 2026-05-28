@@ -1,0 +1,60 @@
+// Prisma schema for Indexfolio
+// Datasource: Supabase Postgres (local Docker for dev)
+// Generator: Prisma Client JS
+
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model ETF {
+  id             String    @id @default(cuid())
+  ticker         String    @unique
+  isin           String    @unique
+  name           String
+  domicile       String
+  exchange       String
+  currency       String
+  ter            Decimal
+  fundSizeEur    BigInt
+  isAccumulating Boolean
+  isUcits        Boolean
+  indexTracked   String
+  assetClass     String
+  provider       String
+  inceptionDate  DateTime
+  kiidUrl        String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  holdings       Holding[]
+  prices         Price[]
+}
+
+model Holding {
+  id       String   @id @default(cuid())
+  etfId    String
+  etf      ETF      @relation(fields: [etfId], references: [id])
+  ticker   String
+  name     String
+  weight   Decimal
+  country  String
+  sector   String
+  asOfDate DateTime
+
+  @@index([etfId, asOfDate])
+}
+
+model Price {
+  id       String   @id @default(cuid())
+  etfId    String
+  etf      ETF      @relation(fields: [etfId], references: [id])
+  date     DateTime
+  close    Decimal
+  currency String
+
+  @@unique([etfId, date])
+  @@index([etfId, date])
+}

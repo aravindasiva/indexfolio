@@ -28,22 +28,31 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
+      - name: Restore turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm turbo lint
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm turbo typecheck
 
       - name: Test
-        run: pnpm test
+        run: pnpm turbo test
 
       - name: Build
-        run: pnpm build
+        run: pnpm turbo build
 
       - name: SonarQube Scan
+        if: github.event_name == 'pull_request'
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

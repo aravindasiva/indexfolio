@@ -144,7 +144,7 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
     // The charge + link forces then push them outward organically — this IS
     // the spread animation, and the result is never perfectly symmetric.
     function jitter() {
-      return (Math.random() - 0.5) * 12
+      return (Math.random() - 0.5) * 12 // NOSONAR -- used only for D3 force simulation visual spread, not security-sensitive
     }
 
     const simNodes: SimNode[] = graphNodes.map((n) => {

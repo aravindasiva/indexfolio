@@ -1,0 +1,6 @@
+{
+  "buildCommand": "turbo run build --filter=@indexfolio/web",
+  "outputDirectory": "apps/web/.next",
+  "framework": "nextjs",
+  "installCommand": "pnpm install --frozen-lockfile"
+}

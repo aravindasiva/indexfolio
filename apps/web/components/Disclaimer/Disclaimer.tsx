@@ -27,6 +27,7 @@ export function Disclaimer() {
     readDismissedFromSession,
     () => false,
   )
+  
   const [dismissedLocally, setDismissedLocally] = useState(false)
   const [tooltipVisible, setTooltipVisible] = useState(false)
   const [tooltipAnchorRect, setTooltipAnchorRect] = useState<DOMRect | null>(null)

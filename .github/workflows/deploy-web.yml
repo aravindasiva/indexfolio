@@ -35,52 +35,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build workspace packages
-        run: pnpm turbo run build --force --filter=@indexfolio/knowledge-graph --filter=@indexfolio/tax-engine --filter=@indexfolio/etf-types
-
-      - name: Verify workspace package dist
-        run: |
-          echo "=== knowledge-graph ==="
-          ls packages/knowledge-graph/dist/ 2>/dev/null || echo "NOT FOUND"
-          echo "=== tax-engine ==="
-          ls packages/tax-engine/dist/ 2>/dev/null || echo "NOT FOUND"
-          echo "=== etf-types ==="
-          ls packages/etf-types/dist/ 2>/dev/null || echo "NOT FOUND"
+        run: pnpm turbo run build --filter=@indexfolio/knowledge-graph --filter=@indexfolio/tax-engine --filter=@indexfolio/etf-types
 
       - name: Pull Vercel project settings
         run: npx vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Verify Vercel project config
-        run: |
-          echo "=== .vercel/project.json ==="
-          cat .vercel/project.json 2>/dev/null || echo "NOT FOUND at repo root"
-          echo "=== apps/web/.vercel/project.json ==="
-          cat apps/web/.vercel/project.json 2>/dev/null || echo "NOT FOUND at apps/web"
-
       - name: Build
         run: npx vercel build ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Inspect build output
-        run: |
-          echo "=== apps/web/.next/ size ==="
-          du -sh apps/web/.next/ 2>/dev/null || echo "NOT FOUND"
-          echo "=== apps/web/out/ size (static export) ==="
-          du -sh apps/web/out/ 2>/dev/null || echo "NOT FOUND"
-          echo "=== apps/web/out/ top-level ==="
-          ls apps/web/out/ 2>/dev/null || echo "empty or missing"
-          echo "=== .vercel/output/ at repo root ==="
-          du -sh .vercel/output/ 2>/dev/null || echo "NOT FOUND at repo root"
-          echo "=== .vercel/output top-level ==="
-          ls -la .vercel/output/ 2>/dev/null || echo "empty or missing"
-          echo "=== all files in .vercel/output (up to 50) ==="
-          find .vercel/output -type f 2>/dev/null | head -50 || echo "none"
-          echo "=== file count in .vercel/output ==="
-          find .vercel/output -type f 2>/dev/null | wc -l
-          echo "=== config.json ==="
-          cat .vercel/output/config.json 2>/dev/null || echo "none"
-          echo "=== builds.json ==="
-          cat .vercel/output/builds.json 2>/dev/null || echo "none"
-          echo "=== diagnostics ==="
-          find .vercel/output/diagnostics -type f 2>/dev/null | xargs cat 2>/dev/null || echo "none"
 
       - name: Deploy
         run: npx vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}

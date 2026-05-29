@@ -6,9 +6,9 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: indexfolio
-      POSTGRES_PASSWORD: indexfolio_dev
-      POSTGRES_DB: indexfolio
+      POSTGRES_USER: ${POSTGRES_USER:-indexfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-indexfolio_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-indexfolio}
     ports:
       - '5432:5432'
     volumes:

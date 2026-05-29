@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+/*
+  Design tokens — single source of truth for the whole app.
+  @theme inline maps CSS variables to Tailwind utilities so classes like
+  bg-background, text-primary, font-sans, etc. all work off these values.
+  VS Code may warn "Unknown at rule @theme" — that is a false positive.
+  The warning is suppressed in .vscode/settings.json.
+*/
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-warning: var(--warning);
+  --color-neutral: var(--neutral);
+
+  /* Syne for display/brand/headings, DM Sans for body/UI/small text */
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-syne), system-ui, sans-serif;
+}
+
+/*
+  font-sans (DM Sans) is the global default.
+  Use font-display (Syne) explicitly for brand names, headings, and hero labels.
+*/
+body {
+  font-family: var(--font-sans);
+}
+
+:root {
+  --primary: #635bff;
+  --positive: #0e8a16;
+  --negative: #a32d2d;
+  --warning: #ba7517;
+  --neutral: #888780;
+  --background: hsl(240 20% 98%);
+  --foreground: hsl(240 10% 4%);
+
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(15, 23, 42, 0.12);
+  --glass-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --glass-gloss-start: rgba(255, 255, 255, 0.74);
+
+  --glass-chip-bg: rgba(255, 255, 255, 0.48);
+  --glass-chip-hover-bg: rgba(255, 255, 255, 0.74);
+  --glass-chip-border: rgba(15, 23, 42, 0.14);
+  --glass-chip-text: rgba(15, 23, 42, 0.8);
+
+  --tooltip-bg: rgba(255, 255, 255, 0.86);
+  --tooltip-border: rgba(15, 23, 42, 0.14);
+  --tooltip-text: rgba(15, 23, 42, 0.88);
+}
+
+.dark {
+  --background: hsl(240 10% 4%);
+  --foreground: hsl(0 0% 98%);
+
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --glass-gloss-start: rgba(255, 255, 255, 0.12);
+
+  --glass-chip-bg: rgba(255, 255, 255, 0.08);
+  --glass-chip-hover-bg: rgba(255, 255, 255, 0.14);
+  --glass-chip-border: rgba(255, 255, 255, 0.16);
+  --glass-chip-text: rgba(255, 255, 255, 0.82);
+
+  --tooltip-bg: rgba(10, 10, 14, 0.85);
+  --tooltip-border: rgba(255, 255, 255, 0.16);
+  --tooltip-text: rgba(255, 255, 255, 0.9);
+}
+
+/*
+  .glass-surface — reusable frosted-glass layer.
+  Works on any element. Add rounded-* and overflow-hidden to shape it.
+  Pair with a gloss overlay div (see Nav) for the iPhone liquid-glass sheen.
+*/
+@layer components {
+  .glass-surface {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      var(--glass-shadow),
+      var(--glass-inset);
+  }
+
+  .glass-gloss {
+    background: linear-gradient(to bottom, var(--glass-gloss-start), transparent);
+  }
+
+  .glass-chip {
+    border: 1px solid var(--glass-chip-border);
+    background: var(--glass-chip-bg);
+    color: var(--glass-chip-text);
+    box-shadow: var(--glass-inset);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .glass-chip:hover {
+    background: var(--glass-chip-hover-bg);
+  }
+
+  .glass-chip-hover {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--glass-chip-text);
+    transition: all 150ms ease;
+  }
+
+  .glass-chip-hover:hover,
+  .glass-chip-hover:focus-visible {
+    border-color: var(--glass-chip-border);
+    background: var(--glass-chip-hover-bg);
+    box-shadow: var(--glass-inset);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+  }
+
+  .glass-chip-link {
+    border: 1px solid transparent;
+    color: var(--glass-chip-text);
+    transition: all 150ms ease;
+  }
+
+  .glass-chip-link:hover {
+    border-color: var(--glass-chip-border);
+    background: var(--glass-chip-hover-bg);
+    box-shadow: var(--glass-inset);
+    backdrop-filter: blur(12px) saturate(135%);
+    -webkit-backdrop-filter: blur(12px) saturate(135%);
+  }
+
+  .glass-chip-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 999px;
+  }
+
+  .glass-tooltip {
+    border: 1px solid var(--tooltip-border);
+    background: var(--tooltip-bg);
+    color: var(--tooltip-text);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.2),
+      var(--glass-inset);
+    backdrop-filter: blur(12px) saturate(135%);
+    -webkit-backdrop-filter: blur(12px) saturate(135%);
+  }
+}
+
+@keyframes indexfolio-pulse {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  50% {
+    opacity: 0.14;
+  }
+}

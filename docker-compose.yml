@@ -1,0 +1,31 @@
+# Local development stack only. Not used in CI or production.
+# Start with: docker compose up -d
+# Stop with:  docker compose down
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-indexfolio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-indexfolio_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-indexfolio}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U indexfolio -d indexfolio']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

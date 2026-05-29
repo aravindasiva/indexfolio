@@ -1,0 +1,19 @@
+name: Bossman
+
+run-name: "${{ github.ref_name }}"
+
+on:
+  push:
+    branches: [dev, main]
+
+jobs:
+  checks:
+    uses: ./.github/workflows/checks.yml
+    secrets: inherit
+
+  deploy-web:
+    needs: checks
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    secrets: inherit

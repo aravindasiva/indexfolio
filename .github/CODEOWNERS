@@ -1,0 +1,11 @@
+# Global - maintainer reviews everything
+* @aravindasiva
+
+# Tax engine - always reviewed by maintainer, no exceptions
+/packages/tax-engine/ @aravindasiva
+
+# Data pipelines - always reviewed by maintainer
+/workers/ @aravindasiva
+
+# CI/CD - always reviewed by maintainer
+/.github/workflows/ @aravindasiva

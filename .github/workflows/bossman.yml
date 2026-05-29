@@ -1,12 +1,10 @@
 name: Bossman
 
-run-name: "${{ github.event_name == 'pull_request' && format('PR #{0}: {1}', github.event.pull_request.number, github.event.pull_request.title) || github.ref_name }}"
+run-name: "${{ github.ref_name }}"
 
 on:
   push:
     branches: [dev, main]
-  pull_request:
-    branches: [main, dev]
 
 jobs:
   checks:
@@ -15,7 +13,6 @@ jobs:
 
   deploy-web:
     needs: checks
-    if: github.event_name == 'push'
     uses: ./.github/workflows/deploy-web.yml
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}

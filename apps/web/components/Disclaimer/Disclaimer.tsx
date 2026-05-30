@@ -25,7 +25,7 @@ export function Disclaimer() {
   const dismissedInSession = useSyncExternalStore(
     subscribeNoop,
     readDismissedFromSession,
-    () => false,
+    () => true,
   )
 
   const [dismissedLocally, setDismissedLocally] = useState(false)

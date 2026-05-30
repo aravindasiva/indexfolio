@@ -3,7 +3,9 @@ import { HoldingsQuerySchema } from './holdings.schema.js'
 
 describe('HoldingsQuerySchema', () => {
   it('parses a valid query with etfId only', () => {
-    expect(HoldingsQuerySchema.parse({ etfId: 'abc123' })).toEqual({ etfId: 'abc123' })
+    expect(HoldingsQuerySchema.parse({ etfId: 'abc123' })).toEqual({
+      etfId: 'abc123',
+    })
   })
 
   it('parses a query with an ISO datetime asOfDate', () => {

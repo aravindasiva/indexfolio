@@ -54,7 +54,12 @@ export function GraphNode({
       role="button"
       aria-label={`Go to ${label}`}
       tabIndex={0}
-      style={{ cursor: 'pointer', opacity, outline: 'none', transition: 'opacity 0.2s ease' }}
+      style={{
+        cursor: 'pointer',
+        opacity,
+        outline: 'none',
+        transition: 'opacity 0.2s ease',
+      }}
       onClick={onClick}
       onKeyDown={handleKeyDown}
       onPointerEnter={onPointerEnter}

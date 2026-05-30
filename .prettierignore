@@ -5,3 +5,4 @@ build
 .turbo
 pnpm-lock.yaml
 *.generated.*
+apps/web/tsconfig.json

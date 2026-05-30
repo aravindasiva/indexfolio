@@ -15,11 +15,21 @@ export interface GraphEdge {
 }
 
 export const nodes: GraphNode[] = [
-  { id: 'home',        label: 'Indexfolio',      type: 'home', href: '/' },
-  { id: 'screener',    label: 'ETF Screener',     type: 'tool', href: '/screener' },
-  { id: 'calculator',  label: 'Tax Calculator',   type: 'tool', href: '/calculator' },
-  { id: 'overlap',     label: 'Overlap Analyser', type: 'tool', href: '/overlap' },
-  { id: 'tax-guides',  label: 'Tax Guides',       type: 'tool', href: '/tax/portugal' },
+  { id: 'home', label: 'Indexfolio', type: 'home', href: '/' },
+  { id: 'screener', label: 'ETF Screener', type: 'tool', href: '/screener' },
+  {
+    id: 'calculator',
+    label: 'Tax Calculator',
+    type: 'tool',
+    href: '/calculator',
+  },
+  { id: 'overlap', label: 'Overlap Analyser', type: 'tool', href: '/overlap' },
+  {
+    id: 'tax-guides',
+    label: 'Tax Guides',
+    type: 'tool',
+    href: '/tax/portugal',
+  },
 ]
 
 export const edges: GraphEdge[] = [

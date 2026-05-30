@@ -12,15 +12,27 @@ describe('PORTUGAL_TAX', () => {
   })
 
   it('bracket 0: 0-2 years at 28%', () => {
-    expect(PORTUGAL_TAX.holdingDiscounts[0]).toEqual({ minYears: 0, maxYears: 2, rate: 0.28 })
+    expect(PORTUGAL_TAX.holdingDiscounts[0]).toEqual({
+      minYears: 0,
+      maxYears: 2,
+      rate: 0.28,
+    })
   })
 
   it('bracket 1: 2-5 years at 26.5%', () => {
-    expect(PORTUGAL_TAX.holdingDiscounts[1]).toEqual({ minYears: 2, maxYears: 5, rate: 0.265 })
+    expect(PORTUGAL_TAX.holdingDiscounts[1]).toEqual({
+      minYears: 2,
+      maxYears: 5,
+      rate: 0.265,
+    })
   })
 
   it('bracket 2: 5-8 years at 24%', () => {
-    expect(PORTUGAL_TAX.holdingDiscounts[2]).toEqual({ minYears: 5, maxYears: 8, rate: 0.24 })
+    expect(PORTUGAL_TAX.holdingDiscounts[2]).toEqual({
+      minYears: 5,
+      maxYears: 8,
+      rate: 0.24,
+    })
   })
 
   it('bracket 3: 8+ years at 19.6% (Law 31/2024 long-hold discount)', () => {
@@ -55,6 +67,8 @@ describe('getCountry', () => {
 
   it('throws for an unregistered country code', () => {
     // @ts-expect-error - testing runtime guard with an unregistered code
-    expect(() => getCountry('DE')).toThrow('Country code "DE" is not registered in the tax engine')
+    expect(() => getCountry('DE')).toThrow(
+      'Country code "DE" is not registered in the tax engine',
+    )
   })
 })

@@ -7,7 +7,12 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
-    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml,yaml}\" --ignore-path .prettierignore"
+    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml,yaml}\" --ignore-path .prettierignore",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:reset": "docker compose down -v && docker compose up -d",
+    "docker:logs": "docker compose logs -f",
+    "kill:ports": "kill-port 5432 6379 3000 3001"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.0.0",
@@ -19,11 +24,17 @@
     "prettier": "^3.4.0",
     "turbo": "^2.5.0",
     "typescript": "~5.7.0",
-    "typescript-eslint": "^8.0.0"
+    "typescript-eslint": "^8.0.0",
+    "vercel": "^54.6.1"
   },
   "lint-staged": {
-    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
-    "*.{json,md,yml,yaml}": ["prettier --write"]
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {

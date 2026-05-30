@@ -24,9 +24,15 @@ export const metadata: Metadata = {
   description: 'Free toolkit for EU passive investors',
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${syne.variable} ${dmSans.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${syne.variable} ${dmSans.variable}`}
+      suppressHydrationWarning
+    >
       <body className="bg-background text-foreground" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Nav />

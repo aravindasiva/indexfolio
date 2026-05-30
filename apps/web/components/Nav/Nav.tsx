@@ -4,10 +4,13 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
-const ThemeToggle = dynamic(() => import('./_components/ThemeToggle').then((m) => m.ThemeToggle), {
-  ssr: false,
-  loading: () => <div aria-hidden="true" className="size-8" />,
-})
+const ThemeToggle = dynamic(
+  () => import('./_components/ThemeToggle').then((m) => m.ThemeToggle),
+  {
+    ssr: false,
+    loading: () => <div aria-hidden="true" className="size-8" />,
+  },
+)
 
 const NAV_LINKS = [
   { label: 'Screener', href: '/screener' },

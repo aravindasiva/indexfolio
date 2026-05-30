@@ -25,17 +25,21 @@ export function Disclaimer() {
   const dismissedInSession = useSyncExternalStore(
     subscribeNoop,
     readDismissedFromSession,
-    () => false,
+    () => true,
   )
-  
+
   const [dismissedLocally, setDismissedLocally] = useState(false)
   const [tooltipVisible, setTooltipVisible] = useState(false)
-  const [tooltipAnchorRect, setTooltipAnchorRect] = useState<DOMRect | null>(null)
+  const [tooltipAnchorRect, setTooltipAnchorRect] = useState<DOMRect | null>(
+    null,
+  )
   const [isHoldingToUnlock, setIsHoldingToUnlock] = useState(false)
   const [canDismiss, setCanDismiss] = useState(false)
   const [progressKey, setProgressKey] = useState(0)
 
-  function startUnlockHold(event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>) {
+  function startUnlockHold(
+    event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>,
+  ) {
     setTooltipVisible(true)
     setTooltipAnchorRect(event.currentTarget.getBoundingClientRect())
     if (canDismiss) return
@@ -118,7 +122,10 @@ export function Disclaimer() {
                   strokeLinecap="round"
                   initial={{ pathLength: 0 }}
                   animate={{ pathLength: isHoldingToUnlock ? 1 : 0 }}
-                  transition={{ duration: WAIT_BEFORE_DISMISS_MS / 1000, ease: 'linear' }}
+                  transition={{
+                    duration: WAIT_BEFORE_DISMISS_MS / 1000,
+                    ease: 'linear',
+                  }}
                   onAnimationComplete={handleUnlockAnimationComplete}
                   className="text-primary dark:text-foreground"
                 />

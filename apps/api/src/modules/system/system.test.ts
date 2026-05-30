@@ -3,7 +3,9 @@ import { HealthResponseSchema, ReadyResponseSchema } from './system.schema.js'
 
 describe('HealthResponseSchema', () => {
   it('parses a valid health response', () => {
-    expect(HealthResponseSchema.parse({ status: 'ok' })).toEqual({ status: 'ok' })
+    expect(HealthResponseSchema.parse({ status: 'ok' })).toEqual({
+      status: 'ok',
+    })
   })
 
   it('rejects an invalid status', () => {

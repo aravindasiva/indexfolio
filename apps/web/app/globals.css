@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /*
   Design tokens — single source of truth for the whole app.
@@ -85,13 +85,15 @@ body {
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
     border: 1px solid var(--glass-border);
-    box-shadow:
-      var(--glass-shadow),
-      var(--glass-inset);
+    box-shadow: var(--glass-shadow), var(--glass-inset);
   }
 
   .glass-gloss {
-    background: linear-gradient(to bottom, var(--glass-gloss-start), transparent);
+    background: linear-gradient(
+      to bottom,
+      var(--glass-gloss-start),
+      transparent
+    );
   }
 
   .glass-chip {

@@ -22,14 +22,17 @@ assignees: ''
 **Dividend tax rate:**
 
 **Any holding period discounts?**
+
 <!-- Example: Portugal has Law 31/2024 which reduces rate after 2, 5, and 8 years -->
 
 **Are gains taxed at a flat rate or progressive rate?**
 
 **Annual filing process:**
+
 <!-- What form, what portal, what deadline -->
 
 **Official sources:**
+
 <!-- Links to government tax authority documentation -->
 
 ## Are you willing to implement this?

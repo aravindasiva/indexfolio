@@ -3,7 +3,9 @@ import { EtfParamsSchema, EtfListQuerySchema } from './etf.schema.js'
 
 describe('EtfParamsSchema', () => {
   it('parses a valid ticker', () => {
-    expect(EtfParamsSchema.parse({ ticker: 'VWCE' })).toEqual({ ticker: 'VWCE' })
+    expect(EtfParamsSchema.parse({ ticker: 'VWCE' })).toEqual({
+      ticker: 'VWCE',
+    })
   })
 
   it('rejects an empty ticker', () => {

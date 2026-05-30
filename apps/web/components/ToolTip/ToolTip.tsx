@@ -2,7 +2,10 @@ import { motion } from 'framer-motion'
 
 type ToolTipPlacement = 'auto' | 'top' | 'right' | 'bottom' | 'left'
 
-type AnchorRect = Pick<DOMRect, 'top' | 'right' | 'bottom' | 'left' | 'width' | 'height'>
+type AnchorRect = Pick<
+  DOMRect,
+  'top' | 'right' | 'bottom' | 'left' | 'width' | 'height'
+>
 
 interface ToolTipProps {
   text: string
@@ -52,7 +55,10 @@ function resolvePosition(
   placement: ToolTipPlacement,
   offset: number,
 ): PositionResult {
-  const side = placement === 'auto' ? resolveAutoPlacement(rect, viewportWidth, viewportHeight) : placement
+  const side =
+    placement === 'auto'
+      ? resolveAutoPlacement(rect, viewportWidth, viewportHeight)
+      : placement
 
   if (side === 'top') {
     return {
@@ -117,7 +123,13 @@ export function ToolTip({
   const viewportHeight = hasWindow ? globalThis.window.innerHeight : 720
   const fallback = { top: -9999, left: -9999, placement: 'top' as const }
   const position = anchorRect
-    ? resolvePosition(anchorRect as DOMRect, viewportWidth, viewportHeight, placement, offset)
+    ? resolvePosition(
+        anchorRect as DOMRect,
+        viewportWidth,
+        viewportHeight,
+        placement,
+        offset,
+      )
     : fallback
 
   return (

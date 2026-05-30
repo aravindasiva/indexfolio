@@ -1,9 +1,10 @@
 // Prisma schema for Indexfolio
-// Datasource: Supabase Postgres (local Docker for dev)
+// Datasource: Neon Postgres (local Docker for dev)
 // Generator: Prisma Client JS
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -11,26 +12,27 @@ generator client {
 }
 
 model ETF {
-  id             String    @id @default(cuid())
-  ticker         String    @unique
-  isin           String    @unique
-  name           String
-  domicile       String
-  exchange       String
-  currency       String
-  ter            Decimal
-  fundSizeEur    BigInt
-  isAccumulating Boolean
-  isUcits        Boolean
-  indexTracked   String
-  assetClass     String
-  provider       String
-  inceptionDate  DateTime
-  kiidUrl        String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  holdings       Holding[]
-  prices         Price[]
+  id               String    @id @default(cuid())
+  ticker           String    @unique
+  isin             String    @unique
+  name             String
+  domicile         String
+  exchange         String
+  currency         String
+  ter              Decimal
+  fundSizeEur      BigInt
+  isAccumulating   Boolean
+  isUcits          Boolean
+  indexTracked     String
+  assetClass       String
+  provider         String
+  inceptionDate    DateTime
+  kiidUrl          String?
+  lastMetadataSync DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  holdings         Holding[]
+  prices           Price[]
 }
 
 model Holding {
@@ -57,4 +59,25 @@ model Price {
 
   @@unique([etfId, date])
   @@index([etfId, date])
+}
+
+model ExchangeRate {
+  id           String   @id @default(cuid())
+  date         DateTime
+  fromCurrency String
+  toCurrency   String
+  rate         Decimal
+
+  @@unique([date, fromCurrency, toCurrency])
+  @@index([date, fromCurrency, toCurrency])
+}
+
+model PipelineRun {
+  id               String    @id @default(cuid())
+  pipeline         String
+  status           String
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  errorMessage     String?
+  recordsProcessed Int?
 }

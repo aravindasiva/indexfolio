@@ -9,8 +9,15 @@ import {
   forceManyBody,
   forceSimulation,
 } from 'd3-force'
-import type { Simulation, SimulationLinkDatum, SimulationNodeDatum } from 'd3-force'
-import { edges as graphEdges, nodes as graphNodes } from '@indexfolio/knowledge-graph'
+import type {
+  Simulation,
+  SimulationLinkDatum,
+  SimulationNodeDatum,
+} from 'd3-force'
+import {
+  edges as graphEdges,
+  nodes as graphNodes,
+} from '@indexfolio/knowledge-graph'
 import type { NodeType } from '@indexfolio/knowledge-graph'
 import { GraphNode, NODE_COLORS } from './_components/GraphNode'
 
@@ -75,7 +82,11 @@ function nodeOpacity(nodeId: string, hoveredId: string | null): number {
   return 0.12
 }
 
-function edgeOpacity(srcId: string, tgtId: string, hoveredId: string | null): number {
+function edgeOpacity(
+  srcId: string,
+  tgtId: string,
+  hoveredId: string | null,
+): number {
   if (!hoveredId) return 0.2
   if (srcId === hoveredId || tgtId === hoveredId) return 0.7
   return 0.04
@@ -124,7 +135,11 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
     if (!el) return
     const obs = new ResizeObserver((entries) => {
       const rect = entries[0]?.contentRect
-      if (rect) setDims({ width: Math.floor(rect.width), height: Math.floor(rect.height) })
+      if (rect)
+        setDims({
+          width: Math.floor(rect.width),
+          height: Math.floor(rect.height),
+        })
     })
     obs.observe(el)
     return () => obs.disconnect()
@@ -171,7 +186,15 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
           const x = n.fx == null ? clamp(n.x, pad, width - pad) : n.x
           const y = n.fy == null ? clamp(n.y, pad, height - pad) : n.y
           posMap.set(n.id, { x, y })
-          nextNodes.push({ id: n.id, label: n.label, type: n.type, href: n.href, x, y, index: i })
+          nextNodes.push({
+            id: n.id,
+            label: n.label,
+            type: n.type,
+            href: n.href,
+            x,
+            y,
+            index: i,
+          })
         }
       }
 
@@ -281,22 +304,24 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
 
       <svg width="100%" height="100%" aria-hidden="true" className="block">
         <defs>
-          {(Object.entries(NODE_COLORS) as [NodeType, string][]).map(([type]) => (
-            <filter
-              key={type}
-              id={`graph-glow-${type}`}
-              x="-80%"
-              y="-80%"
-              width="260%"
-              height="260%"
-            >
-              <feGaussianBlur stdDeviation="2.5" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          ))}
+          {(Object.entries(NODE_COLORS) as [NodeType, string][]).map(
+            ([type]) => (
+              <filter
+                key={type}
+                id={`graph-glow-${type}`}
+                x="-80%"
+                y="-80%"
+                width="260%"
+                height="260%"
+              >
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            ),
+          )}
         </defs>
 
         {/* Edges */}

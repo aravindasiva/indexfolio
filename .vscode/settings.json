@@ -1,6 +1,22 @@
 {
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.useFlatConfig": true,
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "tailwindCSS.experimental.configFile": "apps/web/app/globals.css",
+  "prettier.requireConfig": true,
+  "files.eol": "\n",
+  "editor.rulers": [100],
   // Tailwind v4 uses @theme, @layer, and other custom at-rules that VS Code's
   // built-in CSS linter does not know about. These are false positives — the
   // CSS is valid and processed correctly by the Tailwind PostCSS plugin.
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
 }

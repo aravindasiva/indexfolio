@@ -3,7 +3,9 @@ import { PricesQuerySchema } from './prices.schema.js'
 
 describe('PricesQuerySchema', () => {
   it('parses a valid query with etfId only', () => {
-    expect(PricesQuerySchema.parse({ etfId: 'abc123' })).toEqual({ etfId: 'abc123' })
+    expect(PricesQuerySchema.parse({ etfId: 'abc123' })).toEqual({
+      etfId: 'abc123',
+    })
   })
 
   it('parses a query with date range', () => {

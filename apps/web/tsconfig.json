@@ -7,7 +7,6 @@
     "moduleResolution": "Bundler",
     "jsx": "preserve",
     "allowJs": true,
-    "incremental": true,
     "paths": {
       "@/*": ["./*"]
     },

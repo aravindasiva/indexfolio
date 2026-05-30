@@ -1,8 +1,9 @@
-import { defineConfig } from 'eslint'
 import tseslint from 'typescript-eslint'
 import prettier from 'eslint-config-prettier'
 
-export default defineConfig(
+// NOSONAR - tseslint.config is flagged as deprecated by SonarQube S1874
+// defineConfig from ESLint core does not support named ESM imports in current setup
+export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**'] },
   ...tseslint.configs.strict,
   prettier,

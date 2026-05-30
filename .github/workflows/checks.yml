@@ -5,7 +5,7 @@ on:
 
 jobs:
   checks:
-    name: Lint, Typecheck, Test, Build
+    name: '🧪 The Quality Squad'
     runs-on: ubuntu-latest
 
     steps:

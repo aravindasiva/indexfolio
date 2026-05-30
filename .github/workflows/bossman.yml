@@ -1,6 +1,6 @@
 name: Bossman
 
-run-name: '${{ github.ref_name }}'
+run-name: '🤖 Bossman on ${{ github.ref_name }} by @${{ github.actor }}'
 
 on:
   push:

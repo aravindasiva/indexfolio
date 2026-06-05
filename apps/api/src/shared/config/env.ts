@@ -3,7 +3,8 @@ import { z } from 'zod'
 const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),
-  TEMPORAL_ADDRESS: z.string().min(1),
+  CORS_ORIGIN: z.string().optional(),
+  TEMPORAL_ADDRESS: z.string().min(1).optional(),
   API_URL: z.string().url().optional(),
   PORT: z.coerce.number().int().positive().default(3001),
   NODE_ENV: z

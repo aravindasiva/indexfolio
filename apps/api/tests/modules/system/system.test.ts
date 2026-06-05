@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { HealthResponseSchema, ReadyResponseSchema } from './system.schema.js'
+import {
+  HealthResponseSchema,
+  ReadyResponseSchema,
+} from '../../../src/modules/system/system.schema.js'
 
 describe('HealthResponseSchema', () => {
   it('parses a valid health response', () => {

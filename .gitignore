@@ -1,5 +1,6 @@
 # Local context files - never commit
 COPILOT_CONTEXT.md
+COPILOT_CURRENT_CONTEXT.md
 
 # Dependencies
 node_modules/

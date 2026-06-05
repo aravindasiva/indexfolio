@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { HoldingsQuerySchema } from './holdings.schema.js'
+import { HoldingsQuerySchema } from '../../../src/modules/holdings/holdings.schema.js'
 
 describe('HoldingsQuerySchema', () => {
   it('parses a valid query with etfId only', () => {

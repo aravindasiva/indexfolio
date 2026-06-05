@@ -14,7 +14,7 @@ generator client {
 model ETF {
   id               String    @id @default(cuid())
   ticker           String    @unique
-  isin             String    @unique
+  isin             String
   name             String
   domicile         String
   exchange         String
@@ -33,6 +33,8 @@ model ETF {
   updatedAt        DateTime  @updatedAt
   holdings         Holding[]
   prices           Price[]
+
+  @@unique([isin, ticker])
 }
 
 model Holding {

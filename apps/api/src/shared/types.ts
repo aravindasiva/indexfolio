@@ -1,11 +1,9 @@
-export interface ApiEnvelope<T> {
-  data: T
-  meta?: Record<string, unknown>
-}
+import type { PrismaClient } from '@prisma/client'
+import type { Redis } from 'ioredis'
 
-export interface PaginatedResponse<T> {
-  data: T[]
-  total: number
-  page: number
-  pageSize: number
+declare module 'fastify' {
+  interface FastifyInstance {
+    db: PrismaClient
+    redis: Redis
+  }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PricesQuerySchema } from './prices.schema.js'
+import { PricesQuerySchema } from '../../../src/modules/prices/prices.schema.js'
 
 describe('PricesQuerySchema', () => {
   it('parses a valid query with etfId only', () => {

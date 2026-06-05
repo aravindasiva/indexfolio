@@ -4,14 +4,23 @@ import prettier from 'eslint-config-prettier'
 // NOSONAR - tseslint.config is flagged as deprecated by SonarQube S1874
 // defineConfig from ESLint core does not support named ESM imports in current setup
 export default tseslint.config(
-  { ignores: ['dist/**', 'node_modules/**'] },
+  {
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      'eslint.config.mjs',
+      'vitest.config.ts',
+      'tsup.config.ts',
+      'prisma.config.ts',
+    ],
+  },
   ...tseslint.configs.strict,
   prettier,
   {
     languageOptions: {
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
-        project: true,
+        project: ['./tsconfig.eslint.json'],
       },
     },
     rules: {

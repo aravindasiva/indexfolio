@@ -24,6 +24,6 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
         summary: 'Readiness check',
       },
     },
-    async () => getReady(),
+    async () => getReady(fastify.db, fastify.redis),
   )
 }

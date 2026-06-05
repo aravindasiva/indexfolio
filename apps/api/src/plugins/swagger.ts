@@ -17,7 +17,7 @@ async function swaggerPlugin(fastify: FastifyInstance): Promise<void> {
   })
 
   await fastify.register(swaggerUi, {
-    routePrefix: '/documentation',
+    routePrefix: '/docs',
   })
 }
 

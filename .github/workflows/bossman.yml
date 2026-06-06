@@ -1,6 +1,6 @@
 name: Bossman
 
-run-name: "🤖 Bossman on ${{ github.ref_name }} by @${{ github.actor }}"
+run-name: '🤖 Bossman on ${{ github.ref_name }} by @${{ github.actor }}'
 
 on:
   push:
@@ -12,7 +12,7 @@ jobs:
     secrets: inherit
 
   detect-changes:
-    name: "🔍 Detecting changes"
+    name: '🔍 Detecting changes'
     runs-on: ubuntu-latest
     outputs:
       api: ${{ steps.filter.outputs.api }}

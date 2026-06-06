@@ -18,5 +18,11 @@
   "css.lint.unknownAtRules": "ignore",
   "[prisma]": {
     "editor.defaultFormatter": "Prisma.prisma"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

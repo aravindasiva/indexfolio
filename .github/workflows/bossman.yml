@@ -38,6 +38,10 @@ jobs:
   deploy-api:
     needs: [checks, detect-changes]
     if: needs.detect-changes.outputs.api == 'true'
+    # One API deployment at a time per branch -- queue, never cancel mid-deploy
+    concurrency:
+      group: deploy-api-${{ github.ref }}
+      cancel-in-progress: false
     uses: ./.github/workflows/deploy-api.yml
     permissions:
       contents: read
@@ -49,6 +53,10 @@ jobs:
 
   deploy-web:
     needs: [checks, detect-changes, deploy-api]
+    # One web deployment at a time per branch -- queue, never cancel mid-deploy
+    concurrency:
+      group: deploy-web-${{ github.ref }}
+      cancel-in-progress: false
     if: |
       always() &&
       needs.checks.result == 'success' &&

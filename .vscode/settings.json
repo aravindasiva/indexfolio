@@ -13,7 +13,7 @@
   "files.eol": "\n",
   "editor.rulers": [100],
   // Tailwind v4 uses @theme, @layer, and other custom at-rules that VS Code's
-  // built-in CSS linter does not know about. These are false positives — the
+  // built-in CSS linter does not know about. These are false positives - the
   // CSS is valid and processed correctly by the Tailwind PostCSS plugin.
   "css.lint.unknownAtRules": "ignore",
   "[prisma]": {

@@ -31,7 +31,7 @@ export function Nav() {
         aria-label="Main navigation"
         className="glass-surface relative flex items-center justify-between gap-4 overflow-hidden rounded-full px-5 py-2.5"
       >
-        {/* Gloss sheen — clipped to pill shape by overflow-hidden on the nav */}
+        {/* Gloss sheen - clipped to pill shape by overflow-hidden on the nav */}
         <div
           aria-hidden="true"
           className="glass-gloss pointer-events-none absolute inset-x-0 top-0 h-1/2"

@@ -10,6 +10,10 @@ updates:
       prefix: 'ci'
     labels:
       - 'dependencies'
+    groups:
+      github-actions:
+        patterns:
+          - '*'
 
   - package-ecosystem: 'npm'
     directory: '/'
@@ -20,7 +24,18 @@ updates:
       prefix: 'chore'
     labels:
       - 'dependencies'
+    groups:
+      npm-patch-minor:
+        update-types:
+          - 'minor'
+          - 'patch'
     ignore:
-      # Turborepo major versions require manual review
+      # Major version bumps need manual review and dedicated testing
       - dependency-name: 'turbo'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'prisma'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@prisma/client'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'fastify-type-provider-zod'
         update-types: ['version-update:semver-major']

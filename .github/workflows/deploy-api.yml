@@ -9,6 +9,9 @@ on:
       railway-service-id:
         required: true
         type: string
+    secrets:
+      railway-token:
+        required: true
 
 jobs:
   deploy:
@@ -31,9 +34,7 @@ jobs:
 
       - name: Deploy to Railway
         env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-          RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+          RAILWAY_TOKEN: ${{ secrets.railway-token }}
         run: |
           railway up \
-            --service ${{ inputs.railway-service-id }} \
-            --environment ${{ inputs.environment }}
+            --service ${{ inputs.railway-service-id }}

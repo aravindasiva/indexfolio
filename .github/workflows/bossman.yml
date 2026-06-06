@@ -44,7 +44,8 @@ jobs:
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
       railway-service-id: ${{ github.ref == 'refs/heads/main' && vars.RAILWAY_API_PRODUCTION_SERVICE_ID || vars.RAILWAY_API_STAGING_SERVICE_ID }}
-    secrets: inherit
+    secrets:
+      railway-token: ${{ github.ref == 'refs/heads/main' && secrets.RAILWAY_TOKEN_PRODUCTION || secrets.RAILWAY_TOKEN_STAGING }}
 
   deploy-web:
     needs: [checks, detect-changes, deploy-api]

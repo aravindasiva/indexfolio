@@ -50,7 +50,8 @@ RUN addgroup --system --gid 1001 nodejs \
 
 WORKDIR /app
 
-COPY --from=build --chown=fastify:nodejs /standalone .
+COPY --from=build /standalone .
+RUN chmod -R a-w .
 
 USER fastify
 

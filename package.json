@@ -7,6 +7,7 @@
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
+    "prepare": "husky",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,md,yml,yaml}\" --ignore-path .prettierignore",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
@@ -36,7 +37,7 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"

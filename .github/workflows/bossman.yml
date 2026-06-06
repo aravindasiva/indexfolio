@@ -11,8 +11,46 @@ jobs:
     uses: ./.github/workflows/checks.yml
     secrets: inherit
 
+  detect-changes:
+    name: '🔍 Detecting changes'
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Check paths
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'packages/**'
+            web:
+              - 'apps/web/**'
+              - 'packages/**'
+
+  deploy-api:
+    needs: [checks, detect-changes]
+    if: needs.detect-changes.outputs.api == 'true'
+    uses: ./.github/workflows/deploy-api.yml
+    with:
+      environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+      railway-service-id: ${{ github.ref == 'refs/heads/main' && vars.RAILWAY_API_PRODUCTION_SERVICE_ID || vars.RAILWAY_API_STAGING_SERVICE_ID }}
+    secrets: inherit
+
   deploy-web:
-    needs: checks
+    needs: [checks, detect-changes, deploy-api]
+    if: |
+      always() &&
+      needs.checks.result == 'success' &&
+      needs.detect-changes.outputs.web == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
     uses: ./.github/workflows/deploy-web.yml
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}

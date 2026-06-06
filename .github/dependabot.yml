@@ -4,8 +4,9 @@ updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'weekly'
+      interval: 'monthly'
     target-branch: 'dev'
+    open-pull-requests-limit: 1
     commit-message:
       prefix: 'ci'
     labels:
@@ -18,8 +19,9 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: 'weekly'
+      interval: 'monthly'
     target-branch: 'dev'
+    open-pull-requests-limit: 1
     commit-message:
       prefix: 'chore'
     labels:
@@ -38,4 +40,19 @@ updates:
       - dependency-name: '@prisma/client'
         update-types: ['version-update:semver-major']
       - dependency-name: 'fastify-type-provider-zod'
+        update-types: ['version-update:semver-major']
+      # @types/node should track Node.js major version (currently Node 20)
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
+      # Next.js major upgrades need dedicated migration testing
+      - dependency-name: 'next'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'eslint-config-next'
+        update-types: ['version-update:semver-major']
+      # Dev tooling major bumps -- low urgency, handle manually
+      - dependency-name: '@commitlint/cli'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@commitlint/config-conventional'
+        update-types: ['version-update:semver-major']
+      - dependency-name: 'lint-staged'
         update-types: ['version-update:semver-major']

@@ -19,11 +19,20 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
     '/ready',
     {
       schema: {
-        response: { 200: ReadyResponseSchema },
+        response: {
+          200: ReadyResponseSchema,
+          503: ReadyResponseSchema,
+        },
         tags: ['system'],
         summary: 'Readiness check',
       },
     },
-    async () => getReady(fastify.db, fastify.redis),
+    async (_request, reply) => {
+      const result = await getReady(fastify.db, fastify.redis)
+      if (result.status === 'degraded') {
+        return reply.code(503).send(result)
+      }
+      return result
+    },
   )
 }

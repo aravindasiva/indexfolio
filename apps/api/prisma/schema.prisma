@@ -60,7 +60,6 @@ model Price {
   currency String
 
   @@unique([etfId, date])
-  @@index([etfId, date])
 }
 
 model ExchangeRate {
@@ -71,7 +70,6 @@ model ExchangeRate {
   rate         Decimal
 
   @@unique([date, fromCurrency, toCurrency])
-  @@index([date, fromCurrency, toCurrency])
 }
 
 model PipelineRun {

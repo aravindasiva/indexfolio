@@ -1,6 +1,5 @@
 import Fastify, { type FastifyError } from 'fastify'
 import {
-  type ZodTypeProvider,
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
@@ -22,8 +21,6 @@ const server = Fastify({
 
 server.setValidatorCompiler(validatorCompiler)
 server.setSerializerCompiler(serializerCompiler)
-
-server.withTypeProvider<ZodTypeProvider>()
 
 server.setErrorHandler<FastifyError>((error, _request, reply) => {
   if (error instanceof AppError) {

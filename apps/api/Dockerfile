@@ -40,7 +40,8 @@ RUN cp -r apps/api/dist /standalone/dist \
 
 # Re-generate the Prisma client inside the standalone flat node_modules so the
 # engine binary paths resolve correctly at runtime.
-RUN cd /standalone && node_modules/.bin/prisma generate --schema=prisma/schema.prisma
+WORKDIR /standalone
+RUN node_modules/.bin/prisma generate --schema=prisma/schema.prisma
 
 # ─── Stage 3: runner ──────────────────────────────────────────────────────────
 FROM node:20-alpine AS runner

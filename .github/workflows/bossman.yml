@@ -41,7 +41,6 @@ jobs:
     uses: ./.github/workflows/deploy-api.yml
     permissions:
       contents: read
-      packages: write
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
       railway-service-id: ${{ github.ref == 'refs/heads/main' && vars.RAILWAY_API_PRODUCTION_SERVICE_ID || vars.RAILWAY_API_STAGING_SERVICE_ID }}

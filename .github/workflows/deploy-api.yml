@@ -21,30 +21,10 @@ jobs:
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/api/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository_owner }}/indexfolio-api:${{ inputs.environment }}-latest
-            ghcr.io/${{ github.repository_owner }}/indexfolio-api:${{ github.sha }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/indexfolio-api:${{ inputs.environment }}-latest
-          cache-to: type=inline
 
       - name: Install Railway CLI
         run: npm install -g @railway/cli
@@ -55,5 +35,4 @@ jobs:
         run: |
           railway up \
             --service ${{ inputs.railway-service-id }} \
-            --environment ${{ inputs.environment }} \
-            --image ghcr.io/${{ github.repository_owner }}/indexfolio-api:${{ github.sha }}
+            --environment ${{ inputs.environment }}

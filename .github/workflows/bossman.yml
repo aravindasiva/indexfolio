@@ -21,10 +21,10 @@ jobs:
       web: ${{ steps.filter.outputs.web }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6.0.3
 
       - name: Check paths
-        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
         id: filter
         with:
           filters: |
@@ -36,8 +36,13 @@ jobs:
               - 'packages/**'
 
   deploy-api:
+    name: '🚢 Shipping API to Railway'
     needs: [checks, detect-changes]
     if: needs.detect-changes.outputs.api == 'true'
+    # One API deployment at a time per branch -- queue, never cancel mid-deploy
+    concurrency:
+      group: deploy-api-${{ github.ref }}
+      cancel-in-progress: false
     uses: ./.github/workflows/deploy-api.yml
     permissions:
       contents: read
@@ -48,7 +53,12 @@ jobs:
       railway-token: ${{ github.ref == 'refs/heads/main' && secrets.RAILWAY_TOKEN_PRODUCTION || secrets.RAILWAY_TOKEN_STAGING }}
 
   deploy-web:
+    name: '🚀 Shipping Web to Vercel'
     needs: [checks, detect-changes, deploy-api]
+    # One web deployment at a time per branch -- queue, never cancel mid-deploy
+    concurrency:
+      group: deploy-web-${{ github.ref }}
+      cancel-in-progress: false
     if: |
       always() &&
       needs.checks.result == 'success' &&

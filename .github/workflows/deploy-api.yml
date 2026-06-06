@@ -15,7 +15,7 @@ on:
 
 jobs:
   deploy:
-    name: '🚢 Shipping API to Railway ${{ inputs.environment }}'
+    name: 'api → ${{ inputs.environment }}'
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
 

@@ -36,6 +36,7 @@ jobs:
               - 'packages/**'
 
   deploy-api:
+    name: '🚢 Shipping API to Railway'
     needs: [checks, detect-changes]
     if: needs.detect-changes.outputs.api == 'true'
     # One API deployment at a time per branch -- queue, never cancel mid-deploy
@@ -52,6 +53,7 @@ jobs:
       railway-token: ${{ github.ref == 'refs/heads/main' && secrets.RAILWAY_TOKEN_PRODUCTION || secrets.RAILWAY_TOKEN_STAGING }}
 
   deploy-web:
+    name: '🚀 Shipping Web to Vercel'
     needs: [checks, detect-changes, deploy-api]
     # One web deployment at a time per branch -- queue, never cancel mid-deploy
     concurrency:

@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy:
-    name: '🚀 Shipping to Vercel ${{ inputs.environment }}'
+    name: 'web → ${{ inputs.environment }}'
     runs-on: ubuntu-latest
 
     env:

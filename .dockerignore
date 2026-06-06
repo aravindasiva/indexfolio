@@ -1,0 +1,42 @@
+# Dependencies (installed fresh in Docker)
+node_modules
+**/node_modules
+
+# Build outputs (built fresh in Docker)
+**/dist
+**/coverage
+
+# Git
+.git
+.gitignore
+.github
+
+# Editor / OS
+.DS_Store
+.idea
+.vscode
+*.swp
+*.swo
+
+# Local env files (never bake secrets into images)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Test and dev artifacts
+**/*.test.ts
+**/*.spec.ts
+**/__tests__
+**/vitest.config.ts
+
+# Misc
+*.md
+*.log
+turbo.json
+sonar-project.properties
+docker-compose.yml
+
+# Web app source not needed for API image; only the package.json manifest is
+# included so pnpm workspace resolution works correctly during install.
+apps/web
+!apps/web/package.json

@@ -1,0 +1,40 @@
+name: Deploy API
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      railway-service-id:
+        required: true
+        type: string
+    secrets:
+      railway-token:
+        required: true
+
+jobs:
+  deploy:
+    name: '🚢 Shipping API to Railway ${{ inputs.environment }}'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.railway-token }}
+        run: |
+          railway up \
+            --service ${{ inputs.railway-service-id }}

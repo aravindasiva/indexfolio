@@ -1,0 +1,26 @@
+version: 2
+
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    target-branch: 'dev'
+    commit-message:
+      prefix: 'ci'
+    labels:
+      - 'dependencies'
+
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    target-branch: 'dev'
+    commit-message:
+      prefix: 'chore'
+    labels:
+      - 'dependencies'
+    ignore:
+      # Turborepo major versions require manual review
+      - dependency-name: 'turbo'
+        update-types: ['version-update:semver-major']

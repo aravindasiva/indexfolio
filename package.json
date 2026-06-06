@@ -23,10 +23,10 @@
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "prettier": "^3.4.0",
-    "turbo": "^2.5.0",
+    "turbo": "^2.9.16",
     "typescript": "~5.7.0",
-    "typescript-eslint": "^8.0.0",
-    "vercel": "^54.6.1"
+    "typescript-eslint": "^8.60.1",
+    "vercel": "^54.9.1"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

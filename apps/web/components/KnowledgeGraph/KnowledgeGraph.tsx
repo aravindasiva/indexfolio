@@ -156,7 +156,7 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
     const pad = 100
 
     // All non-home nodes start at the centre with a tiny jitter.
-    // The charge + link forces then push them outward organically — this IS
+    // The charge + link forces then push them outward organically - this IS
     // the spread animation, and the result is never perfectly symmetric.
     function jitter() {
       return (Math.random() - 0.5) * 12 // NOSONAR -- used only for D3 force simulation visual spread, not security-sensitive
@@ -227,7 +227,7 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
       requestAnimationFrame(onRafComplete)
     }
 
-    // No forceRadial — charge repulsion + link distance produce the organic
+    // No forceRadial - charge repulsion + link distance produce the organic
     // hub-and-spoke layout naturally and avoid perfect symmetry.
     const linkDistance = Math.min(width, height) * 0.26
 

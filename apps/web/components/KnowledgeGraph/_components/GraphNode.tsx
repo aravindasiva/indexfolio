@@ -93,7 +93,7 @@ export function GraphNode({
       {/* Core dot */}
       <circle r={radius} fill={color} filter={`url(#graph-glow-${type})`} />
 
-      {/* Label — centred below the node dot */}
+      {/* Label - centred below the node dot */}
       <text
         x={0}
         y={radius + 18}

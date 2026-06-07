@@ -38,3 +38,12 @@ jobs:
         run: |
           railway up \
             --service ${{ inputs.railway-service-id }}
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            echo "🚀 API live at https://api.indexfolio.dev"
+            echo "## 🚀 API deployed to production" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Live:** https://api.indexfolio.dev" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "🧪 API live at https://staging.api.indexfolio.dev"
+            echo "## 🧪 API deployed to staging" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Staging:** https://staging.api.indexfolio.dev" >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -2,11 +2,11 @@
 
 This is a solo-maintained open-source project and contributions are genuinely welcome. Extra hands help it grow faster and reach more investors across Europe.
 
-Read this before opening anything. It's short.
+Read this before opening anything. It is short.
 
 ---
 
-## Before you start
+## 🔍 Before you start
 
 - Search open issues before creating a new one
 - For anything non-trivial, open an issue first and talk it through before writing code
@@ -14,7 +14,7 @@ Read this before opening anything. It's short.
 
 ---
 
-## The branch flow
+## 🌿 The branch flow
 
 ```
 your-fork/your-branch → dev → main
@@ -24,7 +24,7 @@ your-fork/your-branch → dev → main
 
 ---
 
-## Get it running
+## 🚀 Get it running
 
 Full instructions in [README.md](./README.md). Quick version:
 
@@ -38,7 +38,7 @@ pnpm dev
 
 ---
 
-## Submitting a PR
+## 📝 Submitting a PR
 
 1. Fork the repo and branch off `dev`
 
@@ -61,17 +61,17 @@ pnpm test
 
 ---
 
-## What happens after you push
+## ⚡ What happens after you push
 
-No surprises - here's the full CI/CD pipeline:
+No surprises - here is the full CI/CD pipeline:
 
 ```mermaid
 flowchart TD
     PR(["📬 Open PR → dev"]):::blue --> CI["🧪 CI Suite\nformat · lint · typecheck · test · build · SonarQube"]:::yellow
-    CI -- "❌ fails" --> Fix(["🔧 fix it & push again"]):::red
+    CI -- "❌ fails" --> Fix(["🔧 fix it and push again"]):::red
     Fix --> CI
     CI -- "✅ passes" --> Review(["👀 maintainer reviews"]):::blue
-    Review -- "approved" --> Merged(["✅ merged to dev"]):::blue
+    Review -- "approved" --> Merged(["merged to dev ✅"]):::blue
     Merged --> Bossman{{"🤖 Bossman\ndetects what changed"}}:::gray
     Bossman -- "API files changed" --> Staging(["🚢 API → Railway staging"]):::green
     Bossman -- "web files changed" --> Preview(["🚀 web → Vercel preview"]):::green
@@ -90,21 +90,21 @@ Your job ends at getting the PR green and approved. The rest is automatic.
 
 ---
 
-## The quality bar
+## 🎯 The quality bar
 
 This is the part that actually matters - read it properly.
 
-**TypeScript strict is on and `any` is not welcome here.** If you're wrestling the type system to make something work, the types are right and the approach needs rethinking. No bullshit escape hatches.
+**TypeScript strict is on and `any` is not welcome here.** If you are wrestling the type system to make something work, the types are right and the approach needs rethinking. No bullshit escape hatches.
 
 **Logic changes need tests.** New feature? Write tests. Bug fix? Write a regression test. The suite runs in Vitest. Mock at the boundary (PrismaClient, external APIs) - not inside business logic.
 
-**The bar goes up, not down.** A PR that adds something useful while weakening types, skipping tests, or introducing inconsistency won't land - even if the feature itself is solid. This isn't gatekeeping, it's how things stay maintainable without a full team behind it.
+**The bar goes up, not down.** A PR that adds something useful while weakening types, skipping tests, or introducing inconsistency will not land - even if the feature itself is solid. This is not gatekeeping, it is how things stay maintainable without a full team behind it.
 
 If something feels like a hack, it probably is. Do it properly or discuss it first.
 
 ---
 
-## Commit messages
+## 💬 Commit messages
 
 [Conventional Commits](https://www.conventionalcommits.org/). Husky enforces this locally - if a commit bounces, check the format.
 
@@ -124,7 +124,7 @@ Imperative tense, lowercase, no trailing period.
 
 ---
 
-## What will not be merged
+## 🚫 What will not be merged
 
 - PRs targeting `main`
 - New dependencies outside the approved stack without prior discussion
@@ -137,18 +137,18 @@ Not sure if something will land? Open an issue first - always better than a wast
 
 ---
 
-## Highest-value contribution: a country tax module
+## 🌍 Highest-value contribution: a country tax module
 
-EU investors in different countries face completely different tax treatment for ETFs - exit taxes, stamp duties, dividend withholding, you name it. Each country lives as an isolated module in `packages/tax-engine/`. One file, its tests, and you're done.
+EU investors in different countries face completely different tax treatment for ETFs - exit taxes, stamp duties, dividend withholding, you name it. Each country lives as an isolated module in `packages/tax-engine/`. One file, its tests, and you are done.
 
-**Only contribute a module if you're a tax resident of that country or have verified the rules against official government sources.** Include your sources in the PR. Wrong numbers mean wrong decisions for real people - this one matters more than most.
+**Only contribute a module if you are a tax resident of that country or have verified the rules against official government sources.** Include your sources in the PR. Wrong numbers mean wrong decisions for real people - this one matters more than most.
 
 See open issues for the spec and template.
 
 ---
 
-## Community
+## 🗣️ Community
 
 Questions, ideas, and discussion live in [GitHub Discussions](https://github.com/aravindasiva/indexfolio/discussions). Issues are for bugs and concrete feature requests only.
 
-Be decent. If you're rude, harass anyone, or make the space worse for others - you're out. No long drawn-out process about it.
+Be decent. If you are rude, harass anyone, or make the space worse for others - you are out. No long drawn-out process about it.

@@ -15,7 +15,7 @@ Built first for Portugal. Expanding to the rest of the EU as the project grows.
 
 ---
 
-## What's here
+## 🗂️ What's here
 
 | Tool                       | Status   | Description                                                                                     |
 | -------------------------- | -------- | ----------------------------------------------------------------------------------------------- |
@@ -26,7 +26,7 @@ Built first for Portugal. Expanding to the rest of the EU as the project grows.
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
 ```mermaid
 graph LR
@@ -50,7 +50,7 @@ graph LR
 
 ---
 
-## Stack
+## 🛠️ Stack
 
 | Layer    | Tech                                |
 | -------- | ----------------------------------- |
@@ -64,7 +64,7 @@ graph LR
 
 ---
 
-## Run it locally
+## 🚀 Run it locally
 
 **Prerequisites:** Node.js 20+, pnpm, Docker
 
@@ -98,7 +98,7 @@ To stop: `pnpm docker:down`
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 PRs are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening one - it is short and covers everything you need.
 
@@ -145,20 +145,29 @@ Full details in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ---
 
-## Contributors
+## ✨ Contributors
 
-Thanks to everyone who has contributed. ([emoji key](https://allcontributors.org/docs/en/emoji-key))
+Thanks go to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/aravindasiva"><img src="https://avatars.githubusercontent.com/u/53944996?v=4?s=100" width="100px;" alt="cxx"/><br /><sub><b>cxx</b></sub></a><br /><a href="https://github.com/aravindasiva/indexfolio/commits?author=aravindasiva" title="Code">💻</a> <a href="#infra-aravindasiva" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#ideas-aravindasiva" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/aravindasiva/indexfolio/commits?author=aravindasiva" title="Documentation">📖</a> <a href="#maintenance-aravindasiva" title="Maintenance">🚧</a> <a href="#data-aravindasiva" title="Data">🔣</a></td>
+    </tr>
+  </tbody>
+</table>
+
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ---
 
-## Support
+## 💙 Support
 
 Indexfolio is free and always will be. Running costs come out of pocket (hosting, DB, Redis - roughly $10/month).
 
@@ -171,12 +180,12 @@ All support goes to infrastructure. The project will never be monetised.
 
 ---
 
-## Disclaimer
+## ⚠️ Disclaimer
 
 Educational information and calculations only. Nothing here is financial advice. Make your own decisions. Consult a qualified professional if you need one.
 
 ---
 
-## License
+## 📄 License
 
 [MIT](./LICENSE) - use it, modify it, build on it.

@@ -43,4 +43,17 @@ jobs:
         run: pnpm exec vercel build ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy
-        run: pnpm exec vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          deploy_url=$(pnpm exec vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+
+          if [ "${{ inputs.environment }}" = "production" ]; then
+            echo "🚀 Web live at https://www.indexfolio.dev"
+            echo "## 🚀 Web deployed to production" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Deployment:** $deploy_url" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Live:** https://www.indexfolio.dev" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "🧪 Web live at https://staging.indexfolio.dev"
+            echo "## 🧪 Web deployed to staging" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Deployment:** $deploy_url" >> "$GITHUB_STEP_SUMMARY"
+            echo "- **Staging:** https://staging.indexfolio.dev" >> "$GITHUB_STEP_SUMMARY"
+          fi

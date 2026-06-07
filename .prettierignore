@@ -6,3 +6,4 @@ build
 pnpm-lock.yaml
 *.generated.*
 apps/web/tsconfig.json
+.all-contributorsrc

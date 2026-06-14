@@ -7,3 +7,4 @@ pnpm-lock.yaml
 *.generated.*
 apps/web/tsconfig.json
 .all-contributorsrc
+apps/web/next-env.d.ts

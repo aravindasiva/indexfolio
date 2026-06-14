@@ -1,83 +1,158 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
 
 /*
-  Design tokens — single source of truth for the whole app.
-  @theme inline maps CSS variables to Tailwind utilities so classes like
-  bg-background, text-primary, font-sans, etc. all work off these values.
-  VS Code may warn "Unknown at rule @theme" — that is a false positive.
-  The warning is suppressed in .vscode/settings.json.
+  Design system - single source of truth for Indexfolio.
+
+  Tailwind v4 maps these CSS variables to utility classes via @theme inline.
+  To retheme the whole app, edit the values in :root (light) and .dark below.
+  shadcn Base UI components read the same tokens, so brand colours flow into
+  every generated component automatically.
 */
 @theme inline {
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-syne), system-ui, sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Indexfolio brand semantics */
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-warning: var(--warning);
   --color-neutral: var(--neutral);
 
-  /* Syne for display/brand/headings, DM Sans for body/UI/small text */
-  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
-  --font-display: var(--font-syne), system-ui, sans-serif;
+  /* Chart palette (maps to brand colours) */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
-/*
-  font-sans (DM Sans) is the global default.
-  Use font-display (Syne) explicitly for brand names, headings, and hero labels.
-*/
-body {
-  font-family: var(--font-sans);
-}
-
+/* Light theme */
 :root {
+  --radius: 0.625rem;
+
+  /* Brand - constant across themes */
   --primary: #635bff;
+  --primary-foreground: #ffffff;
   --positive: #0e8a16;
   --negative: #a32d2d;
   --warning: #ba7517;
   --neutral: #888780;
+
+  /* Surfaces */
   --background: hsl(240 20% 98%);
   --foreground: hsl(240 10% 4%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 4%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 4%);
+  --secondary: hsl(240 5% 96%);
+  --secondary-foreground: hsl(240 10% 4%);
+  --muted: hsl(240 5% 96%);
+  --muted-foreground: hsl(240 4% 46%);
+  --accent: hsl(240 5% 96%);
+  --accent-foreground: hsl(240 10% 4%);
+  --destructive: var(--negative);
+  --border: hsl(240 6% 90%);
+  --input: hsl(240 6% 90%);
+  --ring: var(--primary);
 
+  /* Charts */
+  --chart-1: var(--primary);
+  --chart-2: var(--positive);
+  --chart-3: var(--warning);
+  --chart-4: var(--negative);
+  --chart-5: var(--neutral);
+
+  /* Glass */
   --glass-bg: rgba(255, 255, 255, 0.62);
   --glass-border: rgba(15, 23, 42, 0.12);
   --glass-shadow: 0 10px 30px rgba(15, 23, 42, 0.14);
   --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   --glass-gloss-start: rgba(255, 255, 255, 0.74);
-
   --glass-chip-bg: rgba(255, 255, 255, 0.48);
   --glass-chip-hover-bg: rgba(255, 255, 255, 0.74);
   --glass-chip-border: rgba(15, 23, 42, 0.14);
   --glass-chip-text: rgba(15, 23, 42, 0.8);
-
   --tooltip-bg: rgba(255, 255, 255, 0.86);
   --tooltip-border: rgba(15, 23, 42, 0.14);
   --tooltip-text: rgba(15, 23, 42, 0.88);
 }
 
+/* Dark theme */
 .dark {
   --background: hsl(240 10% 4%);
   --foreground: hsl(0 0% 98%);
+  --card: hsl(240 8% 8%);
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(240 8% 8%);
+  --popover-foreground: hsl(0 0% 98%);
+  --secondary: hsl(240 6% 14%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(240 6% 14%);
+  --muted-foreground: hsl(240 5% 65%);
+  --accent: hsl(240 6% 14%);
+  --accent-foreground: hsl(0 0% 98%);
+  --destructive: var(--negative);
+  --border: hsl(0 0% 100% / 10%);
+  --input: hsl(0 0% 100% / 15%);
+  --ring: var(--primary);
 
+  /* Glass */
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.14);
   --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
   --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.2);
   --glass-gloss-start: rgba(255, 255, 255, 0.12);
-
   --glass-chip-bg: rgba(255, 255, 255, 0.08);
   --glass-chip-hover-bg: rgba(255, 255, 255, 0.14);
   --glass-chip-border: rgba(255, 255, 255, 0.16);
   --glass-chip-text: rgba(255, 255, 255, 0.82);
-
   --tooltip-bg: rgba(10, 10, 14, 0.85);
   --tooltip-border: rgba(255, 255, 255, 0.16);
   --tooltip-text: rgba(255, 255, 255, 0.9);
 }
 
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
 /*
-  .glass-surface — reusable frosted-glass layer.
-  Works on any element. Add rounded-* and overflow-hidden to shape it.
-  Pair with a gloss overlay div (see Nav) for the iPhone liquid-glass sheen.
+  Glass utilities - frosted layer built from three CSS properties
+  (backdrop-filter + translucent background + border). No library needed.
+  Pair .glass-surface with rounded-* and overflow-hidden to shape it.
 */
 @layer components {
   .glass-surface {

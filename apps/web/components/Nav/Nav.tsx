@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { Logo } from '@/components/icons/Logo'
 
 const ThemeToggle = dynamic(
   () => import('./_components/ThemeToggle').then((m) => m.ThemeToggle),
@@ -40,9 +41,9 @@ export function Nav() {
         <Link
           href="/"
           aria-label="Indexfolio home"
-          className="relative shrink-0 font-display text-[0.9375rem] font-bold tracking-tight text-foreground no-underline"
+          className="relative inline-flex shrink-0 items-center no-underline"
         >
-          Indexfolio
+          <Logo />
         </Link>
 
         <ul className="relative hidden items-center gap-0.5 md:flex">

@@ -1,13 +1,12 @@
 'use client'
 
-import { useState, useSyncExternalStore } from 'react'
-import type { FocusEvent, MouseEvent } from 'react'
-import { motion } from 'framer-motion'
-import { CircleAlert, X } from 'lucide-react'
-import { ToolTip } from '@/components/ToolTip/ToolTip'
+import { useRef, useState, useSyncExternalStore } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Info, X } from 'lucide-react'
+import { Tooltip } from '@/components/Tooltip/Tooltip'
 
 const SESSION_KEY = 'indexfolio-disclaimer-dismissed'
-const WAIT_BEFORE_DISMISS_MS = 2500
+const UNLOCK_DURATION_S = 2.5
 
 function subscribeNoop() {
   return () => {}
@@ -29,120 +28,123 @@ export function Disclaimer() {
   )
 
   const [dismissedLocally, setDismissedLocally] = useState(false)
-  const [tooltipVisible, setTooltipVisible] = useState(false)
-  const [tooltipAnchorRect, setTooltipAnchorRect] = useState<DOMRect | null>(
-    null,
-  )
-  const [isHoldingToUnlock, setIsHoldingToUnlock] = useState(false)
-  const [canDismiss, setCanDismiss] = useState(false)
+  const [isHovering, setIsHovering] = useState(false)
+  const [unlocked, setUnlocked] = useState(false)
   const [progressKey, setProgressKey] = useState(0)
+  // Read once at mount: true on devices with a real pointer (mouse/trackpad).
+  // Lazy initializer avoids the effect + setState cascade-render pattern.
+  const [requiresHold] = useState(
+    () =>
+      globalThis.window?.matchMedia('(hover: hover) and (pointer: fine)')
+        .matches ?? false,
+  )
+  // Ref so the animation-complete callback always sees the current hover state,
+  // avoiding a stale-closure race between the animation and pointer-leave events.
+  const isHoveringRef = useRef(false)
 
-  function startUnlockHold(
-    event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>,
-  ) {
-    setTooltipVisible(true)
-    setTooltipAnchorRect(event.currentTarget.getBoundingClientRect())
-    if (canDismiss) return
-    setIsHoldingToUnlock(true)
+  function startHover() {
+    isHoveringRef.current = true
+    setIsHovering(true)
   }
 
-  function resetUnlockHold() {
-    setTooltipVisible(false)
-    // Always fully reset regardless of canDismiss state.
-    // Closing must be intentional: the user has to hover AND click within
-    // the same hover session. Moving away cancels and requires starting over.
-    setIsHoldingToUnlock(false)
-    setCanDismiss(false)
-    setProgressKey((prev) => prev + 1)
+  function endHover() {
+    isHoveringRef.current = false
+    setIsHovering(false)
+    setUnlocked(false)
+    setProgressKey((k) => k + 1)
   }
 
-  function handleUnlockAnimationComplete() {
-    if (!isHoldingToUnlock) return
-    setCanDismiss(true)
-    setIsHoldingToUnlock(false)
+  function handleAnimationComplete() {
+    if (isHoveringRef.current) setUnlocked(true)
   }
 
-  function closeDisclaimer() {
-    if (!canDismiss) return
+  function dismiss() {
+    if (requiresHold && !unlocked) return
     try {
       globalThis.sessionStorage.setItem(SESSION_KEY, '1')
-    } catch {
-      // Ignore storage write errors and still hide locally.
-    }
+    } catch {}
     setDismissedLocally(true)
   }
 
-  if (dismissedInSession || dismissedLocally) return null
+  const isDismissed = dismissedInSession || dismissedLocally
+  const isClickable = unlocked || !requiresHold
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center px-4">
-      <div className="glass-surface pointer-events-auto relative inline-flex w-auto max-w-[92vw] items-center gap-2 rounded-full px-4 py-2">
-        <p className="max-w-[54ch] text-center text-xs font-normal italic leading-5 text-foreground/78 whitespace-normal wrap-break-word">
-          <span className="inline-flex items-center gap-1">
-            <CircleAlert size={12} />
-            Nothing here is financial advice. Always do your own research.
-          </span>
-        </p>
+    <AnimatePresence>
+      {!isDismissed && (
+        <motion.div
+          key="disclaimer"
+          className="pointer-events-none fixed inset-x-0 bottom-3 z-40 flex justify-center px-4"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.2, ease: 'easeOut' }}
+        >
+          <div className="glass-surface pointer-events-auto inline-flex items-center gap-3 rounded-full px-4 py-2">
+            <Info size={13} className="shrink-0 text-primary" />
+            <p className="max-w-[54ch] text-xs italic leading-5 text-foreground/75">
+              Nothing here is financial advice. Always do your own research.
+            </p>
 
-        <div className="relative shrink-0">
-          <button
-            type="button"
-            aria-label="Dismiss disclaimer"
-            aria-disabled={!canDismiss}
-            onClick={closeDisclaimer}
-            onMouseEnter={startUnlockHold}
-            onMouseLeave={resetUnlockHold}
-            onFocus={startUnlockHold}
-            onBlur={resetUnlockHold}
-            className="glass-chip inline-flex size-6 items-center justify-center rounded-full transition-all duration-150 hover:scale-[1.03] hover:text-foreground aria-disabled:opacity-70"
-          >
-            {canDismiss ? null : (
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 -rotate-90"
+            <Tooltip content="Yes, I understand 💜">
+              <motion.button
+                type="button"
+                aria-label="Dismiss disclaimer"
+                aria-disabled={!isClickable}
+                onClick={dismiss}
+                onPointerEnter={requiresHold ? startHover : undefined}
+                onPointerLeave={requiresHold ? endHover : undefined}
+                onFocus={requiresHold ? startHover : undefined}
+                onBlur={requiresHold ? endHover : undefined}
+                animate={unlocked ? { scale: [1, 1.14, 1] } : { scale: 1 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className={[
+                  'glass-chip relative inline-flex size-6 shrink-0 items-center justify-center rounded-full transition-opacity',
+                  isClickable ? 'cursor-pointer' : 'cursor-default',
+                ].join(' ')}
               >
-                <circle
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeOpacity="0.2"
-                  strokeWidth="1.6"
-                />
-                <motion.circle
-                  key={progressKey}
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: isHoldingToUnlock ? 1 : 0 }}
-                  transition={{
-                    duration: WAIT_BEFORE_DISMISS_MS / 1000,
-                    ease: 'linear',
-                  }}
-                  onAnimationComplete={handleUnlockAnimationComplete}
-                  className="text-primary dark:text-foreground"
-                />
-              </svg>
-            )}
-            <X size={12} strokeWidth={2.5} />
-          </button>
-
-          <ToolTip
-            text="Yes, I understand 💜"
-            isVisible={tooltipVisible}
-            anchorRect={tooltipAnchorRect}
-            placement="auto"
-            offset={16}
-          />
-        </div>
-      </div>
-    </div>
+                {requiresHold && !unlocked && (
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 size-full -rotate-90"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeOpacity="0.25"
+                      strokeWidth="2"
+                      className="text-primary"
+                    />
+                    <motion.circle
+                      key={progressKey}
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: isHovering ? 1 : 0 }}
+                      transition={{
+                        duration: UNLOCK_DURATION_S,
+                        ease: 'linear',
+                      }}
+                      onAnimationComplete={handleAnimationComplete}
+                      className="text-primary"
+                    />
+                  </svg>
+                )}
+                <X size={11} strokeWidth={2.5} />
+              </motion.button>
+            </Tooltip>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }

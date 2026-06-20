@@ -1,10 +1,5 @@
 import type { NodeType } from '@indexfolio/knowledge-graph'
-
-// Exported so KnowledgeGraph.tsx can use them for glow filter defs
-export const NODE_COLORS: Record<NodeType, string> = {
-  home: 'var(--foreground)',
-  tool: '#635BFF',
-}
+import { NODE_COLORS } from '../_lib/graph'
 
 export const NODE_BASE_RADIUS = 4
 

@@ -7,9 +7,15 @@ import { env } from '../shared/config/env.js'
 
 const VERCEL_PREVIEW = /^https:\/\/indexfolio[-a-z0-9]*\.vercel\.app$/
 
+const ALLOWED_ORIGINS = new Set([
+  'http://localhost:3000',
+  'https://indexfolio.dev',
+  'https://www.indexfolio.dev',
+  'https://staging.indexfolio.dev',
+])
+
 function isAllowedOrigin(origin: string): boolean {
-  if (origin === 'http://localhost:3000') return true
-  if (origin === 'https://indexfolio.dev') return true
+  if (ALLOWED_ORIGINS.has(origin)) return true
   if (VERCEL_PREVIEW.test(origin)) return true
   if (env.CORS_ORIGIN) {
     return env.CORS_ORIGIN.split(',')

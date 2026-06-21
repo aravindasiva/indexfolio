@@ -1,5 +1,5 @@
 import type { NodeType } from '@indexfolio/knowledge-graph'
-import { NODE_COLORS } from '../_lib/graph'
+import { NODE_COLORS } from '../../utils/graph'
 
 export const NODE_BASE_RADIUS = 4
 

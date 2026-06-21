@@ -1,10 +1,5 @@
 import type { NodeType } from '@indexfolio/knowledge-graph'
-
-// Exported so KnowledgeGraph.tsx can use them for glow filter defs
-export const NODE_COLORS: Record<NodeType, string> = {
-  home: 'var(--foreground)',
-  tool: '#635BFF',
-}
+import { NODE_COLORS } from '../_lib/graph'
 
 export const NODE_BASE_RADIUS = 4
 
@@ -52,7 +47,9 @@ export function GraphNode({
   return (
     <g
       role="button"
-      aria-label={`Go to ${label}`}
+      // The home node is a secret trigger, not a link, so don't announce it as
+      // navigation (the sr-only nav is the real map for assistive tech).
+      aria-label={isHome ? label : `Go to ${label}`}
       tabIndex={0}
       style={{
         cursor: 'pointer',

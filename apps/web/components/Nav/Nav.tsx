@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { nodes as graphNodes } from '@indexfolio/knowledge-graph'
 import { Logo } from '@/components/icons/Logo'
 
 const ThemeToggle = dynamic(
@@ -13,12 +14,11 @@ const ThemeToggle = dynamic(
   },
 )
 
-const NAV_LINKS = [
-  { label: 'Screener', href: '/screener' },
-  { label: 'Calculator', href: '/calculator' },
-  { label: 'Overlap', href: '/overlap' },
-  { label: 'Tax guides', href: '/tax/portugal' },
-] as const
+// Derived from the knowledge graph so the nav, the graph, and the tools spine
+// can never drift apart (one source of truth for tool routes and labels).
+const NAV_LINKS = graphNodes
+  .filter((node) => node.type === 'tool')
+  .map((node) => ({ label: node.shortLabel ?? node.label, href: node.href }))
 
 export function Nav() {
   return (

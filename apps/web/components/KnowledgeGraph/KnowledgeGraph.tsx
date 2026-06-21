@@ -1,135 +1,48 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import {
-  forceCollide,
-  forceLink,
-  forceManyBody,
-  forceSimulation,
-} from 'd3-force'
-import type {
-  Simulation,
-  SimulationLinkDatum,
-  SimulationNodeDatum,
-} from 'd3-force'
-import {
-  edges as graphEdges,
-  nodes as graphNodes,
-} from '@indexfolio/knowledge-graph'
-import type { NodeType } from '@indexfolio/knowledge-graph'
-import { GraphNode, NODE_COLORS } from './_components/GraphNode'
+import { nodes as graphNodes } from '@indexfolio/knowledge-graph'
+import { KnowledgeGraph2D } from './KnowledgeGraph2D'
+import { useGraphMode } from './_lib/useGraphMode'
+import { useKonamiCode } from './_lib/useKonamiCode'
+import { useLooseCat, setLooseCat } from './_lib/looseCat'
+import { SUPERNOVA_EVENT, SUPERNOVA_DURATION_MS } from './_lib/supernova'
+import { ParticleBurst } from './_components/ParticleBurst'
+import { FloatingCat } from '@/components/FloatingCat/FloatingCat'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// The 3D graph pulls in three.js, so it is lazy-loaded (and client-only). It is
+// only fetched when the device can actually use it - the 2D fallback ships in
+// the main bundle.
+const KnowledgeGraph3D = dynamic(
+  () => import('./KnowledgeGraph3D').then((m) => m.KnowledgeGraph3D),
+  { ssr: false },
+)
 
-type SimNode = SimulationNodeDatum & {
-  id: string
-  label: string
-  type: NodeType
-  href: string
-}
+type KnowledgeGraphProps = { mode: 'hero' | 'overlay' }
 
-type SimEdge = SimulationLinkDatum<SimNode>
+// Mobile has no keyboard, so the Konami code is unreachable. The secret there is
+// tapping the centre (home) node five times in quick succession.
+const HOME_TAP_TARGET = 5
+const HOME_TAP_WINDOW = 2000
 
-interface RenderedNode {
-  id: string
-  label: string
-  type: NodeType
-  href: string
-  x: number
-  y: number
-  index: number
-}
+export function KnowledgeGraph({ mode }: KnowledgeGraphProps) {
+  const graphMode = useGraphMode()
 
-interface RenderedEdge {
-  key: string
-  sourceId: string
-  targetId: string
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-}
+  // The easter egg lives here (not in either graph) so it fires the same way for
+  // 3D, 2D, desktop, and mobile. The graphs just report the secret trigger via
+  // onHomeActivate and (on 3D) explode in response to the supernova event.
+  const looseCat = useLooseCat()
+  const [burst, setBurst] = useState(false)
 
-// ─── Module-level helpers ─────────────────────────────────────────────────────
-
-function buildAdjacency(): Map<string, Set<string>> {
-  const map = new Map<string, Set<string>>()
-  for (const e of graphEdges) {
-    let src = map.get(e.source)
-    if (!src) {
-      src = new Set<string>()
-      map.set(e.source, src)
-    }
-    let tgt = map.get(e.target)
-    if (!tgt) {
-      tgt = new Set<string>()
-      map.set(e.target, tgt)
-    }
-    src.add(e.target)
-    tgt.add(e.source)
-  }
-  return map
-}
-
-const ADJACENCY = buildAdjacency()
-
-function nodeOpacity(nodeId: string, hoveredId: string | null): number {
-  if (!hoveredId) return 1
-  if (nodeId === hoveredId) return 1
-  if (ADJACENCY.get(hoveredId)?.has(nodeId)) return 1
-  return 0.12
-}
-
-function edgeOpacity(
-  srcId: string,
-  tgtId: string,
-  hoveredId: string | null,
-): number {
-  if (!hoveredId) return 0.2
-  if (srcId === hoveredId || tgtId === hoveredId) return 0.7
-  return 0.04
-}
-
-function resolveId(ref: string | number | SimNode): string {
-  if (typeof ref === 'string') return ref
-  if (typeof ref === 'number') return `n${ref}`
-  return ref.id
-}
-
-function edgeKey(edge: SimEdge): string {
-  return `${resolveId(edge.source)}-${resolveId(edge.target)}`
-}
-
-function clamp(value: number, min: number, max: number): number {
-  if (value < min) return min
-  if (value > max) return max
-  return value
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
-interface KnowledgeGraphProps {
-  mode: 'hero' | 'overlay'
-}
-
-export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-
-  const nodesRef = useRef<SimNode[]>([])
-  const edgesRef = useRef<SimEdge[]>([])
-  const simRef = useRef<Simulation<SimNode, SimEdge> | null>(null)
-  const rafPending = useRef(false)
-
   const [dims, setDims] = useState({ width: 0, height: 0 })
-  const [renderedNodes, setRenderedNodes] = useState<RenderedNode[]>([])
-  const [renderedEdges, setRenderedEdges] = useState<RenderedEdge[]>([])
-  const [hoveredId, setHoveredId] = useState<string | null>(null)
-  const [focusedId, setFocusedId] = useState<string | null>(null)
 
-  // ── Container dimensions ──────────────────────────────────────────────────
+  // Tap counting is kept in refs so each tap doesn't re-render the graph.
+  const tapCount = useRef(0)
+  const lastTap = useRef(0)
+
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -145,153 +58,39 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
     return () => obs.disconnect()
   }, [])
 
-  // ── D3 simulation ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (dims.width === 0 || dims.height === 0) return
+  const fireEgg = useCallback(() => {
+    // Already loose: do nothing until the user clicks the cat away.
+    if (looseCat) return
+    setBurst(true)
+    setLooseCat(true)
+    // Keep the burst mounted until the graph has eased back into place.
+    globalThis.setTimeout(() => setBurst(false), SUPERNOVA_DURATION_MS)
+    // The 3D graph listens for this and blasts itself apart (2D just ignores it).
+    globalThis.dispatchEvent(new Event(SUPERNOVA_EVENT))
+  }, [looseCat])
 
-    const { width, height } = dims
-    const cx = width / 2
-    const cy = height / 2
-    // Larger pad to leave room for labels rendered below nodes
-    const pad = 100
+  useKonamiCode(fireEgg)
 
-    // All non-home nodes start at the centre with a tiny jitter.
-    // The charge + link forces then push them outward organically - this IS
-    // the spread animation, and the result is never perfectly symmetric.
-    function jitter() {
-      return (Math.random() - 0.5) * 12 // NOSONAR -- used only for D3 force simulation visual spread, not security-sensitive
+  // Five quick taps on the home node = the same secret, for touch devices.
+  const handleHomeActivate = useCallback(() => {
+    const now = Date.now()
+    tapCount.current =
+      now - lastTap.current < HOME_TAP_WINDOW ? tapCount.current + 1 : 1
+    lastTap.current = now
+    if (tapCount.current >= HOME_TAP_TARGET) {
+      tapCount.current = 0
+      fireEgg()
     }
+  }, [fireEgg])
 
-    const simNodes: SimNode[] = graphNodes.map((n) => {
-      if (n.id === 'home') {
-        return { ...n, x: cx, y: cy, fx: cx, fy: cy }
-      }
-      return { ...n, x: cx + jitter(), y: cy + jitter() }
-    })
-    const simEdges: SimEdge[] = graphEdges.map((e) => ({ ...e }))
-
-    nodesRef.current = simNodes
-    edgesRef.current = simEdges
-
-    function onRafComplete() {
-      rafPending.current = false
-      const nodes = nodesRef.current
-      const edges = edgesRef.current
-
-      const posMap = new Map<string, { x: number; y: number }>()
-      const nextNodes: RenderedNode[] = []
-      for (let i = 0; i < nodes.length; i++) {
-        const n = nodes[i]
-        if (n?.x != null && n.y != null) {
-          const x = n.fx == null ? clamp(n.x, pad, width - pad) : n.x
-          const y = n.fy == null ? clamp(n.y, pad, height - pad) : n.y
-          posMap.set(n.id, { x, y })
-          nextNodes.push({
-            id: n.id,
-            label: n.label,
-            type: n.type,
-            href: n.href,
-            x,
-            y,
-            index: i,
-          })
-        }
-      }
-
-      const nextEdges: RenderedEdge[] = []
-      for (const edge of edges) {
-        const srcId = resolveId(edge.source)
-        const tgtId = resolveId(edge.target)
-        const src = posMap.get(srcId)
-        const tgt = posMap.get(tgtId)
-        if (src && tgt) {
-          nextEdges.push({
-            key: edgeKey(edge),
-            sourceId: srcId,
-            targetId: tgtId,
-            x1: src.x,
-            y1: src.y,
-            x2: tgt.x,
-            y2: tgt.y,
-          })
-        }
-      }
-
-      setRenderedNodes(nextNodes)
-      setRenderedEdges(nextEdges)
-    }
-
-    function onSimTick() {
-      if (rafPending.current) return
-      rafPending.current = true
-      requestAnimationFrame(onRafComplete)
-    }
-
-    // No forceRadial - charge repulsion + link distance produce the organic
-    // hub-and-spoke layout naturally and avoid perfect symmetry.
-    const linkDistance = Math.min(width, height) * 0.26
-
-    const sim = forceSimulation<SimNode>(simNodes)
-      .force(
-        'link',
-        forceLink<SimNode, SimEdge>(simEdges)
-          .id((d) => d.id)
-          .distance(linkDistance)
-          .strength(0.55),
-      )
-      .force('charge', forceManyBody<SimNode>().strength(-320))
-      .force('collide', forceCollide<SimNode>(42))
-      .alphaDecay(0.012)
-      .velocityDecay(0.38)
-      .on('tick', onSimTick)
-
-    simRef.current = sim
-
-    return () => {
-      sim.stop()
-      rafPending.current = false
-    }
-  }, [dims])
-
-  // ── Pause when scrolled off-screen ────────────────────────────────────────
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0]
-        if (!entry) return
-        if (entry.isIntersecting) {
-          simRef.current?.restart()
-        } else {
-          simRef.current?.stop()
-        }
-      },
-      { threshold: 0.1 },
-    )
-    obs.observe(el)
-    return () => obs.disconnect()
+  const handleCatLeave = useCallback(() => {
+    setLooseCat(false)
   }, [])
 
-  const handleNodeClick = useCallback(
-    (href: string) => {
-      router.push(href)
-    },
-    [router],
-  )
-
-  // Hover takes priority; fall back to keyboard focus for the adjacency highlight
-  const activeId = hoveredId ?? focusedId
-
   return (
-    <motion.div
-      ref={containerRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.7, ease: 'easeOut', delay: 0.15 }}
-      className={`relative w-full overflow-hidden ${mode === 'hero' ? 'h-screen' : 'h-full'}`}
-    >
-      {/* Screen-reader navigation */}
+    <>
+      {/* The visual graph is decorative; this is the real navigable map for
+          screen readers and crawlers. Rendered regardless of 2D/3D. */}
       <nav aria-label="Explore Indexfolio" className="sr-only">
         <ul>
           {graphNodes.map((node) => (
@@ -302,68 +101,46 @@ export function KnowledgeGraph({ mode }: Readonly<KnowledgeGraphProps>) {
         </ul>
       </nav>
 
-      <svg width="100%" height="100%" aria-hidden="true" className="block">
-        <defs>
-          {(Object.entries(NODE_COLORS) as [NodeType, string][]).map(
-            ([type]) => (
-              <filter
-                key={type}
-                id={`graph-glow-${type}`}
-                x="-80%"
-                y="-80%"
-                width="260%"
-                height="260%"
-              >
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            ),
-          )}
-        </defs>
+      <div ref={containerRef} className="relative">
+        {graphMode === '3d' && (
+          <KnowledgeGraph3D mode={mode} onHomeActivate={handleHomeActivate} />
+        )}
+        {graphMode === '2d' && (
+          <KnowledgeGraph2D mode={mode} onHomeActivate={handleHomeActivate} />
+        )}
+        {/* graphMode === 'loading' renders nothing for one tick while we detect
+            capability, avoiding a 2D-to-3D flash. */}
 
-        {/* Edges */}
-        <g>
-          {renderedEdges.map((edge) => (
-            <line
-              key={edge.key}
-              x1={edge.x1}
-              y1={edge.y1}
-              x2={edge.x2}
-              y2={edge.y2}
-              stroke="var(--foreground)"
-              strokeWidth={1.5}
+        {/* Easter egg: supernova flash + particle burst */}
+        {burst && (
+          <>
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 z-20"
               style={{
-                opacity: edgeOpacity(edge.sourceId, edge.targetId, activeId),
-                transition: 'opacity 0.2s ease',
+                background:
+                  'radial-gradient(circle at 50% 50%, rgba(99,91,255,0.55), transparent 60%)',
+              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.9, 0] }}
+              transition={{
+                duration: 0.8,
+                times: [0, 0.2, 1],
+                ease: 'easeOut',
               }}
             />
-          ))}
-        </g>
+            <ParticleBurst />
+          </>
+        )}
 
-        {/* Nodes */}
-        <g>
-          {renderedNodes.map((node) => (
-            <g key={node.id} transform={`translate(${node.x},${node.y})`}>
-              <GraphNode
-                label={node.label}
-                type={node.type}
-                opacity={nodeOpacity(node.id, activeId)}
-                isHome={node.id === 'home'}
-                animationIndex={node.index}
-                isFocused={focusedId === node.id}
-                onClick={() => handleNodeClick(node.href)}
-                onPointerEnter={() => setHoveredId(node.id)}
-                onPointerLeave={() => setHoveredId(null)}
-                onFocus={() => setFocusedId(node.id)}
-                onBlur={() => setFocusedId(null)}
-              />
-            </g>
-          ))}
-        </g>
-      </svg>
-    </motion.div>
+        {/* The cat drifts in, wanders the screen, and stays (across refreshes)
+            until you click it away. */}
+        {looseCat && dims.width > 0 && (
+          <div className="pointer-events-none absolute inset-0 z-30">
+            <FloatingCat size={80} area={dims} onLeave={handleCatLeave} />
+          </div>
+        )}
+      </div>
+    </>
   )
 }

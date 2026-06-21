@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion, useAnimationControls } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { AstronautCat } from '@/components/icons/AstronautCat'
+import { buildBalloonFlight } from '@/components/FloatingCat/balloonFlight'
 
 // Deterministic so server and client render the same stars (no hydration drift).
 const STARS = [
@@ -48,27 +49,8 @@ export default function NotFound() {
     setLaunching(true)
 
     // Released like a balloon: spirals off in a random direction, spinning.
-    const angle = Math.random() * Math.PI * 2
-    const [dirX, dirY] = [Math.cos(angle), Math.sin(angle)]
-    const [perpX, perpY] = [-dirY, dirX]
-    const distance = 840
-    const steps = 6
-    const xs: number[] = []
-    const ys: number[] = []
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps
-      const along = distance * t
-      const wobble = Math.sin(t * Math.PI * 3) * 80 * (1 - t)
-      xs.push(dirX * along + perpX * wobble)
-      ys.push(dirY * along + perpY * wobble)
-    }
-
     await cat.start({
-      x: xs,
-      y: ys,
-      rotate: [0, 180, 360, 560, 760, 920, 1080],
-      scale: [1, 0.96, 0.9, 0.78, 0.62, 0.45, 0.3],
-      opacity: [1, 1, 1, 1, 0.8, 0.4, 0],
+      ...buildBalloonFlight(),
       transition: { duration: 1.9, ease: 'easeIn' },
     })
 

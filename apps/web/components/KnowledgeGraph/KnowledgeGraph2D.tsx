@@ -75,9 +75,13 @@ function clamp(value: number, min: number, max: number): number {
 
 interface KnowledgeGraph2DProps {
   mode: 'hero' | 'overlay'
+  onHomeActivate?: () => void
 }
 
-export function KnowledgeGraph2D({ mode }: Readonly<KnowledgeGraph2DProps>) {
+export function KnowledgeGraph2D({
+  mode,
+  onHomeActivate,
+}: Readonly<KnowledgeGraph2DProps>) {
   const containerRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -237,10 +241,12 @@ export function KnowledgeGraph2D({ mode }: Readonly<KnowledgeGraph2DProps>) {
   }, [])
 
   const handleNodeClick = useCallback(
-    (href: string) => {
-      router.push(href)
+    (node: RenderedNode) => {
+      // The home node is a secret trigger, not a (pointless) self-link.
+      if (node.id === 'home') onHomeActivate?.()
+      else router.push(node.href)
     },
-    [router],
+    [router, onHomeActivate],
   )
 
   // Hover takes priority; fall back to keyboard focus for the adjacency highlight
@@ -306,7 +312,7 @@ export function KnowledgeGraph2D({ mode }: Readonly<KnowledgeGraph2DProps>) {
                 isHome={node.id === 'home'}
                 animationIndex={node.index}
                 isFocused={focusedId === node.id}
-                onClick={() => handleNodeClick(node.href)}
+                onClick={() => handleNodeClick(node)}
                 onPointerEnter={() => setHoveredId(node.id)}
                 onPointerLeave={() => setHoveredId(null)}
                 onFocus={() => setFocusedId(node.id)}

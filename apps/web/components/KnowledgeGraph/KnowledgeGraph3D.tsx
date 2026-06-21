@@ -19,6 +19,7 @@ import type { NodeType } from '@indexfolio/knowledge-graph'
 import { edgeOpacity, nodeOpacity } from './_lib/graph'
 import { createStarfield } from './_lib/createStarfield'
 import type { Starfield } from './_lib/createStarfield'
+import { triggerSupernova, SUPERNOVA_EVENT } from './_lib/supernova'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,9 +94,15 @@ function idOf(ref: FGLink['source']): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-type KnowledgeGraph3DProps = { mode: 'hero' | 'overlay' }
+type KnowledgeGraph3DProps = {
+  mode: 'hero' | 'overlay'
+  onHomeActivate?: () => void
+}
 
-export function KnowledgeGraph3D({ mode }: KnowledgeGraph3DProps) {
+export function KnowledgeGraph3D({
+  mode,
+  onHomeActivate,
+}: KnowledgeGraph3DProps) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
   const themeKey = resolvedTheme ?? 'dark'
@@ -127,6 +134,17 @@ export function KnowledgeGraph3D({ mode }: KnowledgeGraph3DProps) {
     }))
     return { nodes, links }
   }, [])
+
+  // The easter egg is owned by the wrapper; here we just blast the graph apart
+  // (it re-settles) when the wrapper dispatches the supernova event.
+  useEffect(() => {
+    function onSupernova() {
+      const fg = fgRef.current
+      if (fg) triggerSupernova(fg, data.nodes)
+    }
+    window.addEventListener(SUPERNOVA_EVENT, onSupernova)
+    return () => window.removeEventListener(SUPERNOVA_EVENT, onSupernova)
+  }, [data.nodes])
 
   // Each node is a sphere + a billboarded label. Opacity is baked from the
   // hovered node, so react-force-graph rebuilds the (few) nodes on hover - no
@@ -169,9 +187,11 @@ export function KnowledgeGraph3D({ mode }: KnowledgeGraph3DProps) {
 
   const handleNodeClick = useCallback(
     (node: FGNode) => {
-      router.push(node.href)
+      // The home node is a secret trigger, not a (pointless) self-link.
+      if (node.type === 'home') onHomeActivate?.()
+      else router.push(node.href)
     },
-    [router],
+    [router, onHomeActivate],
   )
 
   // ── Tune forces, controls, and scroll behaviour once mounted ──────────────

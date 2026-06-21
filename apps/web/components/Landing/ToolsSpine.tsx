@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
+import { nodes as graphNodes } from '@indexfolio/knowledge-graph'
 
 /*
   The tools presented as nodes on a glowing vertical "spine" that extends the
@@ -20,32 +21,16 @@ import { ArrowUpRight } from 'lucide-react'
 */
 type Tool = { index: string; label: string; href: string; description: string }
 
-const TOOLS: Tool[] = [
-  {
-    index: '01',
-    label: 'ETF Screener',
-    href: '/screener',
-    description: 'Filter UCITS ETFs by TER, domicile, type, and asset class.',
-  },
-  {
-    index: '02',
-    label: 'Tax Calculator',
-    href: '/calculator',
-    description: 'Real after-tax projections using actual country tax rules.',
-  },
-  {
-    index: '03',
-    label: 'Overlap Analyser',
-    href: '/overlap',
-    description: 'See what you actually own across multiple funds.',
-  },
-  {
-    index: '04',
-    label: 'Tax Guides',
-    href: '/tax/portugal',
-    description: 'Interactive, country-specific tax guides. Portugal first.',
-  },
-]
+// Derived from the knowledge graph so the spine, the nav, and the graph stay in
+// lockstep. The index is the tool's position, so it can never drift either.
+const TOOLS: Tool[] = graphNodes
+  .filter((node) => node.type === 'tool')
+  .map((node, index) => ({
+    index: String(index + 1).padStart(2, '0'),
+    label: node.label,
+    href: node.href,
+    description: node.description ?? '',
+  }))
 
 export function ToolsSpine() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -152,7 +137,7 @@ function ToolEntry({
         <p className="mt-2 max-w-md text-muted-foreground">
           {tool.description}
         </p>
-        <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+        <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
           Open
           <ArrowUpRight
             size={14}

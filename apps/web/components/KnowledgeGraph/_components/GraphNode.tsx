@@ -47,7 +47,9 @@ export function GraphNode({
   return (
     <g
       role="button"
-      aria-label={`Go to ${label}`}
+      // The home node is a secret trigger, not a link, so don't announce it as
+      // navigation (the sr-only nav is the real map for assistive tech).
+      aria-label={isHome ? label : `Go to ${label}`}
       tabIndex={0}
       style={{
         cursor: 'pointer',

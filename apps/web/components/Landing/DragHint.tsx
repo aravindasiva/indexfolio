@@ -14,10 +14,10 @@ export function DragHint() {
   useEffect(() => {
     const hide = () => setVisible(false)
     const timer = setTimeout(hide, 3000)
-    window.addEventListener('pointerdown', hide, { once: true })
+    globalThis.addEventListener('pointerdown', hide, { once: true })
     return () => {
       clearTimeout(timer)
-      window.removeEventListener('pointerdown', hide)
+      globalThis.removeEventListener('pointerdown', hide)
     }
   }, [])
 

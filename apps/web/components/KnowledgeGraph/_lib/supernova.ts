@@ -71,7 +71,7 @@ export function triggerSupernova(fg: SupernovaTarget, nodes: SupernovaNode[]) {
   const linkForce = link
   const restingStrength = resting
 
-  window.setTimeout(() => {
+  globalThis.setTimeout(() => {
     // Scale the resting strength by an eased factor each frame so the links
     // tighten gradually rather than yanking every node home at once.
     const base = (l: unknown, i: number, links: unknown[]): number =>

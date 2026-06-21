@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { SUPERNOVA_DURATION_MS } from '../_lib/supernova'
+import { random } from '@/lib/random'
 
 /*
   One-shot particle explosion from the centre of the graph (the supernova).
@@ -12,16 +13,16 @@ import { SUPERNOVA_DURATION_MS } from '../_lib/supernova'
 const TOTAL_S = SUPERNOVA_DURATION_MS / 1000
 
 const PARTICLES = Array.from({ length: 56 }, (_, id) => {
-  const angle = Math.random() * Math.PI * 2
-  const distance = 260 + Math.random() * 460
+  const angle = random() * Math.PI * 2
+  const distance = 260 + random() * 460
   return {
     id,
     x: Math.cos(angle) * distance,
     y: Math.sin(angle) * distance,
-    size: 2 + Math.random() * 5,
+    size: 2 + random() * 5,
     // Spread across most of the effect so the debris fades as the graph settles.
-    duration: TOTAL_S * (0.5 + Math.random() * 0.45),
-    bright: Math.random() > 0.5,
+    duration: TOTAL_S * (0.5 + random() * 0.45),
+    bright: random() > 0.5,
   }
 })
 

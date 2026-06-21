@@ -5,32 +5,26 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown } from 'lucide-react'
 
 /*
-  "Scroll to explore" cue, just above the global disclaimer. Smooth-scrolls to
-  the tools section on click, and fades out once the user starts scrolling.
+  "Scroll to explore" cue, just above the global disclaimer. Purely a visual
+  hint (not interactive) - it fades out once the user starts scrolling.
 */
 export function ScrollHint() {
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
     const onScroll = () => {
-      if (window.scrollY > 24) setVisible(false)
+      if (globalThis.scrollY > 24) setVisible(false)
     }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    globalThis.addEventListener('scroll', onScroll, { passive: true })
+    return () => globalThis.removeEventListener('scroll', onScroll)
   }, [])
-
-  function scrollToTools() {
-    document.getElementById('tools')?.scrollIntoView({ behavior: 'smooth' })
-  }
 
   return (
     <AnimatePresence>
       {visible && (
-        <motion.button
-          type="button"
-          onClick={scrollToTools}
-          aria-label="Scroll to explore the tools"
-          className="absolute bottom-16 left-1/2 z-20 flex -translate-x-1/2 cursor-pointer flex-col items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        <motion.div
+          aria-hidden="true"
+          className="pointer-events-none absolute bottom-16 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-1 text-xs text-muted-foreground"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -43,7 +37,7 @@ export function ScrollHint() {
           >
             <ChevronDown size={18} />
           </motion.span>
-        </motion.button>
+        </motion.div>
       )}
     </AnimatePresence>
   )

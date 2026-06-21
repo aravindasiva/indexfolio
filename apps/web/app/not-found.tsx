@@ -6,6 +6,7 @@ import { motion, useAnimationControls } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { AstronautCat } from '@/components/icons/AstronautCat'
 import { buildBalloonFlight } from '@/components/FloatingCat/balloonFlight'
+import { pick } from '@/lib/random'
 
 // Deterministic so server and client render the same stars (no hydration drift).
 const STARS = [
@@ -55,7 +56,7 @@ export default function NotFound() {
     })
 
     // Drift back in gradually from a random corner.
-    const corner = CORNERS[Math.floor(Math.random() * CORNERS.length)]
+    const corner = pick(CORNERS)
     cat.set({ ...corner, rotate: -25, scale: 0.5, opacity: 0 })
     await cat.start({
       x: 0,

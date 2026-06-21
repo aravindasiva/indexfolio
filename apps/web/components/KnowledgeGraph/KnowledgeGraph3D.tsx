@@ -1,5 +1,3 @@
-'use client'
-
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
@@ -142,8 +140,8 @@ export function KnowledgeGraph3D({
       const fg = fgRef.current
       if (fg) triggerSupernova(fg, data.nodes)
     }
-    window.addEventListener(SUPERNOVA_EVENT, onSupernova)
-    return () => window.removeEventListener(SUPERNOVA_EVENT, onSupernova)
+    globalThis.addEventListener(SUPERNOVA_EVENT, onSupernova)
+    return () => globalThis.removeEventListener(SUPERNOVA_EVENT, onSupernova)
   }, [data.nodes])
 
   // Each node is a sphere + a billboarded label. Opacity is baked from the

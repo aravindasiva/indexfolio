@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { random, randomRange } from '@/lib/random'
 
 /*
   Background atmosphere that lives inside the graph's 3D scene, so it parallaxes
@@ -74,9 +75,9 @@ function makePointTexture(): THREE.Texture {
 
 // Uniform-ish point on a spherical shell around the origin.
 function randomShellPoint(): [number, number, number] {
-  const theta = 2 * Math.PI * Math.random()
-  const phi = Math.acos(2 * Math.random() - 1)
-  const radius = INNER_RADIUS + Math.random() * (OUTER_RADIUS - INNER_RADIUS)
+  const theta = 2 * Math.PI * random()
+  const phi = Math.acos(2 * random() - 1)
+  const radius = randomRange(INNER_RADIUS, OUTER_RADIUS)
   return [
     radius * Math.sin(phi) * Math.cos(theta),
     radius * Math.sin(phi) * Math.sin(theta),
@@ -86,7 +87,7 @@ function randomShellPoint(): [number, number, number] {
 
 // Mostly neutral, with a few subtly tinted points (multipliers over the base).
 function randomTint(): THREE.Color {
-  const roll = Math.random()
+  const roll = random()
   if (roll < 0.72) return new THREE.Color(1, 1, 1)
   if (roll < 0.84) return new THREE.Color(1, 0.95, 0.82) // warm
   if (roll < 0.93) return new THREE.Color(0.85, 0.92, 1) // blue
@@ -220,7 +221,7 @@ export function createStarfield(
     if (!dark) return
     shootTimer = setTimeout(
       fireShoot,
-      SHOOT_MIN_GAP_MS + Math.random() * SHOOT_MAX_EXTRA_MS,
+      SHOOT_MIN_GAP_MS + random() * SHOOT_MAX_EXTRA_MS,
     )
   }
 
@@ -230,12 +231,12 @@ export function createStarfield(
       .crossVectors(forward, camera.up)
       .normalize()
     const up = new THREE.Vector3().crossVectors(right, forward).normalize()
-    const side = Math.random() > 0.5 ? 1 : -1
+    const side = random() > 0.5 ? 1 : -1
     const center = camera.position.clone().addScaledVector(forward, SHOOT_DIST)
     const start = center
       .clone()
       .addScaledVector(right, -side * SHOOT_HALF_WIDTH)
-      .addScaledVector(up, 60 + Math.random() * 90)
+      .addScaledVector(up, 60 + random() * 90)
     const dir = right
       .clone()
       .multiplyScalar(side)

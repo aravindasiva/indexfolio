@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, useAnimationControls } from 'framer-motion'
 import { AstronautCat } from '@/components/icons/AstronautCat'
+import { random } from '@/lib/random'
 
 /*
   The astronaut cat as an interactive floater: it drifts in slowly from off the
@@ -75,7 +76,7 @@ export function FloatingCat({ size = 80, area, onLeave }: FloatingCatProps) {
     if (leaving) return
     setLeaving(true)
     // Shoot off from wherever it is (null = current value), spinning + fading.
-    const angle = Math.random() * Math.PI * 2
+    const angle = random() * Math.PI * 2
     await controls.start({
       x: [null, Math.cos(angle) * 2200],
       y: [null, Math.sin(angle) * 2200],

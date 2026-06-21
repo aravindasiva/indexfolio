@@ -1,5 +1,3 @@
-'use client'
-
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
@@ -21,6 +19,7 @@ import {
 import type { NodeType } from '@indexfolio/knowledge-graph'
 import { GraphNode } from './_components/GraphNode'
 import { NODE_COLORS, edgeOpacity, nodeOpacity } from './_lib/graph'
+import { random } from '@/lib/random'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -126,7 +125,7 @@ export function KnowledgeGraph2D({
     // The charge + link forces then push them outward organically - this IS
     // the spread animation, and the result is never perfectly symmetric.
     function jitter() {
-      return (Math.random() - 0.5) * 12 // NOSONAR -- used only for D3 force simulation visual spread, not security-sensitive
+      return (random() - 0.5) * 12
     }
 
     const simNodes: SimNode[] = graphNodes.map((n) => {

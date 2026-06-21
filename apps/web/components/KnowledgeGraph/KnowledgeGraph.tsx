@@ -64,9 +64,9 @@ export function KnowledgeGraph({ mode }: KnowledgeGraphProps) {
     setBurst(true)
     setLooseCat(true)
     // Keep the burst mounted until the graph has eased back into place.
-    window.setTimeout(() => setBurst(false), SUPERNOVA_DURATION_MS)
+    globalThis.setTimeout(() => setBurst(false), SUPERNOVA_DURATION_MS)
     // The 3D graph listens for this and blasts itself apart (2D just ignores it).
-    window.dispatchEvent(new Event(SUPERNOVA_EVENT))
+    globalThis.dispatchEvent(new Event(SUPERNOVA_EVENT))
   }, [looseCat])
 
   useKonamiCode(fireEgg)

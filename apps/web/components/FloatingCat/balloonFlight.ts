@@ -3,6 +3,8 @@
   random direction, spinning and shrinking, then fades. Shared by the 404 page
   and the Konami easter egg so the motion stays consistent.
 */
+import { random } from '@/lib/random'
+
 export type BalloonFlight = {
   x: number[]
   y: number[]
@@ -12,7 +14,7 @@ export type BalloonFlight = {
 }
 
 export function buildBalloonFlight(): BalloonFlight {
-  const angle = Math.random() * Math.PI * 2
+  const angle = random() * Math.PI * 2
   const [dirX, dirY] = [Math.cos(angle), Math.sin(angle)]
   const [perpX, perpY] = [-dirY, dirX]
   const distance = 840

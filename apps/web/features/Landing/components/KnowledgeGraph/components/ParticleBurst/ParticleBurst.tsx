@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { SUPERNOVA_DURATION_MS } from '../_lib/supernova'
+import { SUPERNOVA_DURATION_MS } from '../../utils/supernova'
 import { random } from '@/lib/random'
 
 /*

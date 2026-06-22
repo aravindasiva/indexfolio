@@ -14,10 +14,10 @@ import {
   nodes as graphNodes,
 } from '@indexfolio/knowledge-graph'
 import type { NodeType } from '@indexfolio/knowledge-graph'
-import { edgeOpacity, nodeOpacity } from './_lib/graph'
-import { createStarfield } from './_lib/createStarfield'
-import type { Starfield } from './_lib/createStarfield'
-import { triggerSupernova, SUPERNOVA_EVENT } from './_lib/supernova'
+import { edgeOpacity, nodeOpacity } from './utils/graph'
+import { createStarfield } from './utils/createStarfield'
+import type { Starfield } from './utils/createStarfield'
+import { triggerSupernova, SUPERNOVA_EVENT } from './utils/supernova'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

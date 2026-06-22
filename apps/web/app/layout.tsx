@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import { Syne, DM_Sans } from 'next/font/google'
-import { ThemeProvider } from 'next-themes'
-import { Nav } from '@/components/Nav/Nav'
-import { Disclaimer } from '@/components/Disclaimer/Disclaimer'
-import { TooltipProvider } from '@/components/ui/tooltip'
+import { RootContainer } from '@/containers/RootContainer/RootContainer'
 import './globals.css'
 
 const syne = Syne({
@@ -35,13 +32,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground" suppressHydrationWarning>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <TooltipProvider>
-            <Nav />
-            {children}
-            <Disclaimer />
-          </TooltipProvider>
-        </ThemeProvider>
+        <RootContainer>{children}</RootContainer>
       </body>
     </html>
   )

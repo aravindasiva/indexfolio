@@ -7,7 +7,8 @@ import { nodes as graphNodes } from '@indexfolio/knowledge-graph'
 import { Logo } from '@/components/icons/Logo'
 
 const ThemeToggle = dynamic(
-  () => import('./_components/ThemeToggle').then((m) => m.ThemeToggle),
+  () =>
+    import('./components/ThemeToggle/ThemeToggle').then((m) => m.ThemeToggle),
   {
     ssr: false,
     loading: () => <div aria-hidden="true" className="size-8" />,

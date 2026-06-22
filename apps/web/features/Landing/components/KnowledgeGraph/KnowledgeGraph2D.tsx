@@ -17,8 +17,8 @@ import {
   nodes as graphNodes,
 } from '@indexfolio/knowledge-graph'
 import type { NodeType } from '@indexfolio/knowledge-graph'
-import { GraphNode } from './_components/GraphNode'
-import { NODE_COLORS, edgeOpacity, nodeOpacity } from './_lib/graph'
+import { GraphNode } from './components/GraphNode/GraphNode'
+import { NODE_COLORS, edgeOpacity, nodeOpacity } from './utils/graph'
 import { random } from '@/lib/random'
 
 // ─── Types ────────────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Syne, DM_Sans } from 'next/font/google'
 import { RootContainer } from '@/containers/RootContainer/RootContainer'
+import { rootMetadata } from '@/lib/seo/metadata'
 import './globals.css'
 
 const syne = Syne({
@@ -17,10 +18,7 @@ const dmSans = DM_Sans({
   display: 'swap',
 })
 
-export const metadata: Metadata = {
-  title: 'Indexfolio',
-  description: 'Free toolkit for EU passive investors',
-}
+export const metadata: Metadata = rootMetadata
 
 export default function RootLayout({
   children,

@@ -3,12 +3,16 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Hand } from 'lucide-react'
+import { useGraphMode } from '../KnowledgeGraph/utils/useGraphMode'
 
 /*
   A one-time hint over the graph so users realise it is an interactive 3D scene.
   Fades out on the first pointer interaction, or after a few seconds if ignored.
+  Only shown for the 3D graph - the 2D fallback (mobile, reduced-motion, no
+  WebGL) is tap-to-navigate, not drag-to-orbit, so the hint would be misleading.
 */
 export function DragHint() {
+  const graphMode = useGraphMode()
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
@@ -23,7 +27,7 @@ export function DragHint() {
 
   return (
     <AnimatePresence>
-      {visible && (
+      {visible && graphMode === '3d' && (
         <motion.div
           aria-hidden="true"
           className="glass-chip pointer-events-none absolute left-1/2 top-[44%] z-20 flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs"

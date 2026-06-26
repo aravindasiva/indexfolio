@@ -1,0 +1,2 @@
+// Next requires this file at app/manifest.ts; the logic lives in lib/seo.
+export { default } from '@/lib/seo/manifest'

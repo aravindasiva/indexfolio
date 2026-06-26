@@ -1,6 +1,12 @@
-import type { Etf, EtfListParams, EtfListResponse } from './types'
+import type { Etf, EtfFilters, EtfListParams, EtfListResponse } from './types'
 
-export type { Etf, EtfListParams, EtfListResponse } from './types'
+export type {
+  Etf,
+  EtfFilters,
+  EtfListParams,
+  EtfListResponse,
+  FilterOption,
+} from './types'
 
 /*
   All HTTP to the Indexfolio API lives here. The API is open and owns validation,
@@ -81,12 +87,15 @@ async function get<T>(path: string, options: GetOptions = {}): Promise<T> {
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
 
-export function getEtfList(
-  params: EtfListParams = {},
-): Promise<EtfListResponse> {
-  return get<EtfListResponse>('/etfs', { params, label: 'getEtfList' })
+export function getEtfs(params: EtfListParams = {}): Promise<EtfListResponse> {
+  return get<EtfListResponse>('/etfs', { params, label: 'getEtfs' })
 }
 
 export function getEtfByTicker(ticker: string): Promise<Etf> {
   return get<Etf>(`/etfs/${ticker}`, { label: 'getEtfByTicker' })
+}
+
+// Available filter values + counts for the screener toolbar (faceted search).
+export function getEtfFilters(): Promise<EtfFilters> {
+  return get<EtfFilters>('/etfs/filters', { label: 'getEtfFilters' })
 }

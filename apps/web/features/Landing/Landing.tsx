@@ -10,15 +10,14 @@ export function Landing() {
   return (
     <main>
       <section className="relative h-screen">
-        <KnowledgeGraph mode="hero" />
+        {/* Mask (not an opaque overlay) fades the starfield out toward the
+            bottom, so the shared ambient background shows through unbroken and
+            the hero dissolves into the tools spine with no section cutoff. */}
+        <div className="hero-fade-mask absolute inset-0">
+          <KnowledgeGraph mode="hero" />
+        </div>
         <DragHint />
         <ScrollHint />
-        {/* Fade the starfield's edge into the page so the space tapers off
-            gradually. Same background continues below - no section cutoff. */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-linear-to-b from-transparent to-background"
-        />
       </section>
 
       <ToolsSpine />

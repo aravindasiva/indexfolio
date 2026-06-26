@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { getEtfByTicker, getEtfList } from '../../../lib/api'
+import { getEtfByTicker, getEtfs } from '../../../lib/api'
 
 type FetchResult = {
   ok?: boolean
@@ -29,11 +29,11 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('getEtfList', () => {
+describe('getEtfs', () => {
   it('builds the /etfs URL with the given params', async () => {
     const fetchMock = stubFetch({ json: async () => ({ data: [], meta: {} }) })
 
-    await getEtfList({ page: 2, domicile: 'IE', maxTer: 0.5 })
+    await getEtfs({ page: 2, domicile: 'IE', maxTer: 0.5 })
 
     const url = String(fetchMock.mock.calls[0]?.[0])
     expect(url).toContain('http://test.local/etfs?')
@@ -45,7 +45,7 @@ describe('getEtfList', () => {
   it('omits absent filters from the query string', async () => {
     const fetchMock = stubFetch({ json: async () => ({ data: [], meta: {} }) })
 
-    await getEtfList({ page: 1 })
+    await getEtfs({ page: 1 })
 
     const url = String(fetchMock.mock.calls[0]?.[0])
     expect(url).not.toContain('domicile')
@@ -56,13 +56,13 @@ describe('getEtfList', () => {
     const payload = { data: [{ ticker: 'VWCE' }], meta: { total: 1 } }
     stubFetch({ json: async () => payload })
 
-    await expect(getEtfList()).resolves.toEqual(payload)
+    await expect(getEtfs()).resolves.toEqual(payload)
   })
 
   it('throws an ApiError carrying the status on a non-2xx response', async () => {
     stubFetch({ ok: false, status: 500 })
 
-    await expect(getEtfList()).rejects.toMatchObject({
+    await expect(getEtfs()).rejects.toMatchObject({
       name: 'ApiError',
       status: 500,
     })
@@ -71,7 +71,7 @@ describe('getEtfList', () => {
   it('throws an ApiError when fetch itself rejects', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')))
 
-    await expect(getEtfList()).rejects.toMatchObject({
+    await expect(getEtfs()).rejects.toMatchObject({
       name: 'ApiError',
       status: 0,
     })

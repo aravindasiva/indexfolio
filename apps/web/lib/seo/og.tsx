@@ -85,17 +85,18 @@ export function renderOgImage({ eyebrow, title, subtitle }: OgContent) {
         backgroundImage: `radial-gradient(820px 760px at 80% 48%, rgba(${COLORS.primaryRgb}, 0.32), transparent 62%)`,
       }}
     >
-      {/* Hero: the logo mark itself, large, bleeding off the right edge */}
+      {/* Hero: the logo mark, large, on the right - sized/placed to clear the
+          title text (no overlap) while still bleeding off the edge. */}
       <div
         style={{
           position: 'absolute',
-          top: 70,
-          right: -80,
+          top: 95,
+          right: -55,
           display: 'flex',
-          opacity: 0.9,
+          opacity: 0.85,
         }}
       >
-        <LogoMark size={520} />
+        <LogoMark size={470} />
       </div>
 
       {/* Wordmark - kept large so the brand reads on a mobile thumbnail */}
@@ -114,8 +115,9 @@ export function renderOgImage({ eyebrow, title, subtitle }: OgContent) {
         </div>
       </div>
 
-      {/* Main copy - the focal hook */}
-      <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 620 }}>
+      {/* Main copy - the focal hook. Narrower than the card so it never runs
+          into the hero mark on the right. */}
+      <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 560 }}>
         {eyebrow ? (
           <div
             style={{

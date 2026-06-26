@@ -11,6 +11,7 @@ import {
 } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 import { nodes as graphNodes } from '@indexfolio/knowledge-graph'
+import { springSoft } from '@/lib/motion'
 
 /*
   The tools presented as nodes on a glowing vertical "spine" that extends the
@@ -50,19 +51,19 @@ export function ToolsSpine() {
     <section ref={sectionRef} className="relative px-6 pb-32 pt-24 sm:px-10">
       <div className="mx-auto max-w-2xl">
         <motion.h2
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 28 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.5 }}
+          transition={springSoft}
           className="font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
         >
           Everything connects.
         </motion.h2>
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.5, delay: 0.05 }}
+          transition={{ ...springSoft, delay: 0.08 }}
           className="mt-4 max-w-md text-base text-muted-foreground"
         >
           The graph is the map. Follow the thread to every tool.
@@ -112,10 +113,14 @@ function ToolEntry({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 12 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
+      transition={springSoft}
+      // The whole entry slides toward the reader on hover - a clear, physical
+      // "this is a link" cue beyond the colour change.
+      whileHover={{ x: 6 }}
+      whileTap={{ scale: 0.99 }}
     >
       <Link
         href={tool.href}

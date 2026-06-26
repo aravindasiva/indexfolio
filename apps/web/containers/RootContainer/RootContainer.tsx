@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ThemeProvider } from 'next-themes'
 import { MotionConfig } from 'framer-motion'
+import { Analytics } from '@vercel/analytics/next'
 import { Nav } from '@/components/Nav/Nav'
 import { Disclaimer } from '@/components/Disclaimer/Disclaimer'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -27,14 +28,14 @@ export function RootContainer({ children }: { children: ReactNode }) {
       <NuqsAdapter>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <TooltipProvider>
-            {/* One place to honour prefers-reduced-motion for every framer
-                animation in the app - so we can be playful by default and still
-                calm down instantly for users who ask the OS to. */}
+            {/* Honour prefers-reduced-motion for all framer animations. */}
             <MotionConfig reducedMotion="user">
               <Nav />
               {children}
               <Disclaimer />
             </MotionConfig>
+            {/* Cookieless, GDPR-friendly page analytics (no consent banner). */}
+            <Analytics />
           </TooltipProvider>
         </ThemeProvider>
       </NuqsAdapter>

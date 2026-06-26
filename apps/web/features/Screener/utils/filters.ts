@@ -90,7 +90,7 @@ export function filtersToParams(filters: ScreenerFilters): EtfListParams {
         ? filters.maxTer / 100
         : undefined,
     minFundSize:
-      filters.minFundSize != null ? String(filters.minFundSize) : undefined,
+      filters.minFundSize == null ? undefined : String(filters.minFundSize),
     sort: filters.sort,
     order: filters.order,
   }

@@ -35,7 +35,7 @@ export function FilterBar({
 
   // Any filter change resets to page 1.
   const update = (patch: Partial<ScreenerFilters>) =>
-    void setFilters({ ...patch, page: 1 })
+    setFilters({ ...patch, page: 1 })
 
   const toggle = (list: string[], value: string) =>
     list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
@@ -227,7 +227,7 @@ export function FilterBar({
           </AnimatePresence>
           <button
             type="button"
-            onClick={() => void setFilters(null)}
+            onClick={() => setFilters(null)}
             className="ml-1 text-xs font-medium text-primary hover:underline"
           >
             Clear all

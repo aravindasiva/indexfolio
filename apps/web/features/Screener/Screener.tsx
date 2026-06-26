@@ -38,12 +38,55 @@ export function Screener() {
   })
 
   // Click a column header: toggle order if already sorted by it, else sort by it.
-  const onSort = (field: SortField) =>
-    void setFilters({
+  const onSort = (field: SortField) => {
+    setFilters({
       sort: field,
       order: filters.sort === field && filters.order === 'asc' ? 'desc' : 'asc',
       page: 1,
     })
+  }
+
+  // Pick the result state with early returns (no nested ternaries).
+  function renderResults() {
+    if (list.isPending) return <ResultsSkeleton />
+    if (list.isError) {
+      return <ErrorState onRetry={() => list.refetch()} />
+    }
+    if (list.data.data.length === 0) {
+      return (
+        <EmptyState
+          filtered={hasActiveFilters(filters)}
+          onClear={() => setFilters(null)}
+        />
+      )
+    }
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={springSoft}
+        className="space-y-4"
+      >
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {list.data.meta.total}
+          </span>{' '}
+          {list.data.meta.total === 1 ? 'ETF' : 'ETFs'}
+        </p>
+        <ResultsTable
+          etfs={list.data.data}
+          sort={filters.sort}
+          order={filters.order}
+          onSort={onSort}
+        />
+        <Pagination
+          page={list.data.meta.page}
+          totalPages={list.data.meta.totalPages}
+          onPage={(page) => setFilters({ page })}
+        />
+      </motion.div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -52,42 +95,7 @@ export function Screener() {
         setFilters={setFilters}
         options={filterOptions.data}
       />
-
-      {list.isPending ? (
-        <ResultsSkeleton />
-      ) : list.isError ? (
-        <ErrorState onRetry={() => void list.refetch()} />
-      ) : list.data.data.length === 0 ? (
-        <EmptyState
-          filtered={hasActiveFilters(filters)}
-          onClear={() => void setFilters(null)}
-        />
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={springSoft}
-          className="space-y-4"
-        >
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">
-              {list.data.meta.total}
-            </span>{' '}
-            {list.data.meta.total === 1 ? 'ETF' : 'ETFs'}
-          </p>
-          <ResultsTable
-            etfs={list.data.data}
-            sort={filters.sort}
-            order={filters.order}
-            onSort={onSort}
-          />
-          <Pagination
-            page={list.data.meta.page}
-            totalPages={list.data.meta.totalPages}
-            onPage={(page) => void setFilters({ page })}
-          />
-        </motion.div>
-      )}
+      {renderResults()}
     </div>
   )
 }

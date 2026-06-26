@@ -7,6 +7,7 @@ export const EtfParamsSchema = z.object({
 export const EtfListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
+  search: z.string().optional(),
   isAccumulating: z.enum(['true', 'false']).optional(),
   domicile: z.string().optional(),
   exchange: z.string().optional(),
@@ -47,7 +48,21 @@ export const EtfListResponseSchema = z.object({
   }),
 })
 
+// Available filter values with counts (the "facets" of faceted search) so the
+// screener toolbar is built from real data, not hardcoded lists.
+const FilterOptionSchema = z.object({
+  value: z.string(),
+  count: z.number().int(),
+})
+
+export const EtfFiltersResponseSchema = z.object({
+  domicile: z.array(FilterOptionSchema),
+  exchange: z.array(FilterOptionSchema),
+  assetClass: z.array(FilterOptionSchema),
+})
+
 export type EtfParams = z.infer<typeof EtfParamsSchema>
 export type EtfListQuery = z.infer<typeof EtfListQuerySchema>
 export type EtfResponse = z.infer<typeof EtfResponseSchema>
 export type EtfListResponse = z.infer<typeof EtfListResponseSchema>
+export type EtfFiltersResponse = z.infer<typeof EtfFiltersResponseSchema>

@@ -29,6 +29,7 @@ export type EtfListResponse = {
 export type EtfListParams = {
   page?: number
   limit?: number
+  search?: string
   isAccumulating?: boolean
   domicile?: string
   exchange?: string
@@ -37,4 +38,12 @@ export type EtfListParams = {
   minFundSize?: string
   sort?: 'ter' | 'fundSizeEur' | 'inceptionDate' | 'ticker' | 'name'
   order?: 'asc' | 'desc'
+}
+
+// Available filter values with counts (from GET /etfs/filters).
+export type FilterOption = { value: string; count: number }
+export type EtfFilters = {
+  domicile: FilterOption[]
+  exchange: FilterOption[]
+  assetClass: FilterOption[]
 }

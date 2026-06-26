@@ -1,12 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import {
+  EtfFiltersResponseSchema,
   EtfListQuerySchema,
   EtfListResponseSchema,
   EtfParamsSchema,
   EtfResponseSchema,
 } from './etf.schema.js'
-import { getEtfByTicker, listEtfs } from './etf.service.js'
+import { getEtfByTicker, getEtfFilters, getEtfs } from './etf.service.js'
 
 export async function etfRoutes(fastify: FastifyInstance): Promise<void> {
   const f = fastify.withTypeProvider<ZodTypeProvider>()
@@ -18,10 +19,24 @@ export async function etfRoutes(fastify: FastifyInstance): Promise<void> {
         querystring: EtfListQuerySchema,
         response: { 200: EtfListResponseSchema },
         tags: ['etf'],
-        summary: 'List ETFs with filters and pagination',
+        summary: 'List ETFs with search, filters and pagination',
       },
     },
-    async (request) => listEtfs(request.query, fastify.db),
+    async (request) => getEtfs(request.query, fastify.db),
+  )
+
+  // Static route registered before '/etfs/:ticker' so it is not captured as a
+  // ticker param. Returns the available filter values with counts.
+  f.get(
+    '/etfs/filters',
+    {
+      schema: {
+        response: { 200: EtfFiltersResponseSchema },
+        tags: ['etf'],
+        summary: 'Available filter options with counts',
+      },
+    },
+    async () => getEtfFilters(fastify.db),
   )
 
   f.get(

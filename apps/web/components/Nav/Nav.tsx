@@ -52,7 +52,7 @@ export function Nav() {
             <li key={href}>
               <Link
                 href={href}
-                className="glass-chip-link block rounded-full px-3.5 py-1.5 text-sm font-medium opacity-90 hover:opacity-100"
+                className="glass-chip-link block rounded-full px-3.5 py-1.5 text-sm font-medium"
               >
                 {label}
               </Link>

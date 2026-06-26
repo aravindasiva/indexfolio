@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { PageContainer } from '@/containers/PageContainer/PageContainer'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Screener } from '@/features/Screener/Screener'
 
 export const metadata: Metadata = {
@@ -14,7 +16,21 @@ export default function ScreenerPage() {
       title="ETF Screener"
       subtitle="Filter UCITS ETFs by TER, domicile, type, and asset class."
     >
-      <Screener />
+      {/* Screener reads filters from the URL (useSearchParams via nuqs), so it
+          needs a Suspense boundary to be statically prerendered. */}
+      <Suspense fallback={<ScreenerFallback />}>
+        <Screener />
+      </Suspense>
     </PageContainer>
+  )
+}
+
+function ScreenerFallback() {
+  return (
+    <div className="space-y-2" aria-busy="true">
+      {Array.from({ length: 8 }, (_, i) => (
+        <Skeleton key={i} className="h-12 w-full" />
+      ))}
+    </div>
   )
 }

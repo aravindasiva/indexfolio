@@ -1,28 +1,15 @@
-import type { PrismaClient, Prisma } from '@prisma/client'
+import type { PrismaClient, Prisma, ETF } from '@prisma/client'
 import { AppError, ErrorCode } from '../../shared/error.js'
 import type {
   EtfListQuery,
   EtfResponse,
   EtfListResponse,
+  EtfFiltersResponse,
 } from './etf.schema.js'
 
-function serializeEtf(etf: {
-  id: string
-  ticker: string
-  name: string
-  isin: string
-  domicile: string
-  exchange: string
-  currency: string
-  ter: unknown
-  fundSizeEur: bigint
-  isAccumulating: boolean
-  isUcits: boolean
-  indexTracked: string
-  assetClass: string
-  provider: string
-  inceptionDate: Date
-}): EtfResponse {
+// Maps a Prisma ETF row to the JSON contract. The DB shape comes from Prisma
+// (ETF) and the JSON shape from etf.schema.ts (EtfResponse) - no retyping here.
+function serializeEtf(etf: ETF): EtfResponse {
   return {
     id: etf.id,
     ticker: etf.ticker,
@@ -44,6 +31,15 @@ function serializeEtf(etf: {
 
 function buildWhere(query: EtfListQuery): Prisma.ETFWhereInput {
   const where: Prisma.ETFWhereInput = {}
+
+  if (query.search !== undefined && query.search.trim() !== '') {
+    const term = query.search.trim()
+    where.OR = [
+      { name: { contains: term, mode: 'insensitive' } },
+      { ticker: { contains: term, mode: 'insensitive' } },
+      { isin: { contains: term, mode: 'insensitive' } },
+    ]
+  }
 
   if (query.isAccumulating !== undefined) {
     where.isAccumulating = query.isAccumulating === 'true'
@@ -72,7 +68,7 @@ function buildWhere(query: EtfListQuery): Prisma.ETFWhereInput {
   return where
 }
 
-export async function listEtfs(
+export async function getEtfs(
   query: EtfListQuery,
   db: PrismaClient,
 ): Promise<EtfListResponse> {
@@ -95,6 +91,40 @@ export async function listEtfs(
       limit: query.limit,
       totalPages: Math.ceil(total / query.limit),
     },
+  }
+}
+
+// A grouped-count row keyed by the field name, e.g. { domicile: 'IE', _count: { _all: 14 } }.
+type GroupRow<K extends string> = { _count: { _all: number } } & Record<
+  K,
+  string
+>
+
+// Map grouped counts to { value, count }, sorted by value. Pure, so it is unit-tested.
+export function toFilterOptions<K extends string>(
+  rows: ReadonlyArray<GroupRow<K>>,
+  key: K,
+): Array<{ value: string; count: number }> {
+  return rows
+    .map((row) => ({ value: row[key], count: row._count._all }))
+    .sort((a, b) => a.value.localeCompare(b.value))
+}
+
+// Distinct filter values with counts (faceted search), so the screener toolbar
+// is built from real data. One GROUP BY per categorical field.
+export async function getEtfFilters(
+  db: PrismaClient,
+): Promise<EtfFiltersResponse> {
+  const [domicile, exchange, assetClass] = await Promise.all([
+    db.eTF.groupBy({ by: ['domicile'], _count: { _all: true } }),
+    db.eTF.groupBy({ by: ['exchange'], _count: { _all: true } }),
+    db.eTF.groupBy({ by: ['assetClass'], _count: { _all: true } }),
+  ])
+
+  return {
+    domicile: toFilterOptions(domicile, 'domicile'),
+    exchange: toFilterOptions(exchange, 'exchange'),
+    assetClass: toFilterOptions(assetClass, 'assetClass'),
   }
 }
 

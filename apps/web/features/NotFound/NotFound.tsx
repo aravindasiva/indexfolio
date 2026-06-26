@@ -6,7 +6,12 @@ import { motion, useAnimationControls } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import { AstronautCat } from '@/components/icons/AstronautCat'
 import { buildBalloonFlight } from '@/components/FloatingCat/utils/balloonFlight'
+import { tactile } from '@/lib/motion'
 import { pick } from '@/lib/random'
+
+// The CTA is a Next.js Link that also reacts to hover/press like every other
+// button in the app.
+const MotionLink = motion.create(Link)
 
 // Deterministic so server and client render the same stars (no hydration drift).
 const STARS = [
@@ -75,8 +80,8 @@ export function NotFound() {
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-6 py-28 text-center">
       {/* Ambient glow (works in both themes) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="absolute left-1/3 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/15 blur-[130px]" />
-        <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-primary/10 blur-[130px]" />
+        <div className="absolute left-1/3 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/25 blur-[130px]" />
+        <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-primary/18 blur-[130px]" />
       </div>
 
       {/* Stars (foreground colour, so they adapt to the theme) */}
@@ -224,13 +229,17 @@ export function NotFound() {
         index. Let&apos;s get you back.
       </p>
 
-      <Link
+      <MotionLink
         href="/"
-        className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground no-underline transition hover:brightness-110"
+        {...tactile}
+        className="group mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground no-underline transition hover:brightness-110"
       >
-        <ArrowLeft size={16} />
+        <ArrowLeft
+          size={16}
+          className="transition-transform duration-200 group-hover:-translate-x-0.5"
+        />
         Back to the graph
-      </Link>
+      </MotionLink>
     </main>
   )
 }

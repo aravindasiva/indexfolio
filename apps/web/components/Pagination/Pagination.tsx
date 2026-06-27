@@ -41,22 +41,22 @@ export function Pagination({
         onClick={() => onPage(page - 1)}
       />
 
-      {paginationRange(page, totalPages).map((item, index) =>
-        item === 'ellipsis' ? (
-          <span
-            key={`gap-${index}`}
-            className="px-1 text-sm text-muted-foreground"
-            aria-hidden="true"
-          >
-            …
-          </span>
-        ) : (
+      {paginationRange(page, totalPages).map((item) =>
+        typeof item === 'number' ? (
           <PageButton
             key={item}
             page={item}
             active={item === page}
             onClick={() => onPage(item)}
           />
+        ) : (
+          <span
+            key={item}
+            className="px-1 text-sm text-muted-foreground"
+            aria-hidden="true"
+          >
+            …
+          </span>
         ),
       )}
 

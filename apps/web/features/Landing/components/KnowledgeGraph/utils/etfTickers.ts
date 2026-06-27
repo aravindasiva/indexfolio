@@ -30,13 +30,19 @@ export function useFadingTicker(intervalMs = 4500, fadeMs = 300) {
 
   useEffect(() => {
     let swap: ReturnType<typeof globalThis.setTimeout>
-    const cycle = globalThis.setInterval(() => {
+
+    // Flat named steps (rather than nested closures): show the next ticker, and
+    // start a cycle that hides it, then reveals the next one after the fade gap.
+    const reveal = () => {
+      setIndex((current) => (current + 1) % ETF_TICKERS.length)
+      setVisible(true)
+    }
+    const beginSwap = () => {
       setVisible(false)
-      swap = globalThis.setTimeout(() => {
-        setIndex((current) => (current + 1) % ETF_TICKERS.length)
-        setVisible(true)
-      }, fadeMs)
-    }, intervalMs)
+      swap = globalThis.setTimeout(reveal, fadeMs)
+    }
+    const cycle = globalThis.setInterval(beginSwap, intervalMs)
+
     return () => {
       globalThis.clearInterval(cycle)
       globalThis.clearTimeout(swap)

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import type { Material } from 'three'
 import type * as THREE from 'three'
 import type SpriteText from 'three-spritetext'
 import { nodeOpacity } from '../graph'
@@ -9,7 +8,7 @@ const FADE_MS = 250
 const MORPH_MS = 700
 
 // Tween a material's opacity over `ms`.
-function fadeOpacity(material: Material, to: number, ms: number): void {
+function fadeOpacity(material: THREE.Material, to: number, ms: number): void {
   const from = material.opacity
   const start = performance.now()
   function step(now: number) {

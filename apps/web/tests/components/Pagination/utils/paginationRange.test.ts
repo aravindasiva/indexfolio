@@ -10,21 +10,21 @@ describe('paginationRange', () => {
   it('shows a window around the current page with gaps', () => {
     expect(paginationRange(5, 10)).toEqual([
       1,
-      'ellipsis',
+      'ellipsis-left',
       4,
       5,
       6,
-      'ellipsis',
+      'ellipsis-right',
       10,
     ])
   })
 
   it('omits the leading gap near the start', () => {
-    expect(paginationRange(2, 10)).toEqual([1, 2, 3, 'ellipsis', 10])
+    expect(paginationRange(2, 10)).toEqual([1, 2, 3, 'ellipsis-right', 10])
   })
 
   it('omits the trailing gap near the end', () => {
-    expect(paginationRange(9, 10)).toEqual([1, 'ellipsis', 8, 9, 10])
+    expect(paginationRange(9, 10)).toEqual([1, 'ellipsis-left', 8, 9, 10])
   })
 
   it('always includes first and last', () => {

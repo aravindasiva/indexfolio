@@ -34,14 +34,7 @@ export const tactile = {
   transition: spring,
 } as const
 
-// Fade + rise. The standard entrance for a content block or heading.
-export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: springSoft },
-}
-
-// Same idea, shorter travel - for an item inside a staggered list so the cascade
-// stays tight.
+// Fade + rise for an item inside a staggered list, so the cascade stays tight.
 export const fadeUpItem: Variants = {
   hidden: { opacity: 0, y: 14 },
   show: { opacity: 1, y: 0, transition: spring },

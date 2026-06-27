@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { springSoft } from '@/lib/motion'
@@ -10,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { FilterBar } from './components/FilterBar/FilterBar'
 import { ResultsTable } from './components/ResultsTable/ResultsTable'
+import { rememberScreenerReturn } from './utils/returnUrl'
 import {
   filtersToParams,
   hasActiveFilters,
@@ -36,6 +38,13 @@ export function Screener() {
     queryKey: ['etfs', params],
     queryFn: () => getEtfs(params),
   })
+
+  // Remember the current filtered URL so an ETF detail page can return here.
+  useEffect(() => {
+    rememberScreenerReturn(
+      globalThis.location.pathname + globalThis.location.search,
+    )
+  }, [filters])
 
   // Click a column header: toggle order if already sorted by it, else sort by it.
   const onSort = (field: SortField) => {

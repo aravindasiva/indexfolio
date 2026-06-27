@@ -5,15 +5,11 @@ import { SlidersHorizontal } from 'lucide-react'
 import type { EtfFilters } from '@/lib/api'
 import { Surface } from '@/components/Surface/Surface'
 import { Chip } from '@/components/Chip/Chip'
-import { Pill } from '@/components/Pill/Pill'
 import { SearchField } from '@/components/SearchField/SearchField'
 import { fadeUpItem, staggerContainer, tactile } from '@/lib/motion'
 import type { ScreenerFilters, SetScreenerFilters } from '../../utils/filters'
-import {
-  assetClassLabel,
-  FUND_SIZE_PRESETS,
-  TER_PRESETS,
-} from '../../utils/options'
+import { assetClassLabel } from '@/lib/etf/labels'
+import { FUND_SIZE_PRESETS, TER_PRESETS } from '../../utils/options'
 
 type ActivePill = { key: string; label: string; clear: () => void }
 
@@ -221,7 +217,9 @@ export function FilterBar({
                 exit={{ opacity: 0, scale: 0.85 }}
                 transition={{ duration: 0.15 }}
               >
-                <Pill onRemove={pill.clear}>{pill.label}</Pill>
+                <Chip mode="removable" onRemove={pill.clear}>
+                  {pill.label}
+                </Chip>
               </motion.div>
             ))}
           </AnimatePresence>

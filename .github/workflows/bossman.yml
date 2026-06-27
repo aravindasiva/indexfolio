@@ -19,6 +19,7 @@ jobs:
     outputs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
+      seed: ${{ steps.filter.outputs.seed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.3
@@ -34,6 +35,9 @@ jobs:
             web:
               - 'apps/web/**'
               - 'packages/**'
+            seed:
+              - 'apps/api/prisma/data/**'
+              - 'apps/api/prisma/seed.ts'
 
   deploy-api:
     name: '🚢 Shipping API to Railway'
@@ -68,3 +72,55 @@ jobs:
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
     secrets: inherit
+
+  reseed-staging:
+    name: '🌱 Reseeding the staging DB'
+    needs: [checks, detect-changes, deploy-api]
+    # Staging only, and only when the seed data/script changed. Runs after a
+    # healthy API deploy (so the schema is current) and never touches prod -- it
+    # is hard-wired to the dev branch + the staging service and token.
+    if: |
+      always() &&
+      github.ref == 'refs/heads/dev' &&
+      needs.checks.result == 'success' &&
+      needs.detect-changes.outputs.seed == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
+    # One reseed at a time; never cancel a reset mid-run.
+    concurrency:
+      group: reseed-staging-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli@5.4.2
+
+      - name: Reset and reseed staging
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+        # `railway run` injects the staging service's variables (incl. DATABASE_URL)
+        # from Railway -- single source of truth, no duplicated secret. prisma:reset
+        # = `prisma migrate reset --force`: drop -> migrate -> seed.
+        run: |
+          railway run --service ${{ vars.RAILWAY_API_STAGING_SERVICE_ID }} -- \
+            pnpm --filter @indexfolio/api prisma:reset
+          echo "## 🌱 Staging DB reset + reseeded" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dropped, re-migrated, and reseeded from \`apps/api/prisma/data\`." >> "$GITHUB_STEP_SUMMARY"

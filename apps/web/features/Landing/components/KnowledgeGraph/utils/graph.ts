@@ -13,6 +13,8 @@ import type { NodeType } from '@indexfolio/knowledge-graph'
 export const NODE_COLORS: Record<NodeType, string> = {
   home: 'var(--foreground)',
   tool: '#635BFF',
+  // Shares the tool indigo so the ETF node reads as part of the same family.
+  etf: '#635BFF',
 }
 
 // Opacities that drive the hover highlight. Shared so 2D and 3D match exactly.
@@ -20,6 +22,10 @@ export const NODE_DIM_OPACITY = 0.12
 export const EDGE_BASE_OPACITY = 0.4
 export const EDGE_ACTIVE_OPACITY = 0.95
 export const EDGE_DIM_OPACITY = 0.06
+
+// Dotted (ETF) edges read as indigo connectors in both 2D and 3D, so they stay
+// visible in either theme; they share the solid edges' hover opacity behaviour.
+export const EDGE_DASHED_COLOR = NODE_COLORS.etf
 
 // Undirected adjacency: which nodes are directly connected to which.
 function buildAdjacency(): Map<string, Set<string>> {

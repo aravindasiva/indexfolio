@@ -3,7 +3,7 @@ import {
   formatFundSize,
   formatTer,
   fundTypeLabel,
-} from '../../../../features/Screener/utils/format'
+} from '../../../lib/etf/format'
 
 describe('formatTer', () => {
   it('renders the API fraction as a percentage', () => {

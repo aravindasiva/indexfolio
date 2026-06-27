@@ -1,17 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Link from 'next/link'
 import { motion, useAnimationControls } from 'framer-motion'
-import { ArrowLeft } from 'lucide-react'
 import { AstronautCat } from '@/components/icons/AstronautCat'
+import { BackButton } from '@/components/BackButton/BackButton'
 import { buildBalloonFlight } from '@/components/FloatingCat/utils/balloonFlight'
-import { tactile } from '@/lib/motion'
 import { pick } from '@/lib/random'
-
-// The CTA is a Next.js Link that also reacts to hover/press like every other
-// button in the app.
-const MotionLink = motion.create(Link)
 
 // Deterministic so server and client render the same stars (no hydration drift).
 const STARS = [
@@ -213,7 +207,7 @@ export function NotFound() {
             }
           />
 
-          <AstronautCat size={104} />
+          <AstronautCat size={104} priority />
         </motion.button>
       </div>
 
@@ -229,17 +223,15 @@ export function NotFound() {
         index. Let&apos;s get you back.
       </p>
 
-      <MotionLink
-        href="/"
-        {...tactile}
-        className="group mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground no-underline transition hover:brightness-110"
-      >
-        <ArrowLeft
-          size={16}
-          className="transition-transform duration-200 group-hover:-translate-x-0.5"
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <BackButton
+          to="/"
+          label="Back to the graph"
+          variant="solid"
+          icon={null}
         />
-        Back to the graph
-      </MotionLink>
+        <BackButton label="Go back" variant="outline" />
+      </div>
     </main>
   )
 }

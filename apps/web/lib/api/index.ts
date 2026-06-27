@@ -26,7 +26,9 @@ const isDev = process.env.NODE_ENV !== 'production'
 // An Error with an HTTP status attached - a type + factory, no class needed.
 export type ApiError = Error & { status: number }
 type Params = Record<string, string | number | boolean | undefined>
-type GetOptions = { params?: Params; label?: string }
+// `revalidate` (seconds) opts a server-side call into Next's ISR cache; it is
+// ignored by the browser, so client callers can leave it unset.
+type GetOptions = { params?: Params; label?: string; revalidate?: number }
 type ApiOutcome = { status: number; ms: number } | { error: unknown }
 
 // ─── Functions ──────────────────────────────────────────────────────────────
@@ -59,17 +61,19 @@ function logApi(name: string, outcome: ApiOutcome) {
 }
 
 async function get<T>(path: string, options: GetOptions = {}): Promise<T> {
-  const { params, label } = options
+  const { params, label, revalidate } = options
   // A friendly name for logs (e.g. "getEtfList"), falling back to the path.
   const name = label ?? `GET ${path}`
 
   if (!BASE_URL) throw apiError('NEXT_PUBLIC_API_URL is not set', 0)
   const url = `${BASE_URL}${path}${buildQuery(params)}`
 
+  const init = revalidate === undefined ? undefined : { next: { revalidate } }
+
   const startedAt = performance.now()
   let response: Response
   try {
-    response = await fetch(url)
+    response = await fetch(url, init)
   } catch (error) {
     logApi(name, { error })
     throw apiError(`Network error calling ${path}`, 0)
@@ -87,12 +91,42 @@ async function get<T>(path: string, options: GetOptions = {}): Promise<T> {
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
 
-export function getEtfs(params: EtfListParams = {}): Promise<EtfListResponse> {
-  return get<EtfListResponse>('/etfs', { params, label: 'getEtfs' })
+// `revalidate` is for server callers (detail page, sitemap) that want ISR
+// caching; the screener (client) omits it.
+type ServerOptions = { revalidate?: number }
+
+export function getEtfs(
+  params: EtfListParams = {},
+  options: ServerOptions = {},
+): Promise<EtfListResponse> {
+  return get<EtfListResponse>('/etfs', {
+    params,
+    label: 'getEtfs',
+    revalidate: options.revalidate,
+  })
 }
 
-export function getEtfByTicker(ticker: string): Promise<Etf> {
-  return get<Etf>(`/etfs/${ticker}`, { label: 'getEtfByTicker' })
+export function getEtfByTicker(
+  ticker: string,
+  options: ServerOptions = {},
+): Promise<Etf> {
+  return get<Etf>(`/etfs/${ticker}`, {
+    label: 'getEtfByTicker',
+    revalidate: options.revalidate,
+  })
+}
+
+// Every ETF across all pages (the API caps limit at 100). For server-side
+// enumeration: generateStaticParams and the sitemap.
+export async function getAllEtfs(options: ServerOptions = {}): Promise<Etf[]> {
+  const PAGE_SIZE = 100
+  const first = await getEtfs({ limit: PAGE_SIZE, page: 1 }, options)
+  const all = [...first.data]
+  for (let page = 2; page <= first.meta.totalPages; page++) {
+    const next = await getEtfs({ limit: PAGE_SIZE, page }, options)
+    all.push(...next.data)
+  }
+  return all
 }
 
 // Available filter values + counts for the screener toolbar (faceted search).

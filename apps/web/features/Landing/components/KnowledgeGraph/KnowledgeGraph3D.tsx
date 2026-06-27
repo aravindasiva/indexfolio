@@ -4,19 +4,30 @@ import { useTheme } from 'next-themes'
 import ForceGraph3D from 'react-force-graph-3d'
 import type {
   ForceGraphMethods,
+  ForceGraphProps,
   LinkObject,
   NodeObject,
 } from 'react-force-graph-3d'
 import * as THREE from 'three'
+import type { Line2 } from 'three/addons/lines/Line2.js'
 import SpriteText from 'three-spritetext'
 import {
   edges as graphEdges,
   nodes as graphNodes,
 } from '@indexfolio/knowledge-graph'
 import type { NodeType } from '@indexfolio/knowledge-graph'
-import { edgeOpacity, nodeOpacity } from './utils/graph'
-import { createStarfield } from './utils/createStarfield'
-import type { Starfield } from './utils/createStarfield'
+import { EDGE_DASHED_COLOR, edgeOpacity, nodeOpacity } from './utils/graph'
+import { useFadingTicker } from './utils/etfTickers'
+import { useDetailNode } from './utils/3d/useDetailNode'
+import { createDetailPoints, DETAIL_RADIUS } from './utils/3d/detailShape'
+import {
+  createDashedLine,
+  setDashedLineEndpoints,
+  DASHED_WIDTH,
+  DASHED_WIDTH_ACTIVE,
+} from './utils/3d/dashedLink'
+import { createStarfield } from './utils/3d/createStarfield'
+import type { Starfield } from './utils/3d/createStarfield'
 import { triggerSupernova, SUPERNOVA_EVENT } from './utils/supernova'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -32,13 +43,15 @@ type GraphNodeDatum = {
 }
 
 type FGNode = NodeObject<GraphNodeDatum>
-// Link payload is empty: the library swaps the string source/target for node
-// objects at runtime, so we let LinkObject supply that union.
-type FGLink = LinkObject<GraphNodeDatum>
+// The library swaps string source/target for node objects at runtime; the link
+// payload only carries our `dashed` flag.
+type GraphLinkDatum = { dashed?: boolean }
+type FGLink = LinkObject<GraphNodeDatum, GraphLinkDatum>
 type FGMethods = ForceGraphMethods<FGNode, FGLink>
+type Coords = { x: number; y: number; z: number }
 
-// Narrowed shapes for the parts of the OrbitControls / d3-force APIs we touch
-// (react-force-graph types controls() as `object`).
+// Narrowed shapes for the OrbitControls / d3-force bits we touch (the library
+// types controls() as `object`).
 type OrbitLike = {
   autoRotate: boolean
   autoRotateSpeed: number
@@ -46,38 +59,23 @@ type OrbitLike = {
   enableDamping: boolean
 }
 type ChargeForce = { strength: (value: number) => unknown }
-type DistanceForce = { distance: (value: number) => unknown }
+type DistanceForce = {
+  distance: (value: number | ((link: FGLink) => number)) => unknown
+}
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants & helpers ────────────────────────────────────────────────────────
 
 const TOOL_COLOR = '#635BFF'
 const HOME_RADIUS = 7
 const TOOL_RADIUS = 4
 const CAMERA_DISTANCE = 300
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-// Resolve a CSS custom property to a concrete `rgb(...)` string three.js can
-// parse, by reading the computed colour off a throwaway element.
-function resolveCssColor(expr: string): string {
-  const probe = document.createElement('span')
-  probe.style.color = expr
-  probe.style.display = 'none'
-  document.body.appendChild(probe)
-  const rgb = getComputedStyle(probe).color
-  probe.remove()
-  return rgb || 'rgb(255, 255, 255)'
-}
-
-// --foreground is constant per theme, so resolve it once per theme key.
-const foregroundCache = new Map<string, string>()
-function foregroundColor(themeKey: string): string {
-  const cached = foregroundCache.get(themeKey)
-  if (cached) return cached
-  const color = resolveCssColor('var(--foreground)')
-  foregroundCache.set(themeKey, color)
-  return color
-}
+// Mirror --foreground from globals.css, derived from the theme rather than read
+// from the DOM: next-themes swaps the class in an effect that runs after this
+// render, so a DOM read would be one toggle stale (and three.js can't read CSS
+// vars anyway).
+const FG_LIGHT = 'rgb(9, 9, 11)' // hsl(240 10% 4%)
+const FG_DARK = 'rgb(250, 250, 250)' // hsl(0 0% 98%)
 
 // `rgb(r, g, b)` -> `rgba(r, g, b, a)`
 function withAlpha(rgb: string, alpha: number): string {
@@ -88,6 +86,13 @@ function idOf(ref: FGLink['source']): string {
   if (ref == null) return ''
   if (typeof ref === 'object') return ref.id
   return String(ref)
+}
+
+function isLinkActive(link: FGLink, hoveredId: string | null): boolean {
+  return (
+    hoveredId != null &&
+    (idOf(link.source) === hoveredId || idOf(link.target) === hoveredId)
+  )
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -103,8 +108,8 @@ export function KnowledgeGraph3D({
 }: KnowledgeGraph3DProps) {
   const router = useRouter()
   const { resolvedTheme } = useTheme()
-  const themeKey = resolvedTheme ?? 'dark'
   const isDark = resolvedTheme !== 'light'
+  const fgColor = isDark ? FG_DARK : FG_LIGHT
 
   const containerRef = useRef<HTMLDivElement>(null)
   const fgRef = useRef<FGMethods | undefined>(undefined)
@@ -118,8 +123,12 @@ export function KnowledgeGraph3D({
   const [dims, setDims] = useState({ width: 0, height: 0 })
   const [hoveredId, setHoveredId] = useState<string | null>(null)
 
-  // Graph data is static; the home node is pinned at the origin so every other
-  // node spreads evenly around it (charge + links do the rest).
+  // The ETF-detail node's live label + morphing shape (refs to attach below).
+  const { ticker, visible } = useFadingTicker()
+  const detail = useDetailNode(ticker, visible, hoveredId)
+
+  // Graph data is static; the home node is pinned at the origin so the rest
+  // spreads evenly around it (charge + links do the rest).
   const data = useMemo(() => {
     const nodes: GraphNodeDatum[] = graphNodes.map((n) =>
       n.id === 'home'
@@ -129,12 +138,13 @@ export function KnowledgeGraph3D({
     const links = graphEdges.map((e) => ({
       source: e.source,
       target: e.target,
+      dashed: e.dashed,
     }))
     return { nodes, links }
   }, [])
 
-  // The easter egg is owned by the wrapper; here we just blast the graph apart
-  // (it re-settles) when the wrapper dispatches the supernova event.
+  // The supernova easter egg is owned by the wrapper; we just blast the graph
+  // apart (it re-settles) when it fires.
   useEffect(() => {
     function onSupernova() {
       const fg = fgRef.current
@@ -144,39 +154,53 @@ export function KnowledgeGraph3D({
     return () => globalThis.removeEventListener(SUPERNOVA_EVENT, onSupernova)
   }, [data.nodes])
 
-  // Each node is a sphere + a billboarded label. Opacity is baked from the
-  // hovered node, so react-force-graph rebuilds the (few) nodes on hover - no
-  // imperative mutation of retained objects. Theme drives the home colour.
+  // A sphere (or the detail point cloud) plus a billboarded label. Opacity is
+  // baked from the hovered node, so the library rebuilds the few nodes on hover.
   const nodeThreeObject = useCallback(
     (node: FGNode) => {
       const isHome = node.type === 'home'
-      const color = isHome ? foregroundColor(themeKey) : TOOL_COLOR
+      const isDetail = node.id === 'etf-detail'
+      const color = isHome ? fgColor : TOOL_COLOR
       const radius = isHome ? HOME_RADIUS : TOOL_RADIUS
+      const meshRadius = isDetail ? DETAIL_RADIUS : radius
       const opacity = nodeOpacity(node.id, hoveredId)
 
       const group = new THREE.Group()
 
-      const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(radius, 32, 32),
-        // Lambert: soft diffuse shading reads as 3D as the camera orbits, with
-        // no fixed specular hotspot. Avoids the lighting/environment rabbit hole.
-        new THREE.MeshLambertMaterial({ color, transparent: true, opacity }),
-      )
-      group.add(sphere)
+      if (isDetail) {
+        const points = createDetailPoints(color, opacity, detail.pRef.current)
+        detail.attachPoints(points)
+        group.add(points)
+      } else {
+        // Lambert: soft diffuse shading that reads as 3D while the camera orbits.
+        group.add(
+          new THREE.Mesh(
+            new THREE.SphereGeometry(radius, 32, 32),
+            new THREE.MeshLambertMaterial({
+              color,
+              transparent: true,
+              opacity,
+            }),
+          ),
+        )
+      }
 
-      const label = new SpriteText(node.label)
+      const label = new SpriteText(
+        isDetail ? `ETF ${detail.tickerRef.current}` : node.label,
+      )
       label.color = color
       label.textHeight = isHome ? 3.2 : 2.6
       label.fontFace = isHome ? 'Syne, sans-serif' : 'DM Sans, sans-serif'
       label.fontWeight = isHome ? 'bold' : 'normal'
       label.material.transparent = true
       label.material.opacity = opacity
-      label.position.set(0, -(radius + 5), 0)
+      label.position.set(0, -(meshRadius + 5), 0)
+      if (isDetail) detail.attachSprite(label)
       group.add(label)
 
       return group
     },
-    [hoveredId, themeKey],
+    [hoveredId, fgColor, detail],
   )
 
   const handleNodeHover = useCallback((node: FGNode | null) => {
@@ -185,23 +209,57 @@ export function KnowledgeGraph3D({
 
   const handleNodeClick = useCallback(
     (node: FGNode) => {
-      // The home node is a secret trigger, not a (pointless) self-link.
+      // Home is a secret trigger, not a self-link; the detail node opens whichever
+      // ticker is showing right now.
       if (node.type === 'home') onHomeActivate?.()
+      else if (node.id === 'etf-detail')
+        router.push(`/etf/${detail.tickerRef.current}`)
       else router.push(node.href)
     },
-    [router, onHomeActivate],
+    [router, onHomeActivate, detail],
   )
 
-  // ── Tune forces, controls, and scroll behaviour once mounted ──────────────
+  // Dotted ETF edges are our own fat line; every other link keeps the default.
+  // Rebuilt on hover (fade/thicken) and resize (line-width resolution).
+  const linkThreeObject = useCallback(
+    (link: FGLink): THREE.Object3D | undefined => {
+      if (!link.dashed) return undefined
+      return createDashedLine({
+        color: EDGE_DASHED_COLOR,
+        opacity: edgeOpacity(idOf(link.source), idOf(link.target), hoveredId),
+        linewidth: isLinkActive(link, hoveredId)
+          ? DASHED_WIDTH_ACTIVE
+          : DASHED_WIDTH,
+        width: dims.width,
+        height: dims.height,
+      })
+    },
+    [hoveredId, dims.width, dims.height],
+  )
+
+  const linkPositionUpdate = useCallback(
+    (
+      obj: THREE.Object3D,
+      coords: { start: Coords; end: Coords },
+      link: FGLink,
+    ) => {
+      if (!link.dashed) return false // let the library position default links
+      setDashedLineEndpoints(obj as Line2, coords.start, coords.end)
+      return true
+    },
+    [],
+  )
+
+  // Tune forces, controls, and scroll behaviour once the graph is mounted.
   useEffect(() => {
     const fg = fgRef.current
     if (!fg) return
 
-    // Pin the layout around the fixed home node (no centering force needed).
     const charge = fg.d3Force('charge') as ChargeForce | undefined
     charge?.strength(-140)
     const link = fg.d3Force('link') as DistanceForce | undefined
-    link?.distance(70)
+    // Dotted (ETF) edges sit closer, so they read as short connectors.
+    link?.distance((edge) => (edge.dashed ? 32 : 70))
     fg.d3Force('center', null)
     fg.cameraPosition({ z: CAMERA_DISTANCE })
 
@@ -209,11 +267,11 @@ export function KnowledgeGraph3D({
     controls.autoRotate = true
     controls.autoRotateSpeed = 0.6
     controls.enableDamping = true
-    // Zoom is locked so the wheel always scrolls the page to the next section.
+    // Zoom is locked so the wheel always scrolls to the next section.
     controls.enableZoom = false
   }, [dims.width])
 
-  // ── Starfield inside the scene (parallaxes as the camera orbits) ──────────
+  // Starfield inside the scene (parallaxes as the camera orbits).
   useEffect(() => {
     const fg = fgRef.current
     if (!fg) return
@@ -233,7 +291,7 @@ export function KnowledgeGraph3D({
     starfieldRef.current?.setDark(isDark)
   }, [isDark])
 
-  // ── Track container size ──────────────────────────────────────────────────
+  // Track container size.
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -249,7 +307,7 @@ export function KnowledgeGraph3D({
     return () => obs.disconnect()
   }, [])
 
-  // ── Pause the render loop when scrolled off-screen ────────────────────────
+  // Pause the render loop when scrolled off-screen.
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -279,7 +337,7 @@ export function KnowledgeGraph3D({
       }}
     >
       {dims.width > 0 && (
-        <ForceGraph3D<GraphNodeDatum>
+        <ForceGraph3D<GraphNodeDatum, GraphLinkDatum>
           ref={fgRef}
           controlType="orbit"
           width={dims.width}
@@ -289,18 +347,28 @@ export function KnowledgeGraph3D({
           showNavInfo={false}
           enableNodeDrag={false}
           nodeThreeObject={nodeThreeObject}
+          // The lib types these accessors strictly (linkThreeObject can't return
+          // undefined; linkPositionUpdate is an independent generic), so the
+          // concretely-typed callbacks need a cast to line up.
+          linkThreeObject={
+            linkThreeObject as ForceGraphProps<
+              GraphNodeDatum,
+              GraphLinkDatum
+            >['linkThreeObject']
+          }
+          linkPositionUpdate={
+            linkPositionUpdate as ForceGraphProps<
+              GraphNodeDatum,
+              GraphLinkDatum
+            >['linkPositionUpdate']
+          }
           linkColor={(link) =>
             withAlpha(
-              foregroundColor(themeKey),
+              fgColor,
               edgeOpacity(idOf(link.source), idOf(link.target), hoveredId),
             )
           }
-          linkWidth={(link) =>
-            hoveredId &&
-            (idOf(link.source) === hoveredId || idOf(link.target) === hoveredId)
-              ? 2.4
-              : 1
-          }
+          linkWidth={(link) => (isLinkActive(link, hoveredId) ? 2.4 : 1)}
           onNodeHover={handleNodeHover}
           onNodeClick={handleNodeClick}
         />

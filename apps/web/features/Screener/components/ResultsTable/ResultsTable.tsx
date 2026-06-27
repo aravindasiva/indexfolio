@@ -17,13 +17,13 @@ import { Tooltip } from '@/components/Tooltip/Tooltip'
 import { cn } from '@/lib/utils'
 import type { Etf } from '@/lib/api'
 import type { ScreenerFilters, SortField } from '../../utils/filters'
-import { formatFundSize, formatTer, fundTypeLabel } from '../../utils/format'
+import { formatFundSize, formatTer, fundTypeLabel } from '@/lib/etf/format'
 import {
   assetClassLabel,
   assetTone,
   DOMICILE_HINT,
   TYPE_HINT,
-} from '../../utils/options'
+} from '@/lib/etf/labels'
 
 type SortControls = {
   sort: ScreenerFilters['sort']

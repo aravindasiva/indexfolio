@@ -5,7 +5,7 @@ import type { Prisma } from '@prisma/client'
   the scraper pipeline will populate it with authoritative figures. These are
   real, well-known UCITS ETFs with realistic but approximate values; treat them
   as demo data, not investment information. ter is a fraction (0.0007 = 0.07%);
-  fundSizeEur is euros as a BigInt.
+  fundSizeEur is euros as BigInt.
 */
 export const etfSeedData: Prisma.ETFCreateManyInput[] = [
   {

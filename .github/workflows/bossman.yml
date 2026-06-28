@@ -56,23 +56,6 @@ jobs:
     secrets:
       railway-token: ${{ github.ref == 'refs/heads/main' && secrets.RAILWAY_TOKEN_PRODUCTION || secrets.RAILWAY_TOKEN_STAGING }}
 
-  deploy-web:
-    name: '🚀 Shipping Web to Vercel'
-    needs: [checks, detect-changes, deploy-api]
-    # One web deployment at a time per branch -- queue, never cancel mid-deploy
-    concurrency:
-      group: deploy-web-${{ github.ref }}
-      cancel-in-progress: false
-    if: |
-      always() &&
-      needs.checks.result == 'success' &&
-      needs.detect-changes.outputs.web == 'true' &&
-      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
-    uses: ./.github/workflows/deploy-web.yml
-    with:
-      environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
-    secrets: inherit
-
   reseed-staging:
     name: '🌱 Reseeding the staging DB'
     needs: [checks, detect-changes, deploy-api]
@@ -89,38 +72,31 @@ jobs:
     concurrency:
       group: reseed-staging-${{ github.ref }}
       cancel-in-progress: false
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    uses: ./.github/workflows/reseed-staging.yml
     permissions:
       contents: read
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6.0.3
+    with:
+      railway-service-id: ${{ vars.RAILWAY_API_STAGING_SERVICE_ID }}
+    secrets:
+      railway-token: ${{ secrets.RAILWAY_TOKEN_STAGING }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Setup Node
-        uses: actions/setup-node@v6.4.0
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install Railway CLI
-        run: npm install -g @railway/cli@5.4.2
-
-      - name: Reset and reseed staging
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
-        # `railway run` injects the staging service's variables (incl. DATABASE_URL)
-        # from Railway -- single source of truth, no duplicated secret. prisma:reset
-        # = `prisma migrate reset --force`: drop -> migrate -> seed.
-        run: |
-          railway run --service ${{ vars.RAILWAY_API_STAGING_SERVICE_ID }} -- \
-            pnpm --filter @indexfolio/api prisma:reset
-          echo "## 🌱 Staging DB reset + reseeded" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Dropped, re-migrated, and reseeded from \`apps/api/prisma/data\`." >> "$GITHUB_STEP_SUMMARY"
+  deploy-web:
+    name: '🚀 Shipping Web to Vercel'
+    needs: [checks, detect-changes, deploy-api, reseed-staging]
+    # One web deployment at a time per branch -- queue, never cancel mid-deploy
+    concurrency:
+      group: deploy-web-${{ github.ref }}
+      cancel-in-progress: false
+    # Wait for the staging reseed so the build pre-renders ETF pages + sitemap
+    # against fresh data; proceed when reseed was skipped (web-only changes, or
+    # main, where reseed never runs).
+    if: |
+      always() &&
+      needs.checks.result == 'success' &&
+      needs.detect-changes.outputs.web == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped') &&
+      (needs.reseed-staging.result == 'success' || needs.reseed-staging.result == 'skipped')
+    uses: ./.github/workflows/deploy-web.yml
+    with:
+      environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
+    secrets: inherit

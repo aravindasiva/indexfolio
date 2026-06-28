@@ -35,9 +35,21 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.railway-token }}
+        # `railway up` uploads can hit a transient 429 (Railway-side rate limit,
+        # not a code/cold-start issue), so retry with linear backoff before failing.
         run: |
-          railway up \
-            --service ${{ inputs.railway-service-id }}
+          attempts=5
+          n=1
+          until railway up --service ${{ inputs.railway-service-id }}; do
+            if [ "$n" -ge "$attempts" ]; then
+              echo "::error::railway up failed after $attempts attempts"
+              exit 1
+            fi
+            wait=$((n * 15))
+            echo "::warning::railway up failed (attempt $n/$attempts) - retrying in ${wait}s (usually a transient 429)"
+            sleep "$wait"
+            n=$((n + 1))
+          done
           if [ "${{ inputs.environment }}" = "production" ]; then
             echo "🚀 API live at https://api.indexfolio.dev"
             echo "## 🚀 API deployed to production" >> "$GITHUB_STEP_SUMMARY"

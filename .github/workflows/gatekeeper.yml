@@ -8,7 +8,7 @@ on:
 
 # Cancel an in-flight run when new commits land on the same PR.
 concurrency:
-  group: ci-${{ github.head_ref }}
+  group: gatekeeper-${{ github.head_ref }}
   cancel-in-progress: true
 
 jobs:
@@ -16,14 +16,37 @@ jobs:
     uses: ./.github/workflows/checks.yml
     secrets: inherit
 
-  preview:
-    name: '🔎 Previewing on Vercel'
-    needs: checks
-    # Forks do not get secrets, so the deploy would fail -- only run on PRs from
-    # this repo. Replaces Vercel's own Git auto-preview now that Actions owns deploys.
-    if: github.event.pull_request.head.repo.full_name == github.repository
+  detect-changes:
+    name: '🔍 Detecting changes'
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.3
 
+      - name: Check paths
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'apps/web/**'
+              - 'packages/**'
+
+  preview:
+    name: '👁️🫦👁️ Previewing on Vercel'
+    needs: [checks, detect-changes]
+    # Only when web (or a shared package it consumes) changed -- no point deploying
+    # a web preview for API-only, worker-only, or CI-only PRs. Skipped on forks too:
+    # they do not get secrets, so the deploy would fail. Replaces Vercel's own Git
+    # auto-preview now that Actions owns deploys.
+    if: |
+      needs.detect-changes.outputs.web == 'true' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}

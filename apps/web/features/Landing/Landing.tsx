@@ -4,7 +4,7 @@ import { ScrollHint } from './components/ScrollHint/ScrollHint'
 import { ToolsSpine } from './components/ToolsSpine/ToolsSpine'
 
 /*
-  The home page: a full viewport 3D knowledge graph hero, then the tools spine.
+  The home page: a full viewport 3D/2D knowledge graph hero, then the tools spine.
 */
 export function Landing() {
   return (

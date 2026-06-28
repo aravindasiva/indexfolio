@@ -4,17 +4,19 @@ import { RootContainer } from '@/containers/RootContainer/RootContainer'
 import { rootMetadata } from '@/lib/seo/metadata'
 import './globals.css'
 
+// Both are variable fonts: omitting `weight` ships one variable file per family
+// (covering every weight we use) instead of a static file per weight. That stops
+// next/font preloading a pile of per-weight woff2s that never paint - the cause
+// of the "preloaded but not used" console warning.
 const syne = Syne({
   subsets: ['latin'],
   variable: '--font-syne',
-  weight: ['400', '500', '600', '700', '800'],
   display: 'swap',
 })
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-dm-sans',
-  weight: ['300', '400', '500', '600', '700'],
   display: 'swap',
 })
 

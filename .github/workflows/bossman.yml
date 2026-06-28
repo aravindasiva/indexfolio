@@ -19,6 +19,7 @@ jobs:
     outputs:
       api: ${{ steps.filter.outputs.api }}
       web: ${{ steps.filter.outputs.web }}
+      seed: ${{ steps.filter.outputs.seed }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6.0.3
@@ -34,6 +35,9 @@ jobs:
             web:
               - 'apps/web/**'
               - 'packages/**'
+            seed:
+              - 'apps/api/prisma/data/**'
+              - 'apps/api/prisma/seed.ts'
 
   deploy-api:
     name: '🚢 Shipping API to Railway'
@@ -52,18 +56,46 @@ jobs:
     secrets:
       railway-token: ${{ github.ref == 'refs/heads/main' && secrets.RAILWAY_TOKEN_PRODUCTION || secrets.RAILWAY_TOKEN_STAGING }}
 
+  reseed-staging:
+    name: '🌱 Reseeding the staging DB'
+    needs: [checks, detect-changes, deploy-api]
+    # Staging only, and only when the seed data/script changed. Runs after a
+    # healthy API deploy (so the schema is current) and never touches prod -- it
+    # is hard-wired to the dev branch + the staging service and token.
+    if: |
+      always() &&
+      github.ref == 'refs/heads/dev' &&
+      needs.checks.result == 'success' &&
+      needs.detect-changes.outputs.seed == 'true' &&
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
+    # One reseed at a time; never cancel a reset mid-run.
+    concurrency:
+      group: reseed-staging-${{ github.ref }}
+      cancel-in-progress: false
+    uses: ./.github/workflows/reseed-staging.yml
+    permissions:
+      contents: read
+    with:
+      railway-service-id: ${{ vars.RAILWAY_API_STAGING_SERVICE_ID }}
+    secrets:
+      railway-token: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+
   deploy-web:
     name: '🚀 Shipping Web to Vercel'
-    needs: [checks, detect-changes, deploy-api]
+    needs: [checks, detect-changes, deploy-api, reseed-staging]
     # One web deployment at a time per branch -- queue, never cancel mid-deploy
     concurrency:
       group: deploy-web-${{ github.ref }}
       cancel-in-progress: false
+    # Wait for the staging reseed so the build pre-renders ETF pages + sitemap
+    # against fresh data; proceed when reseed was skipped (web-only changes, or
+    # main, where reseed never runs).
     if: |
       always() &&
       needs.checks.result == 'success' &&
       needs.detect-changes.outputs.web == 'true' &&
-      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped')
+      (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped') &&
+      (needs.reseed-staging.result == 'success' || needs.reseed-staging.result == 'skipped')
     uses: ./.github/workflows/deploy-web.yml
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}

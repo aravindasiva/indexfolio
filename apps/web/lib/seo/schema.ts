@@ -39,6 +39,25 @@ export function websiteSchema(): JsonLd {
   }
 }
 
+// A single ETF as a schema.org FinancialProduct (closest fit for a fund).
+// `provider` is the display name; the caller formats it.
+export function etfSchema(etf: {
+  ticker: string
+  name: string
+  isin: string
+  provider: string
+}): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialProduct',
+    name: etf.name,
+    url: `${SITE_URL}/etf/${etf.ticker}`,
+    category: 'ETF',
+    identifier: etf.isin,
+    provider: { '@type': 'Organization', name: etf.provider },
+  }
+}
+
 export type BreadcrumbItem = { name: string; url: string }
 
 // An ordered trail (absolute URLs) for BreadcrumbList rich results.

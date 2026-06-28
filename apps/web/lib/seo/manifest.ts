@@ -13,6 +13,12 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: COLORS.background,
     theme_color: COLORS.background,
-    icons: [{ src: '/icon.png', sizes: 'any', type: 'image/png' }],
+    // The 32x32 raster favicon, plus the scalable logo for installs. 'any' is
+    // valid (and intended) for an SVG; using it on a raster is what triggered
+    // Chrome's "size is not correct" warning.
+    icons: [
+      { src: '/icon.png', sizes: '32x32', type: 'image/png' },
+      { src: '/indexfolio.svg', sizes: 'any', type: 'image/svg+xml' },
+    ],
   }
 }

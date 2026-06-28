@@ -44,7 +44,20 @@ jobs:
 
       - name: Deploy
         run: |
-          deploy_url=$(pnpm exec vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          # `vercel deploy` uploads can hit a transient "Upload aborted" (a Vercel-side
+          # cancellation, more likely under concurrent deploys), so retry with backoff.
+          attempts=5
+          n=1
+          until deploy_url=$(pnpm exec vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}); do
+            if [ "$n" -ge "$attempts" ]; then
+              echo "::error::vercel deploy failed after $attempts attempts"
+              exit 1
+            fi
+            wait=$((n * 15))
+            echo "::warning::vercel deploy failed (attempt $n/$attempts) - retrying in ${wait}s (usually a transient 'Upload aborted')"
+            sleep "$wait"
+            n=$((n + 1))
+          done
           if [ "${{ inputs.environment }}" = "production" ]; then
             echo "🚀 Web live at https://www.indexfolio.dev"
             echo "## 🚀 Web deployed to production" >> "$GITHUB_STEP_SUMMARY"

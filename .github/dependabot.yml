@@ -41,7 +41,7 @@ updates:
         update-types: ['version-update:semver-major']
       - dependency-name: 'fastify-type-provider-zod'
         update-types: ['version-update:semver-major']
-      # @types/node should track Node.js major version (currently Node 20)
+      # @types/node should track Node.js major version (currently Node 24)
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
       # Next.js major upgrades need dedicated migration testing

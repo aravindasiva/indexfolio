@@ -88,7 +88,7 @@ jobs:
           # Retry transient "Upload aborted" failures with backoff (see deploy-web.yml).
           attempts=5
           n=1
-          until deploy_url=$(pnpm exec vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}); do
+          until deploy_url=$(pnpm exec vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}); do
             if [ "$n" -ge "$attempts" ]; then
               echo "::error::vercel deploy failed after $attempts attempts"
               exit 1

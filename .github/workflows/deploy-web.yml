@@ -44,11 +44,12 @@ jobs:
 
       - name: Deploy
         run: |
-          # `vercel deploy` uploads can hit a transient "Upload aborted" (a Vercel-side
-          # cancellation, more likely under concurrent deploys), so retry with backoff.
+          # --archive=tgz uploads the prebuilt output as a single tarball instead of
+          # hundreds of per-file PUTs, which is what intermittently failed with
+          # "Upload aborted" (the CLI's uploadList path). Retry with backoff on top.
           attempts=5
           n=1
-          until deploy_url=$(pnpm exec vercel deploy --prebuilt ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}); do
+          until deploy_url=$(pnpm exec vercel deploy --prebuilt --archive=tgz ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}); do
             if [ "$n" -ge "$attempts" ]; then
               echo "::error::vercel deploy failed after $attempts attempts"
               exit 1

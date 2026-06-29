@@ -29,9 +29,15 @@ jobs:
         id: filter
         with:
           filters: |
+            # api imports no workspace package today; if it takes one (e.g.
+            # @indexfolio/etf-types) add 'packages/<name>/**' here. prisma/data
+            # and seed.ts are run at reseed time, not built into the API.
             api:
               - 'apps/api/**'
-              - 'packages/**'
+              - '!apps/api/prisma/data/**'
+              - '!apps/api/prisma/seed.ts'
+            # web consumes the shared packages (knowledge-graph today; etf-types
+            # and tax-engine are declared deps), so any package change rebuilds web.
             web:
               - 'apps/web/**'
               - 'packages/**'

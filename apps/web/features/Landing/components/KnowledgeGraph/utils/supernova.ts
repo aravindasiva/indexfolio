@@ -25,8 +25,7 @@ type SupernovaNode = {
 // it re-initialises the internal strengths array, so updating it each frame
 // during the ramp takes effect on the next tick.
 type StrengthAccessor =
-  | number
-  | ((link: unknown, index: number, links: unknown[]) => number)
+  number | ((link: unknown, index: number, links: unknown[]) => number)
 type LinkForce = { strength: (value?: StrengthAccessor) => StrengthAccessor }
 type SupernovaTarget = {
   d3Force: (name: string) => unknown

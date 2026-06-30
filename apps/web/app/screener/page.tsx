@@ -27,8 +27,8 @@ export default function ScreenerPage() {
         />
       }
     >
-      {/* Screener reads filters from the URL (useSearchParams via nuqs), so it
-          needs a Suspense boundary to be statically prerendered. */}
+      {/* Screener reads filters from the URL (nuqs/useSearchParams), so it needs
+          a Suspense boundary to be statically prerendered. */}
       <Suspense fallback={<ScreenerFallback />}>
         <Screener />
       </Suspense>

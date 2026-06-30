@@ -7,16 +7,14 @@ import { Tooltip } from '@/components/Tooltip/Tooltip'
 import { tactile } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
-// size 'sm' fits inside a text-xs chip (matches tag height); 'md' is a standalone
-// affordance.
+// 'sm' fits inside a text-xs chip (matches tag height); 'md' is standalone.
 const SIZES = {
   sm: { button: 'size-4', icon: 'size-3' },
   md: { button: 'size-6', icon: 'size-3.5' },
 }
 
-// A small icon button that copies a value to the clipboard and flips to a check
-// for a moment. The tooltip confirms the action ("Copied!"). No-ops where the
-// Clipboard API is unavailable.
+// Icon button that copies value to the clipboard, flipping to a check briefly.
+// No-ops where the Clipboard API is unavailable.
 export function CopyButton({
   value,
   label,

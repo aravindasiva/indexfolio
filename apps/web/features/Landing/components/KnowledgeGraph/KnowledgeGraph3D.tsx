@@ -30,8 +30,6 @@ import { createStarfield } from './utils/3d/createStarfield'
 import type { Starfield } from './utils/3d/createStarfield'
 import { triggerSupernova, SUPERNOVA_EVENT } from './utils/supernova'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type GraphNodeDatum = {
   id: string
   label: string
@@ -63,8 +61,6 @@ type DistanceForce = {
   distance: (value: number | ((link: FGLink) => number)) => unknown
 }
 
-// ─── Constants & helpers ────────────────────────────────────────────────────────
-
 const TOOL_COLOR = '#635BFF'
 const HOME_RADIUS = 7
 const TOOL_RADIUS = 4
@@ -77,7 +73,6 @@ const CAMERA_DISTANCE = 300
 const FG_LIGHT = 'rgb(9, 9, 11)' // hsl(240 10% 4%)
 const FG_DARK = 'rgb(250, 250, 250)' // hsl(0 0% 98%)
 
-// `rgb(r, g, b)` -> `rgba(r, g, b, a)`
 function withAlpha(rgb: string, alpha: number): string {
   return rgb.replace('rgb(', 'rgba(').replace(')', `, ${alpha})`)
 }
@@ -94,8 +89,6 @@ function isLinkActive(link: FGLink, hoveredId: string | null): boolean {
     (idOf(link.source) === hoveredId || idOf(link.target) === hoveredId)
   )
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 type KnowledgeGraph3DProps = {
   mode: 'hero' | 'overlay'
@@ -291,7 +284,6 @@ export function KnowledgeGraph3D({
     starfieldRef.current?.setDark(isDark)
   }, [isDark])
 
-  // Track container size.
   useEffect(() => {
     const el = containerRef.current
     if (!el) return

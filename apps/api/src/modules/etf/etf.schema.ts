@@ -48,8 +48,7 @@ export const EtfListResponseSchema = z.object({
   }),
 })
 
-// Available filter values with counts (the "facets" of faceted search) so the
-// screener toolbar is built from real data, not hardcoded lists.
+// Facets: available filter values with counts.
 const FilterOptionSchema = z.object({
   value: z.string(),
   count: z.number().int(),

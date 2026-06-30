@@ -3,13 +3,12 @@ import { getAllEtfs } from '@/lib/api'
 import { REVALIDATE } from '@/features/EtfDetail/utils/loader'
 import { pick } from '@/lib/random'
 
-// Re-roll the random fund on every request rather than baking one pick (or the
+// Re-roll the random fund per request rather than baking one pick (or the
 // API-down fallback) at build time.
 export const dynamic = 'force-dynamic'
 
-// /etf has no listing of its own - the screener is the browse UI. Treat the bare
-// route as "feeling lucky" and send curious visitors to a random fund, falling
-// back to the screener if the catalogue can't be reached.
+// /etf has no listing of its own; treat it as "feeling lucky" and send visitors
+// to a random fund, falling back to the screener if the catalogue is unreachable.
 async function pickEtfPath(): Promise<string> {
   try {
     const etfs = await getAllEtfs({ revalidate: REVALIDATE })

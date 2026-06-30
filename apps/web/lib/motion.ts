@@ -1,17 +1,12 @@
 import type { Transition, Variants } from 'framer-motion'
 
 /*
-  The app's shared motion language. Importing these everywhere is what makes the
-  whole product feel like one thing: the same spring, the same entrance, the same
-  tactile press on every clickable surface. Tune a value here and it propagates.
-
-  All of this respects the user's reduced-motion setting automatically, via
-  <MotionConfig reducedMotion="user"> in RootContainer - so we can be playful
-  here without hurting anyone who has asked the OS to calm things down.
+  The app's shared motion language: tune a value here and it propagates everywhere.
+  Reduced-motion is honored automatically via <MotionConfig reducedMotion="user">
+  in RootContainer, so these values can be playful without hurting anyone.
 */
 
-// The house spring. Snappy with a hint of overshoot so taps and hovers feel
-// alive rather than mechanical. Used for interactions.
+// The house spring for interactions. Snappy with a hint of overshoot.
 export const spring: Transition = {
   type: 'spring',
   stiffness: 380,
@@ -25,9 +20,8 @@ export const springSoft: Transition = {
   damping: 28,
 }
 
-// Tactile feedback for anything clickable - chips, pills, buttons. Spread onto a
-// motion element: <motion.button {...tactile}>. Visible on hover (a small lift)
-// and on press (a quick squash) so the UI feels physical.
+// Tactile feedback for anything clickable. Spread onto a motion element:
+// <motion.button {...tactile}>.
 export const tactile = {
   whileHover: { y: -2, scale: 1.03 },
   whileTap: { scale: 0.95 },
@@ -40,8 +34,8 @@ export const fadeUpItem: Variants = {
   show: { opacity: 1, y: 0, transition: spring },
 }
 
-// Wrap a group of `fadeUpItem` children in a motion element carrying this
-// variant (initial="hidden" animate="show") to make them cascade in one by one.
+// Wrap `fadeUpItem` children in a motion element carrying this variant
+// (initial="hidden" animate="show") to cascade them in one by one.
 export const staggerContainer: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },

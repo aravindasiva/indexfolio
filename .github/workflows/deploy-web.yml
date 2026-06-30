@@ -44,9 +44,8 @@ jobs:
 
       - name: Deploy
         run: |
-          # --archive=tgz uploads the prebuilt output as a single tarball instead of
-          # hundreds of per-file PUTs, which is what intermittently failed with
-          # "Upload aborted" (the CLI's uploadList path). Retry with backoff on top.
+          # --archive=tgz uploads the prebuilt output as one tarball instead of hundreds
+          # of per-file PUTs, which intermittently failed with "Upload aborted". Retry with backoff.
           attempts=5
           n=1
           until deploy_url=$(pnpm exec vercel deploy --prebuilt --archive=tgz ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}); do

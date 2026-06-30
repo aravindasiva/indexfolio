@@ -15,8 +15,8 @@ function Fact({ label, value }: { label: string; value: string }) {
   )
 }
 
-// The ETF's fundamentals as a plain label/value grid (no cards). Rendered inside
-// the header surface so the title, tags, and facts read as one block.
+// Plain label/value grid (no cards) so it reads as one block with the header
+// surface it sits inside.
 export function KeyFacts({ etf }: { etf: Etf }) {
   const facts = [
     { label: 'TER', value: formatTer(etf.ter) },

@@ -39,9 +39,9 @@ const HEAD =
   'h-11 px-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase'
 const CELL = 'px-4 py-3.5'
 
-// Results table. One responsive table everywhere (fewer columns on small
-// screens, never a different layout). Sortable headers write to the URL; the
-// whole row links to the (deferred) ETF detail page.
+// One responsive table everywhere (fewer columns on small screens, never a
+// different layout). Sortable headers write to the URL; the whole row links to
+// the ETF detail page.
 export function ResultsTable({ etfs, sort, order, onSort }: Props) {
   const router = useRouter()
   const sortProps = { sort, order, onSort }
@@ -76,14 +76,14 @@ export function ResultsTable({ etfs, sort, order, onSort }: Props) {
         </TableHeader>
         <TableBody>
           {etfs.map((etf, index) => (
+            // Capped per-row delay cascades the list in on load and on every
+            // page/filter change, without long lists dragging on.
             <motion.tr
               key={etf.id}
               data-slot="table-row"
               onClick={() => router.push(`/etf/${etf.ticker}`)}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              // A capped per-row delay makes the list cascade in on load and on
-              // every page/filter change, without long lists dragging on.
               transition={{ ...spring, delay: Math.min(index * 0.035, 0.5) }}
               className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-primary/5"
             >
@@ -96,10 +96,9 @@ export function ResultsTable({ etfs, sort, order, onSort }: Props) {
                   {etf.ticker}
                 </Link>
               </TableCell>
+              {/* Names truncate to keep columns aligned; tooltip shows the full
+                  name on hover (the ticker link goes to the detail page). */}
               <TableCell className={cn(CELL, 'max-w-xs text-muted-foreground')}>
-                {/* Names are truncated to keep columns aligned; the tooltip
-                    surfaces the full name on hover (the row's ticker link leads
-                    to the detail page where the full name is always shown). */}
                 <Tooltip content={etf.name}>
                   <span className="block truncate">{etf.name}</span>
                 </Tooltip>

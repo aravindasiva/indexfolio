@@ -11,14 +11,11 @@ type AstronautCatProps = {
 const INTRINSIC = { width: 25, height: 46 }
 
 /*
-  Themed pixel-art astronaut cat. Two purpose-drawn sprites (warm cat for dark,
-  cool outlined cat for light) are both rendered and toggled with CSS dark:
-  classes - SSR-safe and no theme flash. Reused for the 404 mascot and easter
-  eggs. `size` is the rendered height in px; width follows the sprite aspect.
-
-  We pass the intrinsic size and drive the display height via style with
-  width:auto, so the aspect ratio holds (Tailwind's preflight forces height:auto
-  on images, which otherwise trips next/image's ratio warning).
+  Themed pixel-art astronaut cat. Two sprites (warm for dark, cool for light) are
+  both rendered and toggled via CSS dark: classes, so SSR-safe with no theme flash.
+  `size` is the rendered height in px. We pass the intrinsic size and drive height
+  via style with width:auto so the aspect ratio holds (Tailwind preflight forces
+  height:auto, which otherwise trips next/image's ratio warning).
 */
 export function AstronautCat({
   size = 64,

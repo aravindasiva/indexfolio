@@ -21,10 +21,9 @@ const VARIANTS: Record<Variant, string> = {
 const MotionLink = motion.create(Link)
 
 /*
-  A reusable navigation button. With a string `to` it is a real link (prefetched);
-  with a function `to` it resolves the path on click (e.g. a value read from
-  sessionStorage); with no `to` it goes to the previous page. Pass `icon={null}`
-  for no icon.
+  Navigation button. A string `to` is a real prefetched link; a function `to`
+  resolves the path on click (e.g. from sessionStorage); no `to` goes back.
+  Pass `icon={null}` for no icon.
 */
 export function BackButton({
   to,

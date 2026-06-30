@@ -39,11 +39,9 @@ jobs:
   preview:
     name: '👁️🫦👁️ Previewing on Vercel'
     needs: [checks, detect-changes]
-    # Preview only for PRs into dev, and only when web (or a shared package it
-    # consumes) changed. Skipped on dev->main promotion PRs (that change is already
-    # live on staging, and overlapping uploads cause Vercel cancellations), on
-    # API/worker/CI-only PRs, and on forks (no secrets -> the deploy would fail).
-    # Replaces Vercel's own Git auto-preview now that Actions owns deploys.
+    # Preview only for web-affecting PRs into dev. Skipped on: dev->main promotion
+    # (already live on staging, overlapping uploads cause Vercel cancellations),
+    # API/worker/CI-only PRs, and forks (no secrets). Replaces Vercel's own Git auto-preview.
     if: |
       github.base_ref == 'dev' &&
       needs.detect-changes.outputs.web == 'true' &&

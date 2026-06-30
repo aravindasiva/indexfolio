@@ -1,8 +1,5 @@
-/*
-  API response/param types, as the API serialises them over JSON (fundSizeEur
-  and dates are strings - not the bigint/Date domain shape). Kept separate from
-  the request logic so api.ts stays small as endpoints grow.
-*/
+// API types as serialised over JSON: fundSizeEur and dates are strings, not the
+// bigint/Date domain shape.
 export type Etf = {
   id: string
   ticker: string

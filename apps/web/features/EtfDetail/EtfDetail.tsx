@@ -15,10 +15,8 @@ import { KeyFacts } from './components/KeyFacts/KeyFacts'
 import { RelatedEtfs } from './components/RelatedEtfs/RelatedEtfs'
 
 /*
-  ETF detail page body: a "back to results" link, one header block that folds the
-  title, tags, ISIN and key facts together, a performance placeholder (real data
-  lands with the scrapers), a tax/domicile explainer, and related funds.
-  Server-rendered; only the BackButton and CopyButton are client islands.
+  Server-rendered; only BackButton and CopyButton are client islands. The
+  performance section is a placeholder until the scrapers land.
 */
 export function EtfDetail({ etf, related }: { etf: Etf; related: Etf[] }) {
   return (

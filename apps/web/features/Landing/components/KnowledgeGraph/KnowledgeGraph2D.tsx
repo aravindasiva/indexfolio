@@ -38,7 +38,6 @@ export function KnowledgeGraph2D({
 
   const { renderedNodes, renderedEdges } = useForceLayout(containerRef, dims)
 
-  // Track container size.
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -99,7 +98,6 @@ export function KnowledgeGraph2D({
           )}
         </defs>
 
-        {/* Edges */}
         <g>
           {renderedEdges.map((edge) => (
             <line
@@ -119,7 +117,6 @@ export function KnowledgeGraph2D({
           ))}
         </g>
 
-        {/* Nodes */}
         <g>
           {renderedNodes.map((node) => (
             <g key={node.id} transform={`translate(${node.x},${node.y})`}>

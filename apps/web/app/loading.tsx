@@ -1,8 +1,7 @@
 import { AmbientBackground } from '@/components/AmbientBackground/AmbientBackground'
 import { Skeleton } from '@/components/ui/skeleton'
 
-// Generic route loading skeleton, shown during navigation. Mirrors the
-// content-page layout so the swap to the real page is minimal.
+// Route loading skeleton; mirrors the content-page layout to minimise the swap.
 export default function Loading() {
   return (
     <>

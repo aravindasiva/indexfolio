@@ -43,9 +43,8 @@ jobs:
       - name: Reset and reseed
         env:
           RAILWAY_TOKEN: ${{ secrets.railway-token }}
-        # `railway run` injects the service's variables (incl. DATABASE_URL) from
-        # Railway -- single source of truth, no duplicated secret. prisma:reset =
-        # `prisma migrate reset --force`: drop -> migrate -> seed.
+        # `railway run` injects the service's variables (incl. DATABASE_URL) from Railway,
+        # so no duplicated secret. prisma:reset = `prisma migrate reset --force`: drop, migrate, seed.
         run: |
           railway run --service ${{ inputs.railway-service-id }} -- \
             pnpm --filter @indexfolio/api prisma:reset

@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-/*
-  A small coloured label for categorical data (asset class, fund type, etc.).
-  Tones map to the theme's semantic tokens, which are theme-aware (lighter in
-  dark mode) so they stay legible everywhere.
-*/
+// Small coloured label for categorical data. Tones map to theme-aware semantic
+// tokens (lighter in dark mode) so they stay legible everywhere.
 export type TagTone = 'indigo' | 'amber' | 'emerald' | 'sky' | 'neutral'
 
 const TONES: Record<TagTone, string> = {

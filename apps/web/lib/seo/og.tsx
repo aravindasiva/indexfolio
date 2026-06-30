@@ -7,9 +7,8 @@ export const OG_CONTENT_TYPE = 'image/png'
 
 type OgContent = { eyebrow?: string; title: string; subtitle?: string }
 
-// The indexfolio mark (same paths as components/icons/Logo). Used both as the
-// small wordmark glyph and, rendered large, as the hero graphic - so the hero
-// IS the logo, not a decorative stand-in.
+// The indexfolio mark (same paths as components/icons/Logo). Used as the small
+// wordmark glyph and, rendered large, as the hero graphic.
 function LogoMark({ size, opacity = 1 }: { size: number; opacity?: number }) {
   const c = COLORS.primary
   return (
@@ -85,8 +84,7 @@ export function renderOgImage({ eyebrow, title, subtitle }: OgContent) {
         backgroundImage: `radial-gradient(820px 760px at 80% 48%, rgba(${COLORS.primaryRgb}, 0.32), transparent 62%)`,
       }}
     >
-      {/* Hero: the logo mark, large, on the right - sized/placed to clear the
-          title text (no overlap) while still bleeding off the edge. */}
+      {/* Hero mark, placed to clear the title text while bleeding off the edge. */}
       <div
         style={{
           position: 'absolute',
@@ -99,7 +97,7 @@ export function renderOgImage({ eyebrow, title, subtitle }: OgContent) {
         <LogoMark size={470} />
       </div>
 
-      {/* Wordmark - kept large so the brand reads on a mobile thumbnail */}
+      {/* Wordmark, kept large so the brand reads on a mobile thumbnail. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
         <LogoMark size={56} />
         <div
@@ -115,8 +113,7 @@ export function renderOgImage({ eyebrow, title, subtitle }: OgContent) {
         </div>
       </div>
 
-      {/* Main copy - the focal hook. Narrower than the card so it never runs
-          into the hero mark on the right. */}
+      {/* Main copy, kept narrow so it never runs into the hero mark. */}
       <div style={{ display: 'flex', flexDirection: 'column', maxWidth: 560 }}>
         {eyebrow ? (
           <div
@@ -159,7 +156,6 @@ export function renderOgImage({ eyebrow, title, subtitle }: OgContent) {
         ) : null}
       </div>
 
-      {/* Brand block: domain + open-source badge, grouped */}
       <div
         style={{
           display: 'flex',

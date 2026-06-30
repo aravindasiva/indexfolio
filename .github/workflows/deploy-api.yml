@@ -35,8 +35,8 @@ jobs:
       - name: Deploy to Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.railway-token }}
-        # `railway up` uploads can hit a transient 429 (Railway-side rate limit,
-        # not a code/cold-start issue), so retry with linear backoff before failing.
+        # `railway up` uploads can hit a transient 429 (Railway rate limit), so
+        # retry with linear backoff before failing.
         run: |
           attempts=5
           n=1

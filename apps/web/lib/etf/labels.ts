@@ -1,8 +1,5 @@
 import type { TagTone } from '@/components/Tag/Tag'
 
-// Human labels, colour tones, and tax hints for ETF categorical fields. Shared
-// by the screener and the detail page.
-
 const ASSET_CLASS_LABELS: Record<string, string> = {
   EQUITY: 'Equity',
   BOND: 'Bond',
@@ -13,7 +10,6 @@ export function assetClassLabel(value: string): string {
   return ASSET_CLASS_LABELS[value] ?? value
 }
 
-// Colour per asset class so categories are scannable at a glance.
 const ASSET_TONES: Record<string, TagTone> = {
   EQUITY: 'indigo',
   BOND: 'amber',
@@ -49,8 +45,8 @@ export function domicileLabel(value: string): string {
   return DOMICILE_LABELS[value] ?? value
 }
 
-// General UCITS facts. Deliberately qualitative - no hardcoded tax rates (those
-// belong in packages/tax-engine, never in UI copy).
+// Deliberately qualitative: no hardcoded tax rates (those belong in
+// packages/tax-engine, never in UI copy).
 export const TYPE_HINT =
   'Accumulating reinvests dividends and defers tax until you sell. Distributing pays dividends out.'
 export const DOMICILE_HINT =

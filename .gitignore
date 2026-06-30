@@ -20,7 +20,7 @@ dist/
 build/
 coverage/
 
-# Environment files — no real secrets should ever be committed.
+# Environment files, no real secrets should ever be committed.
 # .env.example is explicitly allowed (placeholder values only, no secrets).
 .env
 .env.*

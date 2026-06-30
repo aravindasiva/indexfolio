@@ -2,10 +2,8 @@ import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
-/*
-  Search input with a leading magnifier. The icon sits above the input (z-10) so
-  the input background never hides it.
-*/
+// Search input with a leading magnifier; icon sits above the input (z-10) so the
+// input background never hides it.
 export function SearchField({
   value,
   onChange,

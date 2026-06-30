@@ -1,7 +1,7 @@
 /*
-  Keyframes for releasing the astronaut cat like a balloon: it spirals off in a
+  Keyframes for releasing the astronaut cat like a balloon: spirals off in a
   random direction, spinning and shrinking, then fades. Shared by the 404 page
-  and the Konami easter egg so the motion stays consistent.
+  and the Konami easter egg to keep the motion consistent.
 */
 import { random } from '@/lib/random'
 

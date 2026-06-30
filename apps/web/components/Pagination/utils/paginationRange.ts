@@ -3,10 +3,10 @@
 export type PageItem = number | 'ellipsis-left' | 'ellipsis-right'
 
 /*
-  The page numbers to render, with gap markers. Always shows the first and last
-  page plus a window around the current one, so the control stays compact for
-  large totals. e.g. paginationRange(5, 10) ->
-  [1,'ellipsis-left',4,5,6,'ellipsis-right',10]. Up to 7 pages show in full.
+  Page numbers to render, with gap markers. Always shows first and last plus a
+  window around the current page, so it stays compact for large totals (up to 7
+  show in full). e.g. paginationRange(5, 10) ->
+  [1,'ellipsis-left',4,5,6,'ellipsis-right',10].
 */
 export function paginationRange(current: number, total: number): PageItem[] {
   if (total <= 7) {

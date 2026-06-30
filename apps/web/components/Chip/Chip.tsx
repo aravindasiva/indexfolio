@@ -5,13 +5,9 @@ import { tactile } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 /*
-  A small rounded interactive token, in two modes:
-    - 'toggle'    (default) a selectable filter; the active state is a clear
-                  indigo tint so a glance shows what is applied.
-    - 'removable' an applied filter that clears itself, with an x that rotates
-                  on hover as a "yes, this closes" cue.
-  Both carry the shared `tactile` lift/press so they feel like every other
-  clickable surface in the app.
+  Small rounded interactive token in two modes: 'toggle' (default) is a
+  selectable filter with an indigo active tint; 'removable' is an applied filter
+  that clears itself, with an x that rotates on hover as a "this closes" cue.
 */
 type ChipProps = { children: ReactNode } & (
   | { mode?: 'toggle'; active: boolean; onClick: () => void }

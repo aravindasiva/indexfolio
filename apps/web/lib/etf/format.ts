@@ -1,6 +1,3 @@
-// Display formatting for ETF fields. Pure, trivially testable. Shared by the
-// screener and the detail page.
-
 // TER comes from the API as a fraction (e.g. 0.0022 means 0.22%).
 export function formatTer(ter: number): string {
   return `${(ter * 100).toFixed(2)}%`

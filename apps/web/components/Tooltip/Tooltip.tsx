@@ -16,11 +16,9 @@ type TooltipProps = {
 }
 
 /*
-  Convenience wrapper over the Base UI tooltip primitives.
-
-  Pass any single interactive element as children. Base UI's render prop merges
-  the trigger behaviour onto that native element, so all handlers stay on the
-  real control - no extra interactive wrapper to trip accessibility checks.
+  Wrapper over the Base UI tooltip primitives. Pass a single interactive element
+  as children; Base UI's render prop merges trigger behaviour onto it, so handlers
+  stay on the real control with no extra wrapper to trip accessibility checks.
 */
 export function Tooltip({ content, children, side = 'top' }: TooltipProps) {
   return (

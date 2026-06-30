@@ -10,8 +10,8 @@ import { tactile } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 import { paginationRange } from './utils/paginationRange'
 
-// Numbered pagination: « first, ‹ prev, page numbers (with gaps), › next, » last.
-// Renders nothing when there is only one page.
+// Numbered pagination with first/prev/next/last arrows. Renders nothing when
+// there is only one page.
 export function Pagination({
   page,
   totalPages,

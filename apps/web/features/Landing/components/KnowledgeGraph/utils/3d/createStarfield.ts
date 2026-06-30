@@ -2,21 +2,13 @@ import * as THREE from 'three'
 import { random, randomRange } from '@/lib/random'
 
 /*
-  Background atmosphere that lives inside the graph's 3D scene, so it parallaxes
-  as the camera orbits - the depth cue that makes the page read as 3D without any
-  copy saying so.
-
-  Two looks, by theme:
-  - Dark: a scattered star field (random points on a large shell), with size
-    variance and subtle warm/red/blue tints. Reads as deep space.
-  - Light: a dotted sphere grid wrapping the graph, so it reads as "the graph
-    lives inside a 3D sphere" (stars in daylight make no sense).
-
-  The whole group also tilts slightly toward the pointer for extra parallax.
-
-  Pure three.js (no React) so it stays easy to read and reuse. Shooting stars
-  (dark only) are spawned in front of the camera so they always streak across the
-  current view, instead of an overlay floating on top of the space.
+  Background atmosphere inside the graph's 3D scene, so it parallaxes as the
+  camera orbits (the depth cue that makes the page read as 3D). Two looks by
+  theme: dark = scattered star field (deep space); light = a dotted sphere grid
+  wrapping the graph (stars in daylight make no sense). The group also tilts
+  toward the pointer for extra parallax. Pure three.js so it stays reusable.
+  Shooting stars (dark only) spawn in front of the camera so they always streak
+  across the current view rather than floating on top as an overlay.
 */
 
 export type Starfield = {
@@ -182,7 +174,7 @@ export function createStarfield(
   group.add(sphereGrid)
   scene.add(group)
 
-  // ── Shooting stars: a point-trail spawned in front of the camera ──────────
+  // Shooting stars: a point-trail spawned in front of the camera.
   const shootGeometry = new THREE.BufferGeometry()
   shootGeometry.setAttribute(
     'position',
@@ -272,7 +264,7 @@ export function createStarfield(
     step()
   }
 
-  // ── Pointer parallax (tilt the background toward the cursor) ───────────────
+  // Pointer parallax: tilt the background toward the cursor.
   let targetX = 0
   let targetY = 0
   let parallaxRaf = 0

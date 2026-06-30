@@ -112,13 +112,13 @@ function ToolEntry({
   const nodeScale = useTransform(fill, [fraction - 0.08, fraction], [0.85, 1])
 
   return (
+    // Entry slides toward the reader on hover - a physical "this is a link" cue
+    // beyond the colour change.
     <motion.div
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-100px' }}
       transition={springSoft}
-      // The whole entry slides toward the reader on hover - a clear, physical
-      // "this is a link" cue beyond the colour change.
       whileHover={{ x: 6 }}
       whileTap={{ scale: 0.99 }}
     >

@@ -1,0 +1,13 @@
+# Railway config-as-code: build + deploy settings live in the repo, not the dashboard.
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/api/Dockerfile"
+
+[deploy]
+# With a Dockerfile, Railway runs startCommand as the ENTRYPOINT (no shell), so a
+# bare && would not chain. Wrap in /bin/sh -c so migrate runs before the server.
+startCommand = "/bin/sh -c 'node_modules/.bin/prisma migrate deploy && node dist/server.js'"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

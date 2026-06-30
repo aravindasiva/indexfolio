@@ -1,12 +1,6 @@
-// Single source of truth. Powers the landing graph and the Phase 2 minimap.
-// Add nodes and edges here as new app features are built.
-//
-// Node types drive how each node is treated downstream:
-//   home - the central hub (secret trigger, not a link)
-//   tool - a top-level feature; listed in the nav and the tools spine
-//   etf  - the ETF surfaces (the /etf hub node and the cycling "ETF <ticker>"
-//          detail node). Graph-only flourishes, deliberately not 'tool's, so
-//          they stay out of the nav and the tools spine.
+// Single source of truth for the landing graph and minimap. Node type drives
+// downstream treatment: 'tool' nodes appear in the nav/tools spine, 'home' and
+// 'etf' nodes deliberately do not (graph-only).
 export type NodeType = 'home' | 'tool' | 'etf'
 
 export interface GraphNode {
@@ -27,9 +21,8 @@ export interface GraphEdge {
   dashed?: boolean
 }
 
-// Order matters for the 2D layout: spokes are seeded around the hub in array
-// order, so keep related nodes adjacent (the ETF cluster sits next to the
-// Screener it belongs to). The nav and tools spine read the same order.
+// Order matters: spokes seed around the hub in array order, so keep related
+// nodes adjacent (ETF cluster next to its Screener). Nav and spine read the same order.
 export const nodes: GraphNode[] = [
   { id: 'home', label: 'Indexfolio', type: 'home', href: '/' },
   {
@@ -40,10 +33,9 @@ export const nodes: GraphNode[] = [
     shortLabel: 'Screener',
     description: 'Filter UCITS ETFs by TER, domicile, type, and asset class.',
   },
-  // The ETF hub (/etf, a random fund) hangs off the home node like the tools.
+  // ETF hub (/etf, a random fund), hangs off home like the tools.
   { id: 'etf', label: 'ETF', type: 'etf', href: '/etf', shortLabel: 'ETF' },
-  // The detail surface (/etf/[ticker]). Its label cycles "ETF <ticker>" in the
-  // renderer; it sits between the ETF hub and the Screener since both lead here.
+  // Detail surface (/etf/[ticker]); label cycles "ETF <ticker>" in the renderer.
   {
     id: 'etf-detail',
     label: 'ETF detail',
@@ -83,8 +75,7 @@ export const edges: GraphEdge[] = [
   { source: 'home', target: 'overlap' },
   { source: 'home', target: 'tax-guides' },
   { source: 'home', target: 'etf' },
-  // The detail node is reached from both the ETF hub and the Screener; dotted to
-  // mark it as the dynamic, per-fund surface.
+  // Detail node reached from both the ETF hub and the Screener; dotted = dynamic.
   { source: 'etf', target: 'etf-detail', dashed: true },
   { source: 'screener', target: 'etf-detail', dashed: true },
 ]

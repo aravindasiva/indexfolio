@@ -15,8 +15,8 @@ const ThemeToggle = dynamic(
   },
 )
 
-// Derived from the knowledge graph so the nav, the graph, and the tools spine
-// can never drift apart (one source of truth for tool routes and labels).
+// Derived from the knowledge graph so nav, graph, and tools spine stay in sync
+// (one source of truth for tool routes and labels).
 const NAV_LINKS = graphNodes
   .filter((node) => node.type === 'tool')
   .map((node) => ({ label: node.shortLabel ?? node.label, href: node.href }))

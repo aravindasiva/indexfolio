@@ -11,27 +11,19 @@ export type {
 /*
   All HTTP to the Indexfolio API lives here. The API is open and owns validation,
   so the frontend just fetches JSON and types it. GET only (no auth/mutations).
-  Every call is logged in dev and failures throw a typed ApiError, so callers and
-  react-query get consistent, inspectable errors. Add new endpoint functions as
-  features need them.
+  Failures throw a typed ApiError so callers and react-query get consistent,
+  inspectable errors.
 */
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL
 const isDev = process.env.NODE_ENV !== 'production'
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-// An Error with an HTTP status attached - a type + factory, no class needed.
 export type ApiError = Error & { status: number }
 type Params = Record<string, string | number | boolean | undefined>
 // `revalidate` (seconds) opts a server-side call into Next's ISR cache; it is
 // ignored by the browser, so client callers can leave it unset.
 type GetOptions = { params?: Params; label?: string; revalidate?: number }
 type ApiOutcome = { status: number; ms: number } | { error: unknown }
-
-// ─── Functions ──────────────────────────────────────────────────────────────
 
 function apiError(message: string, status: number): ApiError {
   return Object.assign(new Error(message), { name: 'ApiError', status })
@@ -48,7 +40,6 @@ function buildQuery(params?: Params): string {
 }
 
 // Dev-only request logging, kept out of get() so the fetch logic reads clean.
-// Icons make success vs failure easy to spot when scanning the console.
 function logApi(name: string, outcome: ApiOutcome) {
   if (!isDev) return
   if ('error' in outcome) {
@@ -62,7 +53,6 @@ function logApi(name: string, outcome: ApiOutcome) {
 
 async function get<T>(path: string, options: GetOptions = {}): Promise<T> {
   const { params, label, revalidate } = options
-  // A friendly name for logs (e.g. "getEtfList"), falling back to the path.
   const name = label ?? `GET ${path}`
 
   if (!BASE_URL) throw apiError('NEXT_PUBLIC_API_URL is not set', 0)
@@ -88,8 +78,6 @@ async function get<T>(path: string, options: GetOptions = {}): Promise<T> {
 
   return response.json() as Promise<T>
 }
-
-// ─── Endpoints ────────────────────────────────────────────────────────────────
 
 // `revalidate` is for server callers (detail page, sitemap) that want ISR
 // caching; the screener (client) omits it.

@@ -72,13 +72,12 @@ export function NotFound() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-6 py-28 text-center">
-      {/* Ambient glow (works in both themes) */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         <div className="absolute left-1/3 top-1/4 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/25 blur-[130px]" />
         <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-primary/18 blur-[130px]" />
       </div>
 
-      {/* Stars (foreground colour, so they adapt to the theme) */}
+      {/* Stars use foreground colour so they adapt to the theme. */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         {STARS.map((star) => (
           <motion.span
@@ -101,9 +100,8 @@ export function NotFound() {
         ))}
       </div>
 
-      {/* Scene: a lone node, and the cat that drifted off it on a frayed rope */}
+      {/* Scene: a node, and the cat that drifted off it on a frayed rope. */}
       <div className="relative mb-12 h-44 w-full max-w-lg">
-        {/* The node it came from, with its own cut rope reaching toward the cat */}
         <motion.div
           className="absolute left-[14%] top-[50%]"
           animate={{ y: [0, 10, 0] }}
@@ -142,7 +140,7 @@ export function NotFound() {
           </svg>
         </motion.div>
 
-        {/* The lost astronaut cat - tap to release it like a balloon */}
+        {/* Tap to release the cat like a balloon. */}
         <motion.button
           type="button"
           onClick={boop}
@@ -160,7 +158,6 @@ export function NotFound() {
           }}
           animate={cat}
         >
-          {/* Frayed rope, gently swaying, trailing toward the node */}
           <svg
             width="130"
             height="90"
@@ -179,7 +176,7 @@ export function NotFound() {
             />
           </svg>
 
-          {/* Thruster fire - bursts when released */}
+          {/* Thruster fire bursts when released. */}
           <motion.div
             aria-hidden="true"
             className="absolute left-1/2 top-full -mt-1 h-10 w-3 -translate-x-1/2 origin-top rounded-full"
@@ -211,7 +208,6 @@ export function NotFound() {
         </motion.button>
       </div>
 
-      {/* Copy */}
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
         404 · off the graph
       </p>

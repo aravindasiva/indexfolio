@@ -7,8 +7,7 @@ import type {
   EtfFiltersResponse,
 } from './etf.schema.js'
 
-// Maps a Prisma ETF row to the JSON contract. The DB shape comes from Prisma
-// (ETF) and the JSON shape from etf.schema.ts (EtfResponse) - no retyping here.
+// Map a Prisma ETF row to the JSON contract (EtfResponse) without retyping.
 function serializeEtf(etf: ETF): EtfResponse {
   return {
     id: etf.id,
@@ -94,13 +93,13 @@ export async function getEtfs(
   }
 }
 
-// A grouped-count row keyed by the field name, e.g. { domicile: 'IE', _count: { _all: 14 } }.
+// A grouped-count row keyed by field name, e.g. { domicile: 'IE', _count: { _all: 14 } }.
 type GroupRow<K extends string> = { _count: { _all: number } } & Record<
   K,
   string
 >
 
-// Map grouped counts to { value, count }, sorted by value. Pure, so it is unit-tested.
+// Map grouped counts to { value, count }, sorted by value.
 export function toFilterOptions<K extends string>(
   rows: ReadonlyArray<GroupRow<K>>,
   key: K,
@@ -110,8 +109,7 @@ export function toFilterOptions<K extends string>(
     .sort((a, b) => a.value.localeCompare(b.value))
 }
 
-// Distinct filter values with counts (faceted search), so the screener toolbar
-// is built from real data. One GROUP BY per categorical field.
+// Distinct filter values with counts (faceted search): one GROUP BY per categorical field.
 export async function getEtfFilters(
   db: PrismaClient,
 ): Promise<EtfFiltersResponse> {

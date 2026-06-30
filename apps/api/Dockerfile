@@ -1,9 +1,11 @@
 # syntax=docker/dockerfile:1
 
-# ─── Stage 1: deps ────────────────────────────────────────────────────────────
-# Install all workspace dependencies so pnpm workspace resolution works.
-# Only package.json manifests are copied here; source is excluded for layer caching.
-FROM node:20-alpine AS deps
+# Stage 1: deps. Copy only manifests (not source) so the install layer caches.
+FROM node:24-slim AS deps
+# openssl is needed by the Prisma engine on Debian.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl \
+ && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /repo
 
@@ -19,35 +21,35 @@ COPY workers/pipelines/price-updater/package.json   ./workers/pipelines/price-up
 
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# ─── Stage 2: build ───────────────────────────────────────────────────────────
+# Stage 2: build.
 FROM deps AS build
 WORKDIR /repo
 
 COPY tsconfig.base.json ./
 COPY apps/api/ ./apps/api/
 
-# Compile TypeScript → dist/server.js (pnpm script handles prisma generate too)
 RUN pnpm --filter @indexfolio/api exec prisma generate
 RUN pnpm --filter @indexfolio/api build
 
-# Create a standalone production bundle using pnpm deploy.
-# This produces a flat node_modules (no pnpm virtual store) with only prod deps.
+# pnpm deploy gives a flat node_modules (no virtual store) with prod deps only.
 RUN pnpm --filter @indexfolio/api deploy --prod /standalone
 
-# Copy compiled output and Prisma schema/migrations into the bundle.
 RUN cp -r apps/api/dist /standalone/dist \
  && cp -r apps/api/prisma /standalone/prisma
 
-# Re-generate the Prisma client inside the standalone flat node_modules so the
-# engine binary paths resolve correctly at runtime.
+# Re-generate inside the flat node_modules so engine binary paths resolve at runtime.
 WORKDIR /standalone
 RUN node_modules/.bin/prisma generate --schema=prisma/schema.prisma
 
-# ─── Stage 3: runner ──────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+# Stage 3: runner.
+FROM node:24-slim AS runner
 
-RUN addgroup --system --gid 1001 nodejs \
- && adduser --system --uid 1001 fastify
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --system --gid 1001 nodejs \
+ && useradd --system --uid 1001 --gid nodejs fastify
 
 WORKDIR /app
 
@@ -61,5 +63,4 @@ ENV NODE_ENV=production
 EXPOSE 3001
 
 # Run pending migrations then start the server.
-# `prisma` is in dependencies, so the CLI is available in node_modules/.bin.
 CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/server.js"]

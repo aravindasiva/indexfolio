@@ -31,15 +31,15 @@ export function Disclaimer() {
   const [isHovering, setIsHovering] = useState(false)
   const [unlocked, setUnlocked] = useState(false)
   const [progressKey, setProgressKey] = useState(0)
-  // Read once at mount: true on devices with a real pointer (mouse/trackpad).
-  // Lazy initializer avoids the effect + setState cascade-render pattern.
+  // True on devices with a real pointer; lazy initializer avoids an effect +
+  // setState cascade re-render.
   const [requiresHold] = useState(
     () =>
       globalThis.window?.matchMedia('(hover: hover) and (pointer: fine)')
         .matches ?? false,
   )
-  // Ref so the animation-complete callback always sees the current hover state,
-  // avoiding a stale-closure race between the animation and pointer-leave events.
+  // Ref so the animation-complete callback sees the current hover state, avoiding
+  // a stale-closure race with pointer-leave.
   const isHoveringRef = useRef(false)
 
   function startHover() {

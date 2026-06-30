@@ -25,8 +25,7 @@ export async function etfRoutes(fastify: FastifyInstance): Promise<void> {
     async (request) => getEtfs(request.query, fastify.db),
   )
 
-  // Static route registered before '/etfs/:ticker' so it is not captured as a
-  // ticker param. Returns the available filter values with counts.
+  // Register before '/etfs/:ticker' so 'filters' is not captured as a ticker param.
   f.get(
     '/etfs/filters',
     {

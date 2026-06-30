@@ -4,8 +4,8 @@ import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '../constants'
 
 const DEFAULT_TITLE = `${SITE_NAME} - Free tools for EU passive investors`
 
-// Site-wide metadata (the root layout exports this). The title template frames
-// child titles, e.g. "ETF Screener · Indexfolio".
+// Site-wide metadata. The title template frames child titles, e.g.
+// "ETF Screener · Indexfolio".
 export const rootMetadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: DEFAULT_TITLE, template: `%s · ${SITE_NAME}` },
@@ -27,15 +27,11 @@ export const rootMetadata: Metadata = {
   },
 }
 
-// Per-page metadata in one call: title, description, canonical, and OG/Twitter.
-//
-// We deliberately do NOT set an `images` field by default. Next's file-convention
-// opengraph-image.tsx already cascades the right image to every route (the root
-// app/opengraph-image for most pages, a route's own for those that have one) and
-// resolves it against the *current* host - so it works in dev, preview, and prod.
-// Hand-setting a path here resolves against metadataBase (the prod domain), which
-// breaks everywhere but prod, so only pass `image` for a genuinely custom OG
-// image. `path` is site-root relative. 1200x630 matches OG_SIZE in og.tsx.
+// Per-page metadata. We deliberately do NOT set `images` by default: Next's
+// opengraph-image.tsx cascades the right image to every route and resolves it
+// against the current host, so it works in dev, preview, and prod. Hand-setting a
+// path resolves against metadataBase (prod domain) and breaks everywhere else, so
+// only pass `image` for a genuinely custom OG image. 1200x630 matches OG_SIZE.
 export function pageMetadata({
   title,
   description,

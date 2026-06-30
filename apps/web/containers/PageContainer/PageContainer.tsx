@@ -9,9 +9,9 @@ interface PageContainerProps {
 }
 
 /*
-  Standard content page wrapper: max-width gutter, padding that clears the fixed
-  nav, optional breadcrumbs, and an optional title/subtitle header. Use for every
-  route except the full-viewport landing page. Lets app/ route files stay trivial.
+  Standard content page wrapper (gutter, padding that clears the fixed nav,
+  optional breadcrumbs and title/subtitle header). Use for every route except the
+  full-viewport landing page, so app/ route files stay trivial.
 */
 export function PageContainer({
   title,

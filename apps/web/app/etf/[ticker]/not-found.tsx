@@ -1,7 +1,6 @@
 import { AmbientBackground } from '@/components/AmbientBackground/AmbientBackground'
 import { BackButton } from '@/components/BackButton/BackButton'
 
-// Shown when a ticker does not exist.
 export default function EtfNotFound() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center px-6 py-28 text-center">

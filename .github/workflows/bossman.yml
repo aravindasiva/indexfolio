@@ -29,15 +29,13 @@ jobs:
         id: filter
         with:
           filters: |
-            # api imports no workspace package today; if it takes one (e.g.
-            # @indexfolio/etf-types) add 'packages/<name>/**' here. prisma/data
-            # and seed.ts are run at reseed time, not built into the API.
+            # api imports no workspace package today; if it takes one, add
+            # 'packages/<name>/**' here. prisma/data and seed.ts run at reseed time, not in the build.
             api:
               - 'apps/api/**'
               - '!apps/api/prisma/data/**'
               - '!apps/api/prisma/seed.ts'
-            # web consumes the shared packages (knowledge-graph today; etf-types
-            # and tax-engine are declared deps), so any package change rebuilds web.
+            # web consumes the shared packages, so any package change rebuilds web.
             web:
               - 'apps/web/**'
               - 'packages/**'
@@ -49,7 +47,7 @@ jobs:
     name: '🚢 Shipping API to Railway'
     needs: [checks, detect-changes]
     if: needs.detect-changes.outputs.api == 'true'
-    # One API deployment at a time per branch -- queue, never cancel mid-deploy
+    # One API deployment at a time per branch: queue, never cancel mid-deploy.
     concurrency:
       group: deploy-api-${{ github.ref }}
       cancel-in-progress: false
@@ -65,9 +63,8 @@ jobs:
   reseed-staging:
     name: '🌱 Reseeding the staging DB'
     needs: [checks, detect-changes, deploy-api]
-    # Staging only, and only when the seed data/script changed. Runs after a
-    # healthy API deploy (so the schema is current) and never touches prod -- it
-    # is hard-wired to the dev branch + the staging service and token.
+    # Staging only, when seed data/script changed, after a healthy API deploy (so
+    # the schema is current). Hard-wired to the dev branch + staging service/token; never touches prod.
     if: |
       always() &&
       github.ref == 'refs/heads/dev' &&
@@ -89,13 +86,12 @@ jobs:
   deploy-web:
     name: '🚀 Shipping Web to Vercel'
     needs: [checks, detect-changes, deploy-api, reseed-staging]
-    # One web deployment at a time per branch -- queue, never cancel mid-deploy
+    # One web deployment at a time per branch: queue, never cancel mid-deploy.
     concurrency:
       group: deploy-web-${{ github.ref }}
       cancel-in-progress: false
-    # Wait for the staging reseed so the build pre-renders ETF pages + sitemap
-    # against fresh data; proceed when reseed was skipped (web-only changes, or
-    # main, where reseed never runs).
+    # Wait for the staging reseed so the build pre-renders ETF pages + sitemap against
+    # fresh data; proceed when reseed was skipped (web-only changes, or main where reseed never runs).
     if: |
       always() &&
       needs.checks.result == 'success' &&

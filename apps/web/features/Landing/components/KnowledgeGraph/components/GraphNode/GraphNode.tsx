@@ -74,7 +74,6 @@ export function GraphNode({
       onFocus={onFocus}
       onBlur={onBlur}
     >
-      {/* Pulse halo */}
       <circle
         r={radius * PULSE_MULTIPLIER}
         fill={color}
@@ -109,10 +108,8 @@ export function GraphNode({
         />
       )}
 
-      {/* Core dot */}
       <circle r={radius} fill={color} filter={`url(#graph-glow-${type})`} />
 
-      {/* Label - centred below the node dot */}
       {fading ? (
         <text
           x={0}

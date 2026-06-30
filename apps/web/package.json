@@ -40,14 +40,14 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.0.0",
-    "@tailwindcss/postcss": "^4.3.1",
+    "@tailwindcss/postcss": "^4.3.2",
     "@types/d3-force": "^3.0.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.0.0",
     "@types/three": "^0.185.0",
     "eslint-config-next": "^16.2.9",
-    "tailwindcss": "^4.3.1",
+    "tailwindcss": "^4.3.2",
     "typescript": "~5.7.0",
     "vitest": "^2.0.0"
   }

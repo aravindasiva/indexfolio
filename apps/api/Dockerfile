@@ -1,7 +1,11 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: deps. Copy only manifests (not source) so the install layer caches.
-FROM node:24-alpine AS deps
+FROM node:24-slim AS deps
+# openssl is needed by the Prisma engine on Debian.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl \
+ && rm -rf /var/lib/apt/lists/*
 RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
 WORKDIR /repo
 
@@ -38,10 +42,14 @@ WORKDIR /standalone
 RUN node_modules/.bin/prisma generate --schema=prisma/schema.prisma
 
 # Stage 3: runner.
-FROM node:24-alpine AS runner
+FROM node:24-slim AS runner
 
-RUN addgroup --system --gid 1001 nodejs \
- && adduser --system --uid 1001 fastify
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends openssl \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd --system --gid 1001 nodejs \
+ && useradd --system --uid 1001 --gid nodejs fastify
 
 WORKDIR /app
 

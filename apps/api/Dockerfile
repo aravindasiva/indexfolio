@@ -15,9 +15,6 @@ COPY apps/web/package.json                          ./apps/web/
 COPY packages/etf-types/package.json                ./packages/etf-types/
 COPY packages/knowledge-graph/package.json          ./packages/knowledge-graph/
 COPY packages/tax-engine/package.json               ./packages/tax-engine/
-COPY workers/pipelines/etf-scraper/package.json     ./workers/pipelines/etf-scraper/
-COPY workers/pipelines/holdings-fetcher/package.json ./workers/pipelines/holdings-fetcher/
-COPY workers/pipelines/price-updater/package.json   ./workers/pipelines/price-updater/
 
 RUN pnpm install --frozen-lockfile --ignore-scripts
 

@@ -1,7 +1,13 @@
 {
   "name": "@indexfolio/db",
-  "version": "0.0.0",
-  "private": true,
+  "version": "0.1.0",
+  "description": "Prisma schema, migrations, and typed client for Indexfolio.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aravindasiva/indexfolio.git",
+    "directory": "packages/db"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -14,8 +20,12 @@
   },
   "files": [
     "dist",
-    "prisma"
+    "prisma/schema.prisma",
+    "prisma/migrations"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",

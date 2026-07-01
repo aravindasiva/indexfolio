@@ -39,11 +39,12 @@ jobs:
     needs: [checks, detect-changes]
     # Preview only for web-affecting PRs into dev. Skipped on: dev->main promotion
     # (already live on staging, overlapping uploads cause Vercel cancellations),
-    # API/worker/CI-only PRs, and forks (no secrets). Replaces Vercel's own Git auto-preview.
+    # API/worker/CI-only PRs, and forks + Dependabot (no secrets). Replaces Vercel's own Git auto-preview.
     if: |
       github.base_ref == 'dev' &&
       needs.detect-changes.outputs.web == 'true' &&
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

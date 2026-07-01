@@ -12,6 +12,7 @@ WORKDIR /repo
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json                          ./apps/api/
 COPY apps/web/package.json                          ./apps/web/
+COPY packages/db/package.json                       ./packages/db/
 COPY packages/etf-types/package.json                ./packages/etf-types/
 COPY packages/knowledge-graph/package.json          ./packages/knowledge-graph/
 COPY packages/tax-engine/package.json               ./packages/tax-engine/
@@ -23,20 +24,19 @@ FROM deps AS build
 WORKDIR /repo
 
 COPY tsconfig.base.json ./
+COPY packages/db/ ./packages/db/
 COPY apps/api/ ./apps/api/
 
-RUN pnpm --filter @indexfolio/api exec prisma generate
+# Generate the Prisma client, then build db and api (api depends on @indexfolio/db).
+RUN pnpm --filter @indexfolio/db generate
+RUN pnpm --filter @indexfolio/db build
 RUN pnpm --filter @indexfolio/api build
 
-# pnpm deploy gives a flat node_modules (no virtual store) with prod deps only.
+# pnpm deploy gives a flat node_modules (no virtual store) with prod deps only;
+# @indexfolio/db ships its dist + prisma (schema/migrations) via its package "files".
 RUN pnpm --filter @indexfolio/api deploy --prod /standalone
 
-RUN cp -r apps/api/dist /standalone/dist \
- && cp -r apps/api/prisma /standalone/prisma
-
-# Re-generate inside the flat node_modules so engine binary paths resolve at runtime.
-WORKDIR /standalone
-RUN node_modules/.bin/prisma generate --schema=prisma/schema.prisma
+RUN cp -r apps/api/dist /standalone/dist
 
 # Stage 3: runner.
 FROM node:24-slim AS runner
@@ -59,5 +59,5 @@ ENV NODE_ENV=production
 
 EXPOSE 3001
 
-# Run pending migrations then start the server.
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/server.js"]
+# Run pending migrations (schema lives in the @indexfolio/db package) then start.
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --schema node_modules/@indexfolio/db/prisma/schema.prisma && node dist/server.js"]

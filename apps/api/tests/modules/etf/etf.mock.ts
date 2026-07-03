@@ -1,5 +1,5 @@
 import { vi } from 'vitest'
-import type { PrismaClient } from '@prisma/client'
+import { Prisma, type PrismaClient } from '@indexfolio/db'
 
 export const mockEtf = {
   id: 'cuid1',
@@ -9,7 +9,7 @@ export const mockEtf = {
   domicile: 'IE',
   exchange: 'XETRA',
   currency: 'EUR',
-  ter: 0.0022,
+  ter: new Prisma.Decimal(0.0022),
   fundSizeEur: 46200000000n,
   isAccumulating: true,
   isUcits: true,

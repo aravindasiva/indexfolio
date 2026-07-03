@@ -1,0 +1,115 @@
+name: Postmaster
+
+run-name: "📮 Postmaster shipping @indexfolio/db ${{ inputs.version && format('v{0}', inputs.version) || github.ref_name }}"
+
+# Owner-only release, two ways to trigger the exact same publish:
+#   1. CLI:  git tag -a db-v<version> -m "..." && git push origin db-v<version>
+#   2. UI:   Actions -> Postmaster -> Run workflow -> pick main, type <version>
+# Either way: bump packages/db/package.json in a reviewed PR and merge to main first.
+on:
+  push:
+    tags:
+      - 'db-v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish - must match packages/db/package.json (e.g. 0.1.1)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    name: '📮 Ship to npm'
+    runs-on: ubuntu-latest
+    # Only the owner can cut a release, whichever trigger fired and even if
+    # collaborators gain write access later.
+    if: github.actor == 'aravindasiva'
+
+    # id-token: OIDC trusted publishing (short-lived token, no NPM_TOKEN to store or
+    # rotate, plus build provenance). contents: write to create the tag + GitHub Release.
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6.4.0
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+          cache: 'pnpm'
+
+      # Trusted publishing + provenance need npm >= 11.5.1; Node 24 bundles an older npm.
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # One source of the version regardless of trigger: the tag on a push, the typed
+      # input on a manual run.
+      - name: Resolve version
+        id: resolve
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            version="$INPUT_VERSION"
+          else
+            version="${REF_NAME#db-v}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # The tag/input is a confirmation, not the source of truth: it must match the
+      # version already committed to package.json, so a release can never ship a stale one.
+      - name: Verify version matches package.json
+        working-directory: packages/db
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
+        run: |
+          pkg_version=$(node -p "require('./package.json').version")
+          if [ "$VERSION" != "$pkg_version" ]; then
+            echo "::error::version $VERSION does not match packages/db/package.json ($pkg_version). Bump it in a PR first."
+            exit 1
+          fi
+
+      # tsup needs the generated Prisma client types to emit the .d.ts bundle.
+      - name: Generate Prisma client
+        run: pnpm --filter @indexfolio/db generate
+
+      - name: Build
+        run: pnpm --filter @indexfolio/db build
+
+      - name: Publish to npm
+        working-directory: packages/db
+        run: npm publish --provenance --access public
+
+      # Create the db-v<version> tag + a Release with an auto-changelog. gh reuses the tag
+      # if the push path already created it, or creates it at this commit on a manual run.
+      - name: Tag + GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.resolve.outputs.version }}
+        run: |
+          gh release create "db-v$VERSION" \
+            --target "$GITHUB_SHA" \
+            --title "@indexfolio/db $VERSION" \
+            --notes "📦 Published to npm: https://www.npmjs.com/package/@indexfolio/db/v/$VERSION" \
+            --generate-notes
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.resolve.outputs.version }}
+        run: |
+          echo "## 📮 Postmaster shipped @indexfolio/db $VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **npm:** https://www.npmjs.com/package/@indexfolio/db/v/$VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Release:** ${{ github.server_url }}/${{ github.repository }}/releases/tag/db-v$VERSION" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Provenance:** attested from \`$GITHUB_SHA\`" >> "$GITHUB_STEP_SUMMARY"

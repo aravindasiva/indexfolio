@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '@indexfolio/db'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 

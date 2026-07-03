@@ -1,4 +1,4 @@
-import type { PrismaClient, Prisma, ETF } from '@prisma/client'
+import type { PrismaClient, Prisma, ETF } from '@indexfolio/db'
 import { AppError, ErrorCode } from '../../shared/error.js'
 import type {
   EtfListQuery,

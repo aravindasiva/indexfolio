@@ -41,9 +41,9 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.railway-token }}
         # `railway run` injects the service's variables (incl. DATABASE_URL) from Railway,
-        # so no duplicated secret. prisma:reset = `prisma migrate reset --force`: drop, migrate, seed.
+        # so no duplicated secret. db reset = `prisma migrate reset --force`: drop, migrate, seed.
         run: |
           railway run --service ${{ inputs.railway-service-id }} -- \
-            pnpm --filter @indexfolio/api prisma:reset
+            pnpm --filter @indexfolio/db reset
           echo "## 🌱 Staging DB reset + reseeded" >> "$GITHUB_STEP_SUMMARY"
           echo "- Dropped, re-migrated, and reseeded from \`apps/api/prisma/data\`." >> "$GITHUB_STEP_SUMMARY"

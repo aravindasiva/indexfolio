@@ -27,19 +27,21 @@ jobs:
         id: filter
         with:
           filters: |
-            # api imports no workspace package today; if it takes one, add
-            # 'packages/<name>/**' here. prisma/data and seed.ts run at reseed time, not in the build.
+            # api imports @indexfolio/db; redeploy when either changes. prisma
+            # data + seed.ts run at reseed time, not in the build, so exclude them.
             api:
               - 'apps/api/**'
-              - '!apps/api/prisma/data/**'
-              - '!apps/api/prisma/seed.ts'
-            # web consumes the shared packages, so any package change rebuilds web.
+              - 'packages/db/**'
+              - '!packages/db/prisma/data/**'
+              - '!packages/db/prisma/seed.ts'
+            # web consumes the shared packages (not db), so any package change but db rebuilds web.
             web:
               - 'apps/web/**'
               - 'packages/**'
+              - '!packages/db/**'
             seed:
-              - 'apps/api/prisma/data/**'
-              - 'apps/api/prisma/seed.ts'
+              - 'packages/db/prisma/data/**'
+              - 'packages/db/prisma/seed.ts'
 
   deploy-api:
     name: '🚢 Shipping API to Railway'

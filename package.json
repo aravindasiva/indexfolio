@@ -13,6 +13,12 @@
     "docker:down": "docker compose down",
     "docker:reset": "docker compose down -v && docker compose up -d",
     "docker:logs": "docker compose logs -f",
+    "db:generate": "pnpm --filter @indexfolio/db generate",
+    "db:migrate": "pnpm --filter @indexfolio/db migrate:dev",
+    "db:migrate:deploy": "pnpm --filter @indexfolio/db migrate:deploy",
+    "db:reset": "pnpm --filter @indexfolio/db reset",
+    "db:seed": "pnpm --filter @indexfolio/db seed",
+    "db:studio": "pnpm --filter @indexfolio/db studio",
     "kill:ports": "kill-port 5432 6379 3000 3001"
   },
   "devDependencies": {

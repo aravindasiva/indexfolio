@@ -6,7 +6,7 @@ dockerfilePath = "apps/api/Dockerfile"
 [deploy]
 # With a Dockerfile, Railway runs startCommand as the ENTRYPOINT (no shell), so a
 # bare && would not chain. Wrap in /bin/sh -c so migrate runs before the server.
-startCommand = "/bin/sh -c 'node_modules/.bin/prisma migrate deploy && node dist/server.js'"
+startCommand = "/bin/sh -c 'node_modules/.bin/prisma migrate deploy --schema node_modules/@indexfolio/db/prisma/schema.prisma && node dist/server.js'"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"

@@ -1,12 +1,30 @@
 {
   "name": "@indexfolio/db",
   "version": "0.1.0",
-  "description": "Prisma schema, migrations, and typed client for Indexfolio.",
+  "description": "Prisma schema, migrations, and typed client for Indexfolio - open-source ETF tools for European passive investors.",
+  "keywords": [
+    "indexfolio",
+    "etf",
+    "ucits",
+    "europe",
+    "passive-investing",
+    "index-funds",
+    "etf-screener",
+    "investing",
+    "finance",
+    "prisma",
+    "postgres"
+  ],
   "license": "MIT",
+  "author": "aravindasiva",
+  "homepage": "https://www.indexfolio.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aravindasiva/indexfolio.git",
     "directory": "packages/db"
+  },
+  "bugs": {
+    "url": "https://github.com/aravindasiva/indexfolio/issues"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

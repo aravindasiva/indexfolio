@@ -13,15 +13,16 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
+// A fund, identified by its ISIN. Accumulating and distributing share classes have
+// different ISINs, so they are separate rows. Exchange-specific data lives in Listing.
 model ETF {
   id               String    @id @default(cuid())
-  ticker           String    @unique
-  isin             String
+  isin             String    @unique
   name             String
   domicile         String
-  exchange         String
-  currency         String
   ter              Decimal
+  fundSize         BigInt
+  fundSizeCurrency String
   fundSizeEur      BigInt
   isAccumulating   Boolean
   isUcits          Boolean
@@ -30,13 +31,50 @@ model ETF {
   provider         String
   inceptionDate    DateTime
   kiidUrl          String?
+  source           String?
+  fetchedAt        DateTime?
   lastMetadataSync DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
+  listings         Listing[]
   holdings         Holding[]
-  prices           Price[]
+}
 
-  @@unique([isin, ticker])
+// One row per exchange a fund trades on. The same fund lists on many venues with
+// different tickers and currencies (IE00B4L5Y983 = EUNL@Xetra = SWDA@London).
+model Listing {
+  id          String    @id @default(cuid())
+  etfId       String
+  etf         ETF       @relation(fields: [etfId], references: [id])
+  exchangeMic String
+  exchange    Exchange  @relation(fields: [exchangeMic], references: [mic])
+  ticker      String
+  currency    String
+  isPrimary   Boolean   @default(false)
+  yahooSymbol String?
+  source      String?
+  fetchedAt   DateTime?
+  prices      Price[]
+
+  @@unique([etfId, exchangeMic, currency])
+  @@unique([exchangeMic, ticker])
+}
+
+// Reference: an exchange keyed by its ISO 10383 MIC, with a human display name and the
+// raw source labels that map to it ("Xetra", "Deutsche Boerse" -> XETR).
+model Exchange {
+  mic      String    @id
+  name     String
+  aliases  String[]
+  listings Listing[]
+}
+
+// Reference: a provider's canonical name and the raw source labels that map to it
+// (BlackRock -> iShares, DWS -> Xtrackers). Ingestion uses it to normalise names.
+model Provider {
+  id      String   @id @default(cuid())
+  name    String   @unique
+  aliases String[]
 }
 
 model Holding {
@@ -54,14 +92,14 @@ model Holding {
 }
 
 model Price {
-  id       String   @id @default(cuid())
-  etfId    String
-  etf      ETF      @relation(fields: [etfId], references: [id])
-  date     DateTime
-  close    Decimal
-  currency String
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id])
+  date      DateTime
+  close     Decimal
+  currency  String
 
-  @@unique([etfId, date])
+  @@unique([listingId, date])
 }
 
 model ExchangeRate {

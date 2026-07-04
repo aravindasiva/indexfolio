@@ -84,9 +84,9 @@ describe('EtfListQuerySchema', () => {
     expect(result.minFundSize).toBe(1000000000n)
   })
 
-  it('defaults sort to ticker', () => {
+  it('defaults sort to name', () => {
     const result = EtfListQuerySchema.parse({})
-    expect(result.sort).toBe('ticker')
+    expect(result.sort).toBe('name')
   })
 
   it('defaults order to asc', () => {
@@ -95,13 +95,7 @@ describe('EtfListQuerySchema', () => {
   })
 
   it('accepts valid sort fields', () => {
-    const fields = [
-      'ter',
-      'fundSizeEur',
-      'inceptionDate',
-      'ticker',
-      'name',
-    ] as const
+    const fields = ['ter', 'fundSizeEur', 'inceptionDate', 'name'] as const
     for (const sort of fields) {
       expect(() => EtfListQuerySchema.parse({ sort })).not.toThrow()
     }

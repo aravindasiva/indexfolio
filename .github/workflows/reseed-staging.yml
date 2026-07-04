@@ -9,6 +9,10 @@ on:
     secrets:
       railway-token:
         required: true
+  # Manual trigger for when the normal deploy path can't apply a migration - e.g. a
+  # destructive schema change where the API's startup migrate-deploy would fail on
+  # existing staging data. Always targets staging.
+  workflow_dispatch:
 
 jobs:
   reseed:
@@ -39,11 +43,12 @@ jobs:
 
       - name: Reset and reseed
         env:
-          RAILWAY_TOKEN: ${{ secrets.railway-token }}
+          # From Bossman (workflow_call) or the staging secret (manual dispatch).
+          RAILWAY_TOKEN: ${{ secrets.railway-token || secrets.RAILWAY_TOKEN_STAGING }}
         # `railway run` injects the service's variables (incl. DATABASE_URL) from Railway,
         # so no duplicated secret. db reset = `prisma migrate reset --force`: drop, migrate, seed.
         run: |
-          railway run --service ${{ inputs.railway-service-id }} -- \
+          railway run --service ${{ inputs.railway-service-id || vars.RAILWAY_API_STAGING_SERVICE_ID }} -- \
             pnpm --filter @indexfolio/db reset
           echo "## 🌱 Staging DB reset + reseeded" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Dropped, re-migrated, and reseeded from \`apps/api/prisma/data\`." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dropped, re-migrated, and reseeded from \`packages/db/prisma/data\`." >> "$GITHUB_STEP_SUMMARY"

@@ -1,4 +1,4 @@
-import type { PrismaClient, Prisma, ETF } from '@indexfolio/db'
+import type { PrismaClient, Prisma } from '@indexfolio/db'
 import { AppError, ErrorCode } from '../../shared/error.js'
 import type {
   EtfListQuery,
@@ -7,16 +7,31 @@ import type {
   EtfFiltersResponse,
 } from './etf.schema.js'
 
-// Map a Prisma ETF row to the JSON contract (EtfResponse) without retyping.
-function serializeEtf(etf: ETF): EtfResponse {
+// A fund lists on many venues, so ticker/exchange/currency come from its primary listing.
+// Pull that one listing (with its exchange) alongside the fund.
+const withPrimaryListing = {
+  listings: {
+    where: { isPrimary: true },
+    take: 1,
+    include: { exchange: true },
+  },
+} satisfies Prisma.ETFInclude
+
+type EtfWithPrimaryListing = Prisma.ETFGetPayload<{
+  include: typeof withPrimaryListing
+}>
+
+// Map a fund + its primary listing to the JSON contract (EtfResponse).
+function serializeEtf(etf: EtfWithPrimaryListing): EtfResponse {
+  const primary = etf.listings[0]
   return {
     id: etf.id,
-    ticker: etf.ticker,
+    ticker: primary?.ticker ?? '',
     name: etf.name,
     isin: etf.isin,
     domicile: etf.domicile,
-    exchange: etf.exchange,
-    currency: etf.currency,
+    exchange: primary?.exchange.name ?? '',
+    currency: primary?.currency ?? '',
     ter: Number(etf.ter),
     fundSizeEur: etf.fundSizeEur.toString(),
     isAccumulating: etf.isAccumulating,
@@ -35,8 +50,10 @@ function buildWhere(query: EtfListQuery): Prisma.ETFWhereInput {
     const term = query.search.trim()
     where.OR = [
       { name: { contains: term, mode: 'insensitive' } },
-      { ticker: { contains: term, mode: 'insensitive' } },
       { isin: { contains: term, mode: 'insensitive' } },
+      {
+        listings: { some: { ticker: { contains: term, mode: 'insensitive' } } },
+      },
     ]
   }
 
@@ -49,7 +66,8 @@ function buildWhere(query: EtfListQuery): Prisma.ETFWhereInput {
   }
 
   if (query.exchange !== undefined) {
-    where.exchange = { in: query.exchange.split(',').map((s) => s.trim()) }
+    const names = query.exchange.split(',').map((s) => s.trim())
+    where.listings = { some: { exchange: { name: { in: names } } } }
   }
 
   if (query.assetClass !== undefined) {
@@ -78,7 +96,13 @@ export async function getEtfs(
   } as Prisma.ETFOrderByWithRelationInput
 
   const [etfs, total] = await Promise.all([
-    db.eTF.findMany({ where, skip, take: query.limit, orderBy }),
+    db.eTF.findMany({
+      where,
+      skip,
+      take: query.limit,
+      orderBy,
+      include: withPrimaryListing,
+    }),
     db.eTF.count({ where }),
   ])
 
@@ -109,19 +133,25 @@ export function toFilterOptions<K extends string>(
     .sort((a, b) => a.value.localeCompare(b.value))
 }
 
-// Distinct filter values with counts (faceted search): one GROUP BY per categorical field.
+// Distinct filter values with counts (faceted search). Domicile and asset class group on
+// the fund; exchange comes from the listings, counted per exchange.
 export async function getEtfFilters(
   db: PrismaClient,
 ): Promise<EtfFiltersResponse> {
-  const [domicile, exchange, assetClass] = await Promise.all([
+  const [domicile, exchanges, assetClass] = await Promise.all([
     db.eTF.groupBy({ by: ['domicile'], _count: { _all: true } }),
-    db.eTF.groupBy({ by: ['exchange'], _count: { _all: true } }),
+    db.exchange.findMany({
+      where: { listings: { some: {} } },
+      select: { name: true, _count: { select: { listings: true } } },
+    }),
     db.eTF.groupBy({ by: ['assetClass'], _count: { _all: true } }),
   ])
 
   return {
     domicile: toFilterOptions(domicile, 'domicile'),
-    exchange: toFilterOptions(exchange, 'exchange'),
+    exchange: exchanges
+      .map((e) => ({ value: e.name, count: e._count.listings }))
+      .sort((a, b) => a.value.localeCompare(b.value)),
     assetClass: toFilterOptions(assetClass, 'assetClass'),
   }
 }
@@ -130,13 +160,14 @@ export async function getEtfByTicker(
   ticker: string,
   db: PrismaClient,
 ): Promise<EtfResponse> {
-  const etf = await db.eTF.findUnique({
+  const listing = await db.listing.findFirst({
     where: { ticker: ticker.toUpperCase() },
+    include: { etf: { include: withPrimaryListing } },
   })
 
-  if (!etf) {
+  if (!listing) {
     throw new AppError(404, ErrorCode.NOT_FOUND, `ETF '${ticker}' not found`)
   }
 
-  return serializeEtf(etf)
+  return serializeEtf(listing.etf)
 }

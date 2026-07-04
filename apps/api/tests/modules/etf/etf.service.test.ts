@@ -6,12 +6,12 @@ import {
 } from '../../../src/modules/etf/etf.service.js'
 import { EtfListQuerySchema } from '../../../src/modules/etf/etf.schema.js'
 import { AppError } from '../../../src/shared/error.js'
-import { mockDb, mockEtf } from './etf.mock.js'
+import { mockDb, mockEtf, mockListingWithEtf } from './etf.mock.js'
 
 beforeEach(() => {
   vi.mocked(mockDb.eTF.findMany).mockResolvedValue([mockEtf])
   vi.mocked(mockDb.eTF.count).mockResolvedValue(1)
-  vi.mocked(mockDb.eTF.findUnique).mockResolvedValue(mockEtf)
+  vi.mocked(mockDb.listing.findFirst).mockResolvedValue(mockListingWithEtf)
 })
 
 describe('getEtfs - filters', () => {
@@ -63,12 +63,20 @@ describe('getEtfs - filters', () => {
     )
   })
 
-  it('filters by multiple exchanges', async () => {
-    const query = EtfListQuerySchema.parse({ exchange: 'XETRA,LSE' })
+  it('filters by multiple exchanges through listings', async () => {
+    const query = EtfListQuerySchema.parse({
+      exchange: 'Xetra,London Stock Exchange',
+    })
     await getEtfs(query, mockDb)
     expect(vi.mocked(mockDb.eTF.findMany)).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { exchange: { in: ['XETRA', 'LSE'] } },
+        where: {
+          listings: {
+            some: {
+              exchange: { name: { in: ['Xetra', 'London Stock Exchange'] } },
+            },
+          },
+        },
       }),
     )
   })
@@ -99,7 +107,7 @@ describe('getEtfs - filters', () => {
     )
   })
 
-  it('builds a case-insensitive OR search across name, ticker and isin', async () => {
+  it('builds a case-insensitive OR search across name, isin and listing ticker', async () => {
     const query = EtfListQuerySchema.parse({ search: 'world' })
     await getEtfs(query, mockDb)
     expect(vi.mocked(mockDb.eTF.findMany)).toHaveBeenCalledWith(
@@ -107,8 +115,12 @@ describe('getEtfs - filters', () => {
         where: {
           OR: [
             { name: { contains: 'world', mode: 'insensitive' } },
-            { ticker: { contains: 'world', mode: 'insensitive' } },
             { isin: { contains: 'world', mode: 'insensitive' } },
+            {
+              listings: {
+                some: { ticker: { contains: 'world', mode: 'insensitive' } },
+              },
+            },
           ],
         },
       }),
@@ -174,11 +186,11 @@ describe('getEtfs - pagination', () => {
 })
 
 describe('getEtfs - sorting', () => {
-  it('defaults to sort by ticker asc', async () => {
+  it('defaults to sort by name asc', async () => {
     const query = EtfListQuerySchema.parse({})
     await getEtfs(query, mockDb)
     expect(vi.mocked(mockDb.eTF.findMany)).toHaveBeenCalledWith(
-      expect.objectContaining({ orderBy: { ticker: 'asc' } }),
+      expect.objectContaining({ orderBy: { name: 'asc' } }),
     )
   })
 
@@ -225,18 +237,18 @@ describe('getEtfByTicker', () => {
 
   it('normalizes ticker to uppercase before querying', async () => {
     await getEtfByTicker('vwce', mockDb)
-    expect(vi.mocked(mockDb.eTF.findUnique)).toHaveBeenCalledWith({
-      where: { ticker: 'VWCE' },
-    })
+    expect(vi.mocked(mockDb.listing.findFirst)).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { ticker: 'VWCE' } }),
+    )
   })
 
   it('throws a 404 AppError when ETF is not found', async () => {
-    vi.mocked(mockDb.eTF.findUnique).mockResolvedValue(null)
+    vi.mocked(mockDb.listing.findFirst).mockResolvedValue(null)
     await expect(getEtfByTicker('NOTREAL', mockDb)).rejects.toThrow(AppError)
   })
 
   it('includes the ticker in the 404 error message', async () => {
-    vi.mocked(mockDb.eTF.findUnique).mockResolvedValue(null)
+    vi.mocked(mockDb.listing.findFirst).mockResolvedValue(null)
     await expect(getEtfByTicker('NOTREAL', mockDb)).rejects.toMatchObject({
       statusCode: 404,
       message: expect.stringContaining('NOTREAL'),

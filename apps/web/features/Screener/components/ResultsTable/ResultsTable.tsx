@@ -51,7 +51,7 @@ export function ResultsTable({ etfs, sort, order, onSort }: Props) {
       <Table>
         <TableHeader>
           <TableRow className="border-border bg-muted/30 hover:bg-transparent">
-            <SortHeader field="ticker" label="Ticker" {...sortProps} />
+            <TableHead className={HEAD}>Ticker</TableHead>
             <SortHeader field="name" label="Name" {...sortProps} />
             <TableHead className={cn(HEAD, 'hidden md:table-cell')}>
               Asset

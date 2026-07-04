@@ -15,7 +15,6 @@ export const SORT_FIELDS = [
   'ter',
   'fundSizeEur',
   'inceptionDate',
-  'ticker',
   'name',
 ] as const
 export type SortField = (typeof SORT_FIELDS)[number]
@@ -38,7 +37,6 @@ export const filterParsers = {
     'ter',
     'fundSizeEur',
     'inceptionDate',
-    'ticker',
     'name',
   ]).withDefault('fundSizeEur'),
   order: parseAsStringEnum(['asc', 'desc']).withDefault('desc'),

@@ -14,9 +14,7 @@ export const EtfListQuerySchema = z.object({
   assetClass: z.string().optional(),
   maxTer: z.coerce.number().positive().optional(),
   minFundSize: z.coerce.bigint().optional(),
-  sort: z
-    .enum(['ter', 'fundSizeEur', 'inceptionDate', 'ticker', 'name'])
-    .default('ticker'),
+  sort: z.enum(['ter', 'fundSizeEur', 'inceptionDate', 'name']).default('name'),
   order: z.enum(['asc', 'desc']).default('asc'),
 })
 

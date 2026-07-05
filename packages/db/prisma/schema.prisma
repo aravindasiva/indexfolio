@@ -26,10 +26,10 @@ model ETF {
   fundSizeEur      BigInt
   isAccumulating   Boolean
   isUcits          Boolean
-  indexTracked     String
-  assetClass       String
+  indexTracked     String?
+  assetClass       String?
   provider         String
-  inceptionDate    DateTime
+  inceptionDate    DateTime?
   kiidUrl          String?
   source           String?
   fetchedAt        DateTime?

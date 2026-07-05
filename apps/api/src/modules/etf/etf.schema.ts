@@ -30,10 +30,10 @@ export const EtfResponseSchema = z.object({
   fundSizeEur: z.string(),
   isAccumulating: z.boolean(),
   isUcits: z.boolean(),
-  indexTracked: z.string(),
-  assetClass: z.string(),
+  indexTracked: z.string().nullable(),
+  assetClass: z.string().nullable(),
   provider: z.string(),
-  inceptionDate: z.string(),
+  inceptionDate: z.string().nullable(),
 })
 
 export const EtfListResponseSchema = z.object({

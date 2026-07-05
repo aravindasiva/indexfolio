@@ -39,7 +39,7 @@ function serializeEtf(etf: EtfWithPrimaryListing): EtfResponse {
     indexTracked: etf.indexTracked,
     assetClass: etf.assetClass,
     provider: etf.provider,
-    inceptionDate: etf.inceptionDate.toISOString(),
+    inceptionDate: etf.inceptionDate?.toISOString() ?? null,
   }
 }
 
@@ -120,17 +120,21 @@ export async function getEtfs(
 // A grouped-count row keyed by field name, e.g. { domicile: 'IE', _count: { _all: 14 } }.
 type GroupRow<K extends string> = { _count: { _all: number } } & Record<
   K,
-  string
+  string | null
 >
 
-// Map grouped counts to { value, count }, sorted by value.
+// Map grouped counts to { value, count }, sorted by value. Null group keys (e.g. an
+// unmapped assetClass) are dropped - a missing value is not a real facet.
 export function toFilterOptions<K extends string>(
   rows: ReadonlyArray<GroupRow<K>>,
   key: K,
 ): Array<{ value: string; count: number }> {
-  return rows
-    .map((row) => ({ value: row[key], count: row._count._all }))
-    .sort((a, b) => a.value.localeCompare(b.value))
+  const options: Array<{ value: string; count: number }> = []
+  for (const row of rows) {
+    const value = row[key]
+    if (value !== null) options.push({ value, count: row._count._all })
+  }
+  return options.sort((a, b) => a.value.localeCompare(b.value))
 }
 
 // Distinct filter values with counts (faceted search). Domicile and asset class group on

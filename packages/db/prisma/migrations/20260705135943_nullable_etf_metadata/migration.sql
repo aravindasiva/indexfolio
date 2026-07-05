@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "ETF" ALTER COLUMN "indexTracked" DROP NOT NULL,
+ALTER COLUMN "assetClass" DROP NOT NULL,
+ALTER COLUMN "inceptionDate" DROP NOT NULL;
+

@@ -15,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
     // 'any' is valid for the SVG only; using it on a raster triggers Chrome's
     // "size is not correct" warning.
     icons: [
-      { src: '/icon.png', sizes: '32x32', type: 'image/png' },
+      { src: '/indexfolio.png', sizes: '192x192', type: 'image/png' },
       { src: '/indexfolio.svg', sizes: 'any', type: 'image/svg+xml' },
     ],
   }

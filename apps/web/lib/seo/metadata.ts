@@ -12,6 +12,10 @@ export const rootMetadata: Metadata = {
   description: SITE_DESCRIPTION,
   applicationName: SITE_NAME,
   alternates: { canonical: '/' },
+  icons: {
+    icon: [{ url: '/indexfolio.png', type: 'image/png', sizes: '192x192' }],
+    apple: '/indexfolio.png',
+  },
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,

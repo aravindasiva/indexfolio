@@ -27,18 +27,30 @@ jobs:
         id: filter
         with:
           filters: |
-            # api imports @indexfolio/db; redeploy when either changes. prisma
-            # data + seed.ts run at reseed time, not in the build, so exclude them.
+            # All-positive patterns: dorny negations don't exclude under the default
+            # `some` quantifier, so each filter lists an app's real build inputs - its
+            # own code, the workspace packages it imports, and shared root config.
+            # api imports @indexfolio/db (only).
             api:
               - 'apps/api/**'
               - 'packages/db/**'
-              - '!packages/db/prisma/data/**'
-              - '!packages/db/prisma/seed.ts'
-            # web consumes the shared packages (not db), so any package change but db rebuilds web.
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.base.json'
+              - 'turbo.json'
+            # web imports etf-types/knowledge-graph/tax-engine (not db). A reseed also
+            # rebuilds web via deploy-web's condition, so seed data is not listed here.
             web:
               - 'apps/web/**'
-              - 'packages/**'
-              - '!packages/db/**'
+              - 'packages/etf-types/**'
+              - 'packages/knowledge-graph/**'
+              - 'packages/tax-engine/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'tsconfig.base.json'
+              - 'turbo.json'
             seed:
               - 'packages/db/prisma/data/**'
               - 'packages/db/prisma/seed.ts'
@@ -90,12 +102,13 @@ jobs:
     concurrency:
       group: deploy-web-${{ github.ref }}
       cancel-in-progress: false
-    # Wait for the staging reseed so the build pre-renders ETF pages + sitemap against
-    # fresh data; proceed when reseed was skipped (web-only changes, or main where reseed never runs).
+    # Rebuild web when its own inputs changed, OR when a staging reseed just ran (to
+    # pre-render ETF pages + sitemap against the fresh data). Reseed only runs on dev,
+    # so on main this reduces to "web inputs changed". Waits for api + reseed first.
     if: |
       always() &&
       needs.checks.result == 'success' &&
-      needs.detect-changes.outputs.web == 'true' &&
+      (needs.detect-changes.outputs.web == 'true' || needs.reseed-staging.result == 'success') &&
       (needs.deploy-api.result == 'success' || needs.deploy-api.result == 'skipped') &&
       (needs.reseed-staging.result == 'success' || needs.reseed-staging.result == 'skipped')
     uses: ./.github/workflows/deploy-web.yml

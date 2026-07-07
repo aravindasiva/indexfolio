@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { getAllEtfs } from '@/lib/api'
+import { REVALIDATE } from '@/features/EtfDetail/utils/loader'
 import { SITE_URL } from '../constants'
 
 // Static routes plus a row per ETF detail page (fetched from the API; resilient
@@ -22,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   try {
-    const etfs = await getAllEtfs()
+    const etfs = await getAllEtfs({ revalidate: REVALIDATE })
     for (const etf of etfs) {
       routes.push({
         url: `${SITE_URL}/etf/${etf.ticker}`,

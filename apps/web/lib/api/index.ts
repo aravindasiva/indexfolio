@@ -1,11 +1,19 @@
-import type { Etf, EtfFilters, EtfListParams, EtfListResponse } from './types'
+import type {
+  Etf,
+  EtfDetail,
+  EtfFilters,
+  EtfListParams,
+  EtfListResponse,
+} from './types'
 
 export type {
   Etf,
+  EtfDetail,
   EtfFilters,
   EtfListParams,
   EtfListResponse,
   FilterOption,
+  Listing,
 } from './types'
 
 /*
@@ -97,8 +105,10 @@ export function getEtfs(
 export function getEtfByTicker(
   ticker: string,
   options: ServerOptions = {},
-): Promise<Etf> {
-  return get<Etf>(`/etfs/${ticker}`, {
+): Promise<EtfDetail> {
+  // Encode the ticker: some are Bloomberg-style with a '#' (e.g. #FING) that would
+  // otherwise be read as a URL fragment and never reach the API.
+  return get<EtfDetail>(`/etfs/${encodeURIComponent(ticker)}`, {
     label: 'getEtfByTicker',
     revalidate: options.revalidate,
   })

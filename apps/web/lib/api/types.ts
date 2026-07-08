@@ -3,6 +3,7 @@
 export type Etf = {
   id: string
   ticker: string
+  matchedTicker: string
   name: string
   isin: string
   domicile: string
@@ -17,6 +18,17 @@ export type Etf = {
   provider: string
   inceptionDate: string
 }
+
+// One venue a fund trades on: the exchange, its local ticker there, and the currency.
+export type Listing = {
+  ticker: string
+  exchange: string
+  currency: string
+  isPrimary: boolean
+}
+
+// A fund plus every venue it trades on (the detail endpoint).
+export type EtfDetail = Etf & { listings: Listing[] }
 
 export type EtfListResponse = {
   data: Etf[]

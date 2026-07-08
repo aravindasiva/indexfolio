@@ -32,6 +32,18 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
   },
+  // Permanent apex -> www redirect so search engines consolidate on one host.
+  // Only fires if Vercel lets non-www reach the app, not an edge redirect.
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'indexfolio.dev' }],
+        destination: 'https://www.indexfolio.dev/:path*',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default nextConfig

@@ -94,6 +94,11 @@
   /* Light needs more strength than dark to read on the near-white background;
      dark overrides this in .dark. */
   --dot-grid-color: color-mix(in oklab, var(--foreground) 19%, transparent);
+  --dot-grid-spotlight-color: color-mix(
+    in oklab,
+    var(--primary) 78%,
+    transparent
+  );
 
   /* Glass */
   --glass-bg: rgba(255, 255, 255, 0.72);
@@ -137,6 +142,11 @@
 
   /* Dark dots can be lighter than light mode's and still read. */
   --dot-grid-color: color-mix(in oklab, var(--foreground) 14%, transparent);
+  --dot-grid-spotlight-color: color-mix(
+    in oklab,
+    var(--primary) 88%,
+    transparent
+  );
 
   /* Opaque enough that content scrolling under the nav blurs into a smear
      rather than staying see-through; blur + tint read as frosted glass. */
@@ -303,5 +313,32 @@
       #000 45%,
       transparent 100%
     );
+  }
+
+  /* Cursor spotlight: primary dots revealed in a soft circle that tracks the pointer. */
+  .dot-grid-spotlight {
+    background-image: radial-gradient(
+      var(--dot-grid-spotlight-color) 1.5px,
+      transparent 2.2px
+    );
+    background-size: 22px 22px;
+    opacity: 0;
+    transition: opacity 300ms ease;
+    -webkit-mask-image: radial-gradient(
+      circle 170px at var(--spot-x, 50%) var(--spot-y, 50%),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 42%,
+      transparent 92%
+    );
+    mask-image: radial-gradient(
+      circle 170px at var(--spot-x, 50%) var(--spot-y, 50%),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 42%,
+      transparent 92%
+    );
+  }
+
+  .dot-grid-spotlight.is-active {
+    opacity: 1;
   }
 }

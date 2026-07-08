@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 // Relative import (test graph; vitest resolves relative paths only).
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from '../constants'
 
-const DEFAULT_TITLE = `${SITE_NAME} - Free tools for EU passive investors`
+const DEFAULT_TITLE = `${SITE_NAME} - Open-source tools for EU passive investors`
 
 // Site-wide metadata. The title template frames child titles, e.g.
 // "ETF Screener · Indexfolio".

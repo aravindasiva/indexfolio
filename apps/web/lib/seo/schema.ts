@@ -15,6 +15,8 @@ export function organizationSchema(): JsonLd {
     '@type': 'Organization',
     name: SITE_NAME,
     url: SITE_URL,
+    // Brand logo for Google search results / knowledge panel.
+    logo: `${SITE_URL}/indexfolio.png`,
     description: SITE_DESCRIPTION,
     sameAs: [SITE_GITHUB],
   }

@@ -4,32 +4,20 @@ import { PageContainer } from '@/containers/PageContainer/PageContainer'
 import { Breadcrumbs } from '@/components/Breadcrumbs/Breadcrumbs'
 import { JsonLd } from '@/components/JsonLd/JsonLd'
 import { EtfDetail } from '@/features/EtfDetail/EtfDetail'
-import {
-  getEtfTickers,
-  loadEtf,
-  loadRelated,
-} from '@/features/EtfDetail/utils/loader'
+import { loadEtf, loadRelated } from '@/features/EtfDetail/utils/loader'
 import { pageMetadata } from '@/lib/seo/metadata'
 import { etfSchema } from '@/lib/seo/schema'
 import { formatTer } from '@/lib/etf/format'
 import { domicileLabel, providerLabel } from '@/lib/etf/labels'
 
-// Next requires a literal here; keep in sync with the loader's REVALIDATE.
-export const revalidate = 3600
-export const dynamicParams = true
+// Rendered per request against the live API, so a newly-ingested ETF
+export const dynamic = 'force-dynamic'
 
 type Params = { params: Promise<{ ticker: string }> }
-
-export async function generateStaticParams() {
-  const tickers = await getEtfTickers()
-  return tickers.map((ticker) => ({ ticker }))
-}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { ticker } = await params
   const etf = await loadEtf(ticker)
-  // notFound() is served as 200 (not 404) on the on-demand path, so noindex an
-  // unknown ticker to keep non-existent ETFs out of search results.
   if (!etf) return { title: 'ETF not found', robots: { index: false } }
 
   const type = etf.isAccumulating ? 'Accumulating' : 'Distributing'

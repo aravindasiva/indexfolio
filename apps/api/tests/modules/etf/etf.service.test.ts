@@ -6,7 +6,13 @@ import {
 } from '../../../src/modules/etf/etf.service.js'
 import { EtfListQuerySchema } from '../../../src/modules/etf/etf.schema.js'
 import { AppError } from '../../../src/shared/error.js'
-import { mockDb, mockEtf, mockListingWithEtf } from './etf.mock.js'
+import {
+  mockDb,
+  mockEtf,
+  mockListingWithEtf,
+  mockMultiEtf,
+  mockMultiListingWithEtf,
+} from './etf.mock.js'
 
 beforeEach(() => {
   vi.mocked(mockDb.eTF.findMany).mockResolvedValue([mockEtf])
@@ -74,6 +80,36 @@ describe('getEtfs - filters', () => {
           listings: {
             some: {
               exchange: { name: { in: ['Xetra', 'London Stock Exchange'] } },
+            },
+          },
+        },
+      }),
+    )
+  })
+
+  it('filters by currency through listings', async () => {
+    const query = EtfListQuerySchema.parse({ currency: 'EUR,USD' })
+    await getEtfs(query, mockDb)
+    expect(vi.mocked(mockDb.eTF.findMany)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { listings: { some: { currency: { in: ['EUR', 'USD'] } } } },
+      }),
+    )
+  })
+
+  it('matches exchange and currency on the same listing', async () => {
+    const query = EtfListQuerySchema.parse({
+      exchange: 'Borsa Italiana',
+      currency: 'EUR',
+    })
+    await getEtfs(query, mockDb)
+    expect(vi.mocked(mockDb.eTF.findMany)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          listings: {
+            some: {
+              exchange: { name: { in: ['Borsa Italiana'] } },
+              currency: { in: ['EUR'] },
             },
           },
         },
@@ -228,11 +264,73 @@ describe('getEtfs - serialization', () => {
   })
 })
 
+describe('getEtfs - listing signals', () => {
+  beforeEach(() => {
+    vi.mocked(mockDb.eTF.findMany).mockResolvedValue([mockMultiEtf])
+  })
+
+  it('lists distinct currencies, sorted', async () => {
+    const result = await getEtfs(EtfListQuerySchema.parse({}), mockDb)
+    expect(result.data[0]?.currencies).toEqual(['EUR', 'GBP'])
+  })
+
+  it('counts distinct exchanges', async () => {
+    const result = await getEtfs(EtfListQuerySchema.parse({}), mockDb)
+    expect(result.data[0]?.exchangeCount).toBe(3)
+  })
+
+  it('falls back to the primary ticker when the search matches no listing', async () => {
+    const result = await getEtfs(EtfListQuerySchema.parse({}), mockDb)
+    expect(result.data[0]?.ticker).toBe('MWRD')
+    expect(result.data[0]?.matchedTicker).toBe('MWRD')
+  })
+
+  it('sets matchedTicker to the listing whose ticker was searched', async () => {
+    const result = await getEtfs(
+      EtfListQuerySchema.parse({ search: 'MWRL' }),
+      mockDb,
+    )
+    expect(result.data[0]?.matchedTicker).toBe('MWRL')
+    expect(result.data[0]?.ticker).toBe('MWRD')
+  })
+})
+
 describe('getEtfByTicker', () => {
   it('returns a serialized ETF when found', async () => {
     const result = await getEtfByTicker('VWCE', mockDb)
     expect(result.ticker).toBe('VWCE')
     expect(result.fundSizeEur).toBe('46200000000')
+  })
+
+  it('returns every listing mapped to the public shape', async () => {
+    vi.mocked(mockDb.listing.findFirst).mockResolvedValue(
+      mockMultiListingWithEtf,
+    )
+    const result = await getEtfByTicker('MWRL', mockDb)
+    expect(result.listings).toEqual([
+      {
+        ticker: 'MWRD',
+        exchange: 'Euronext Paris',
+        currency: 'EUR',
+        isPrimary: true,
+      },
+      { ticker: 'MWRE', exchange: 'Xetra', currency: 'EUR', isPrimary: false },
+      {
+        ticker: 'MWRL',
+        exchange: 'London Stock Exchange',
+        currency: 'GBP',
+        isPrimary: false,
+      },
+    ])
+  })
+
+  it('sets matchedTicker to the routed ticker, ticker to the primary', async () => {
+    vi.mocked(mockDb.listing.findFirst).mockResolvedValue(
+      mockMultiListingWithEtf,
+    )
+    const result = await getEtfByTicker('MWRL', mockDb)
+    expect(result.matchedTicker).toBe('MWRL')
+    expect(result.ticker).toBe('MWRD')
   })
 
   it('normalizes ticker to uppercase before querying', async () => {

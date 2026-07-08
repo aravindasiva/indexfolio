@@ -1,4 +1,6 @@
+import { AmbientBackground } from '@/components/AmbientBackground/AmbientBackground'
 import { KnowledgeGraph } from './components/KnowledgeGraph/KnowledgeGraph'
+import { HeroHeading } from './components/HeroHeading/HeroHeading'
 import { DragHint } from './components/DragHint/DragHint'
 import { ScrollHint } from './components/ScrollHint/ScrollHint'
 import { ToolsSpine } from './components/ToolsSpine/ToolsSpine'
@@ -8,19 +10,22 @@ import { ToolsSpine } from './components/ToolsSpine/ToolsSpine'
 */
 export function Landing() {
   return (
-    <main>
-      <section className="relative h-screen">
-        {/* Mask (not an opaque overlay) fades the starfield out toward the
-            bottom, so the shared ambient background shows through unbroken and
-            the hero dissolves into the tools spine with no section cutoff. */}
-        <div className="hero-fade-mask absolute inset-0">
-          <KnowledgeGraph mode="hero" />
-        </div>
-        <DragHint />
-        <ScrollHint />
-      </section>
+    <>
+      {/* Shared dot-grid backdrop; the hero fades into it. */}
+      <AmbientBackground />
+      <main>
+        <section className="relative h-screen">
+          {/* Fades the hero into the dot-grid at the bottom, dissolving into the tools spine. */}
+          <div className="hero-fade-mask absolute inset-0">
+            <KnowledgeGraph mode="hero" />
+          </div>
+          <HeroHeading />
+          <DragHint />
+          <ScrollHint />
+        </section>
 
-      <ToolsSpine />
-    </main>
+        <ToolsSpine />
+      </main>
+    </>
   )
 }

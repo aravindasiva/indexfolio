@@ -26,8 +26,6 @@ import {
   DASHED_WIDTH,
   DASHED_WIDTH_ACTIVE,
 } from './utils/3d/dashedLink'
-import { createStarfield } from './utils/3d/createStarfield'
-import type { Starfield } from './utils/3d/createStarfield'
 import { triggerSupernova, SUPERNOVA_EVENT } from './utils/supernova'
 
 type GraphNodeDatum = {
@@ -106,12 +104,6 @@ export function KnowledgeGraph3D({
 
   const containerRef = useRef<HTMLDivElement>(null)
   const fgRef = useRef<FGMethods | undefined>(undefined)
-  const starfieldRef = useRef<Starfield | null>(null)
-  const isDarkRef = useRef(isDark)
-
-  useEffect(() => {
-    isDarkRef.current = isDark
-  }, [isDark])
 
   const [dims, setDims] = useState({ width: 0, height: 0 })
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -264,26 +256,6 @@ export function KnowledgeGraph3D({
     controls.enableZoom = false
   }, [dims.width])
 
-  // Starfield inside the scene (parallaxes as the camera orbits).
-  useEffect(() => {
-    const fg = fgRef.current
-    if (!fg) return
-    const starfield = createStarfield(
-      fg.scene(),
-      fg.camera(),
-      isDarkRef.current,
-    )
-    starfieldRef.current = starfield
-    return () => {
-      starfield.dispose()
-      starfieldRef.current = null
-    }
-  }, [dims.width])
-
-  useEffect(() => {
-    starfieldRef.current?.setDark(isDark)
-  }, [isDark])
-
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -321,12 +293,6 @@ export function KnowledgeGraph3D({
       ref={containerRef}
       className={`relative w-full overflow-hidden ${mode === 'hero' ? 'h-screen' : 'h-full'}`}
       style={{ cursor: hoveredId ? 'pointer' : 'grab' }}
-      onPointerMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect()
-        const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1
-        const ny = ((e.clientY - rect.top) / rect.height) * 2 - 1
-        starfieldRef.current?.setPointer(nx, -ny)
-      }}
     >
       {dims.width > 0 && (
         <ForceGraph3D<GraphNodeDatum, GraphLinkDatum>

@@ -22,7 +22,7 @@ export default async function Image({ params }: Params) {
   } catch {
     return renderOgImage({
       title: 'ETF',
-      subtitle: 'Free tools for EU passive investors',
+      subtitle: 'Open-source tools for EU passive investors',
     })
   }
 }

@@ -10,6 +10,7 @@ export type {
   Etf,
   EtfDetail,
   EtfFilters,
+  EtfListItem,
   EtfListParams,
   EtfListResponse,
   FilterOption,

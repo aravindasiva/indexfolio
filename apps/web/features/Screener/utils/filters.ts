@@ -31,6 +31,7 @@ export const filterParsers = {
   type: parseAsStringEnum(['acc', 'dist']),
   domicile: parseAsArrayOf(parseAsString).withDefault([]),
   exchange: parseAsArrayOf(parseAsString).withDefault([]),
+  currency: parseAsArrayOf(parseAsString).withDefault([]),
   maxTer: parseAsFloat,
   minFundSize: parseAsInteger,
   sort: parseAsStringEnum([
@@ -68,6 +69,7 @@ export function hasActiveFilters(f: ScreenerFilters): boolean {
     f.type ||
     f.domicile.length ||
     f.exchange.length ||
+    f.currency.length ||
     f.maxTer != null ||
     f.minFundSize != null,
   )
@@ -82,6 +84,7 @@ export function filtersToParams(filters: ScreenerFilters): EtfListParams {
     isAccumulating: typeToAccumulating(filters.type),
     domicile: filters.domicile.length ? filters.domicile.join(',') : undefined,
     exchange: filters.exchange.length ? filters.exchange.join(',') : undefined,
+    currency: filters.currency.length ? filters.currency.join(',') : undefined,
     // Percent -> fraction. The API requires a positive value, so 0 is dropped.
     maxTer:
       filters.maxTer != null && filters.maxTer > 0

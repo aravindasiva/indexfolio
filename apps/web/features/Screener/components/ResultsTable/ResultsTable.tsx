@@ -1,22 +1,12 @@
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { ArrowUp, Info } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { spring } from '@/lib/motion'
-import { Surface } from '@/components/Surface/Surface'
 import { Tag } from '@/components/Tag/Tag'
 import { Tooltip } from '@/components/Tooltip/Tooltip'
-import { cn } from '@/lib/utils'
-import type { Etf } from '@/lib/api'
-import type { ScreenerFilters, SortField } from '../../utils/filters'
+import { TradedIn } from '@/components/TradedIn/TradedIn'
+import { DataTable, type Column } from '@/components/DataTable/DataTable'
+import type { TableView } from '@/components/ViewToggle/ViewToggle'
+import type { Density } from '@/components/DensityToggle/DensityToggle'
+import type { EtfListItem } from '@/lib/api'
+import type { SortField } from '../../utils/filters'
 import { formatFundSize, formatTer, fundTypeLabel } from '@/lib/etf/format'
 import {
   assetClassLabel,
@@ -25,162 +15,197 @@ import {
   TYPE_HINT,
 } from '@/lib/etf/labels'
 
-type SortControls = {
-  sort: ScreenerFilters['sort']
-  order: ScreenerFilters['order']
-  onSort: (field: SortField) => void
+// Link to the ticker in context (the searched/matched one), encoded so a '#' ticker survives.
+const rowHref = (etf: EtfListItem) =>
+  `/etf/${encodeURIComponent(etf.matchedTicker)}`
+
+// ETF-specific column config (labels/tones/formatters stay here; DataTable stays domain-free).
+function etfColumns(activeCurrency: readonly string[]): Column<EtfListItem>[] {
+  return [
+    {
+      id: 'ticker',
+      header: 'Ticker',
+      cell: (etf) => (
+        <Link
+          href={rowHref(etf)}
+          onClick={(event) => event.stopPropagation()}
+          className="font-semibold transition-colors hover:text-primary"
+        >
+          {etf.matchedTicker}
+        </Link>
+      ),
+    },
+    {
+      id: 'name',
+      header: 'Name',
+      sortField: 'name',
+      cell: (etf) => (
+        <Tooltip content={etf.name}>
+          <span className="block max-w-xs truncate text-muted-foreground">
+            {etf.name}
+          </span>
+        </Tooltip>
+      ),
+    },
+    {
+      id: 'asset',
+      header: 'Asset',
+      showFrom: 'md',
+      hideable: true,
+      cell: (etf) => (
+        <Tag tone={assetTone(etf.assetClass)}>
+          {assetClassLabel(etf.assetClass)}
+        </Tag>
+      ),
+    },
+    {
+      id: 'domicile',
+      header: 'Domicile',
+      headerHint: DOMICILE_HINT,
+      showFrom: 'lg',
+      hideable: true,
+      cell: (etf) => etf.domicile,
+    },
+    {
+      id: 'tradedIn',
+      header: 'Traded in',
+      showFrom: 'lg',
+      hideable: true,
+      cell: (etf) => (
+        <TradedIn
+          currencies={etf.currencies}
+          exchangeCount={etf.exchangeCount}
+          active={activeCurrency}
+        />
+      ),
+    },
+    {
+      id: 'ter',
+      header: 'TER',
+      sortField: 'ter',
+      align: 'end',
+      cell: (etf) => formatTer(etf.ter),
+    },
+    {
+      id: 'fundSize',
+      header: 'Fund size',
+      sortField: 'fundSizeEur',
+      align: 'end',
+      cell: (etf) => (
+        <span className="font-medium">{formatFundSize(etf.fundSizeEur)}</span>
+      ),
+    },
+    {
+      id: 'type',
+      header: 'Type',
+      headerHint: TYPE_HINT,
+      cell: (etf) => (
+        <Tag tone={etf.isAccumulating ? 'emerald' : 'sky'}>
+          {fundTypeLabel(etf.isAccumulating)}
+        </Tag>
+      ),
+    },
+  ]
 }
 
-type Props = SortControls & {
-  etfs: readonly Etf[]
-}
+// Derived from the column config (any `hideable` column shows up), so the menu can't drift. Id/label
+// don't depend on activeCurrency, so we read them off a throwaway instance.
+export const HIDEABLE_COLUMNS = etfColumns([])
+  .filter((col) => col.hideable)
+  .map((col) => ({ value: col.id, label: String(col.header) }))
 
-const HEAD =
-  'h-11 px-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase'
-const CELL = 'px-4 py-3.5'
-
-// One responsive table everywhere (fewer columns on small screens, never a
-// different layout). Sortable headers write to the URL; the whole row links to
-// the ETF detail page.
-export function ResultsTable({ etfs, sort, order, onSort }: Props) {
-  const router = useRouter()
-  const sortProps = { sort, order, onSort }
-
+// The card layout (mobile + list view): matched ticker + asset, name, traded-in, TER/size.
+function EtfCard({
+  etf,
+  activeCurrency,
+}: {
+  etf: EtfListItem
+  activeCurrency: readonly string[]
+}) {
   return (
-    <Surface className="overflow-hidden">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-border bg-muted/30 hover:bg-transparent">
-            <TableHead className={HEAD}>Ticker</TableHead>
-            <SortHeader field="name" label="Name" {...sortProps} />
-            <TableHead className={cn(HEAD, 'hidden md:table-cell')}>
-              Asset
-            </TableHead>
-            <TableHead className={cn(HEAD, 'hidden lg:table-cell')}>
-              <HeaderHint label="Domicile" hint={DOMICILE_HINT} />
-            </TableHead>
-            <TableHead className={cn(HEAD, 'hidden lg:table-cell')}>
-              Exchange
-            </TableHead>
-            <SortHeader field="ter" label="TER" align="right" {...sortProps} />
-            <SortHeader
-              field="fundSizeEur"
-              label="Fund size"
-              align="right"
-              {...sortProps}
-            />
-            <TableHead className={HEAD}>
-              <HeaderHint label="Type" hint={TYPE_HINT} />
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {etfs.map((etf, index) => (
-            // Capped per-row delay cascades the list in on load and on every
-            // page/filter change, without long lists dragging on.
-            <motion.tr
-              key={etf.id}
-              data-slot="table-row"
-              onClick={() => router.push(`/etf/${etf.ticker}`)}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ ...spring, delay: Math.min(index * 0.035, 0.5) }}
-              className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-primary/5"
-            >
-              <TableCell className={cn(CELL, 'font-semibold')}>
-                <Link
-                  href={`/etf/${etf.ticker}`}
-                  onClick={(event) => event.stopPropagation()}
-                  className="transition-colors hover:text-primary"
-                >
-                  {etf.ticker}
-                </Link>
-              </TableCell>
-              {/* Names truncate to keep columns aligned; tooltip shows the full
-                  name on hover (the ticker link goes to the detail page). */}
-              <TableCell className={cn(CELL, 'max-w-xs text-muted-foreground')}>
-                <Tooltip content={etf.name}>
-                  <span className="block truncate">{etf.name}</span>
-                </Tooltip>
-              </TableCell>
-              <TableCell className={cn(CELL, 'hidden md:table-cell')}>
-                <Tag tone={assetTone(etf.assetClass)}>
-                  {assetClassLabel(etf.assetClass)}
-                </Tag>
-              </TableCell>
-              <TableCell className={cn(CELL, 'hidden lg:table-cell')}>
-                {etf.domicile}
-              </TableCell>
-              <TableCell className={cn(CELL, 'hidden lg:table-cell')}>
-                {etf.exchange}
-              </TableCell>
-              <TableCell className={cn(CELL, 'text-right tabular-nums')}>
-                {formatTer(etf.ter)}
-              </TableCell>
-              <TableCell
-                className={cn(CELL, 'text-right font-medium tabular-nums')}
-              >
-                {formatFundSize(etf.fundSizeEur)}
-              </TableCell>
-              <TableCell className={CELL}>
-                <Tag tone={etf.isAccumulating ? 'emerald' : 'sky'}>
-                  {fundTypeLabel(etf.isAccumulating)}
-                </Tag>
-              </TableCell>
-            </motion.tr>
-          ))}
-        </TableBody>
-      </Table>
-    </Surface>
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-foreground">
+              {etf.matchedTicker}
+            </span>
+            <Tag tone={assetTone(etf.assetClass)}>
+              {assetClassLabel(etf.assetClass)}
+            </Tag>
+          </div>
+          <p className="mt-1 truncate text-sm text-muted-foreground">
+            {etf.name}
+          </p>
+        </div>
+        <Tag tone={etf.isAccumulating ? 'emerald' : 'sky'}>
+          {fundTypeLabel(etf.isAccumulating)}
+        </Tag>
+      </div>
+      <div className="mt-3">
+        <TradedIn
+          currencies={etf.currencies}
+          exchangeCount={etf.exchangeCount}
+          active={activeCurrency}
+        />
+      </div>
+      <div className="mt-3 flex items-center gap-5 text-sm text-muted-foreground">
+        <span>
+          TER{' '}
+          <span className="font-medium tabular-nums text-foreground">
+            {formatTer(etf.ter)}
+          </span>
+        </span>
+        <span>
+          Size{' '}
+          <span className="font-medium tabular-nums text-foreground">
+            {formatFundSize(etf.fundSizeEur)}
+          </span>
+        </span>
+      </div>
+    </>
   )
 }
 
-function SortHeader({
-  field,
-  label,
+type Props = {
+  etfs: readonly EtfListItem[]
+  activeCurrency: readonly string[]
+  sort: SortField
+  order: 'asc' | 'desc'
+  onSort: (field: SortField) => void
+  onNavigate: (href: string) => void
+  view: TableView
+  density: Density
+  hiddenColumnIds: readonly string[]
+}
+
+export function ResultsTable({
+  etfs,
+  activeCurrency,
   sort,
   order,
   onSort,
-  align,
-}: SortControls & { field: SortField; label: string; align?: 'right' }) {
-  const active = sort === field
+  onNavigate,
+  view,
+  density,
+  hiddenColumnIds,
+}: Props) {
   return (
-    <TableHead className={cn(HEAD, align === 'right' && 'text-right')}>
-      <button
-        type="button"
-        onClick={() => onSort(field)}
-        className={cn(
-          'inline-flex items-center gap-1 uppercase transition-colors hover:text-foreground',
-          active && 'text-foreground',
-          align === 'right' && 'flex-row-reverse',
-        )}
-      >
-        {label}
-        <ArrowUp
-          className={cn(
-            'size-3.5 transition-all',
-            active ? 'opacity-100' : 'opacity-0',
-            order === 'desc' && 'rotate-180',
-          )}
-        />
-      </button>
-    </TableHead>
-  )
-}
-
-function HeaderHint({ label, hint }: { label: string; hint: string }) {
-  return (
-    <span className="inline-flex items-center gap-1">
-      {label}
-      <Tooltip content={hint}>
-        <button
-          type="button"
-          aria-label={`${label} info`}
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <Info className="size-3.5" />
-        </button>
-      </Tooltip>
-    </span>
+    <DataTable
+      rows={etfs}
+      columns={etfColumns(activeCurrency)}
+      getRowKey={(etf) => etf.id}
+      getRowHref={rowHref}
+      onNavigate={onNavigate}
+      sort={sort}
+      order={order}
+      onSort={(field) => onSort(field as SortField)}
+      view={view}
+      density={density}
+      hiddenColumnIds={hiddenColumnIds}
+      renderCard={(etf) => (
+        <EtfCard etf={etf} activeCurrency={activeCurrency} />
+      )}
+    />
   )
 }

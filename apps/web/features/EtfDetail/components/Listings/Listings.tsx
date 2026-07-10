@@ -38,7 +38,7 @@ export function Listings({
   matchedTicker: string
 }) {
   const matched = listings.findIndex((l) => l.ticker === matchedTicker)
-  const [active, setActive] = useState(matched >= 0 ? matched : 0)
+  const [active, setActive] = useState(Math.max(matched, 0))
   const selected = listings[active] ?? listings[0]
   if (!selected) return null
 

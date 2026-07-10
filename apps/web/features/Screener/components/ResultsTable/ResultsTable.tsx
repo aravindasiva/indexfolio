@@ -112,7 +112,10 @@ function etfColumns(activeCurrency: readonly string[]): Column<EtfListItem>[] {
 // don't depend on activeCurrency, so we read them off a throwaway instance.
 export const HIDEABLE_COLUMNS = etfColumns([])
   .filter((col) => col.hideable)
-  .map((col) => ({ value: col.id, label: String(col.header) }))
+  .map((col) => ({
+    value: col.id,
+    label: typeof col.header === 'string' ? col.header : col.id,
+  }))
 
 // The card layout (mobile + list view): matched ticker + asset, name, traded-in, TER/size.
 function EtfCard({

@@ -64,7 +64,9 @@ function serializeListItem(
 ): EtfListItem {
   return {
     ...serializeEtf(etf, matchedTickerFor(etf, search)),
-    currencies: [...new Set(etf.listings.map((l) => l.currency))].sort(),
+    currencies: [...new Set(etf.listings.map((l) => l.currency))].sort((a, b) =>
+      a.localeCompare(b),
+    ),
     exchangeCount: new Set(etf.listings.map((l) => l.exchangeMic)).size,
   }
 }

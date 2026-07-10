@@ -72,14 +72,11 @@ function snapshot(tableId: string, defaults: TablePrefs): TablePrefs {
   const perTableRaw = safeGet(tableKey(tableId))
   const densityRaw = safeGet(DENSITY_KEY)
   const cached = cache.get(tableId)
-  if (
-    cached &&
-    cached.perTableRaw === perTableRaw &&
-    cached.densityRaw === densityRaw &&
-    cached.defaults === defaults
-  ) {
-    return cached.value
-  }
+  const isFresh =
+    cached?.perTableRaw === perTableRaw &&
+    cached?.densityRaw === densityRaw &&
+    cached?.defaults === defaults
+  if (isFresh && cached) return cached.value
   const perTable =
     parse<Pick<TablePrefs, 'view' | 'hiddenColumns'>>(perTableRaw)
   const density = parse<Density>(densityRaw)

@@ -49,12 +49,20 @@ export type DataTableProps<Row> = {
 const HEAD =
   'h-11 px-4 text-xs font-semibold tracking-wider text-muted-foreground uppercase'
 
+const SHOW_FROM: Record<'md' | 'lg', string> = {
+  md: 'hidden md:table-cell',
+  lg: 'hidden lg:table-cell',
+}
 const showClass = (showFrom?: 'md' | 'lg') =>
-  showFrom === 'md'
-    ? 'hidden md:table-cell'
-    : showFrom === 'lg'
-      ? 'hidden lg:table-cell'
-      : ''
+  showFrom ? SHOW_FROM[showFrom] : ''
+
+function ariaSort(
+  active: boolean,
+  order?: 'asc' | 'desc',
+): 'none' | 'ascending' | 'descending' {
+  if (!active) return 'none'
+  return order === 'desc' ? 'descending' : 'ascending'
+}
 
 // Sortable table that falls back to cards below md (or when view="cards"). Columns are render-prop
 // config, so it stays domain-free - consumers supply the cells and an optional renderCard.
@@ -176,66 +184,89 @@ function HeaderCell<Row>({
   order?: 'asc' | 'desc'
   onSort?: (field: string) => void
 }) {
-  const alignR = col.align === 'end'
-  const base = cn(HEAD, showClass(col.showFrom), alignR && 'text-right')
-
-  // Screen readers get sort state from aria-sort + a named button; the arrow is decorative.
-  const label = typeof col.header === 'string' ? col.header : undefined
+  const base = cn(
+    HEAD,
+    showClass(col.showFrom),
+    col.align === 'end' && 'text-right',
+  )
 
   if (col.sortField && onSort) {
-    const field = col.sortField
-    const active = sort === field
     return (
-      <TableHead
-        aria-sort={
-          active ? (order === 'desc' ? 'descending' : 'ascending') : 'none'
-        }
-        className={base}
-      >
-        <button
-          type="button"
-          onClick={() => onSort(field)}
-          aria-label={label ? `Sort by ${label}` : undefined}
-          className={cn(
-            'inline-flex items-center gap-1 uppercase transition-colors hover:text-foreground',
-            active && 'text-foreground',
-            alignR && 'flex-row-reverse',
-          )}
-        >
-          {col.header}
-          <ArrowUp
-            aria-hidden
-            className={cn(
-              'size-3.5 transition-all',
-              active ? 'opacity-100' : 'opacity-0',
-              order === 'desc' && 'rotate-180',
-            )}
-          />
-        </button>
-      </TableHead>
+      <SortableHeader
+        col={col}
+        base={base}
+        field={col.sortField}
+        active={sort === col.sortField}
+        order={order}
+        onSort={onSort}
+      />
     )
   }
-
-  if (col.headerHint) {
-    return (
-      <TableHead className={base}>
-        <span className="inline-flex items-center gap-1">
-          {col.header}
-          <Tooltip content={col.headerHint}>
-            <button
-              type="button"
-              aria-label={label ? `About ${label}` : 'More info'}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <Info aria-hidden className="size-3.5" />
-            </button>
-          </Tooltip>
-        </span>
-      </TableHead>
-    )
-  }
-
+  if (col.headerHint) return <HintHeader col={col} base={base} />
   return <TableHead className={base}>{col.header}</TableHead>
+}
+
+// Sort state reaches screen readers via aria-sort + a named button; the arrow is decorative.
+function SortableHeader<Row>({
+  col,
+  base,
+  field,
+  active,
+  order,
+  onSort,
+}: {
+  col: Column<Row>
+  base: string
+  field: string
+  active: boolean
+  order?: 'asc' | 'desc'
+  onSort: (field: string) => void
+}) {
+  const label = typeof col.header === 'string' ? col.header : undefined
+  return (
+    <TableHead aria-sort={ariaSort(active, order)} className={base}>
+      <button
+        type="button"
+        onClick={() => onSort(field)}
+        aria-label={label ? `Sort by ${label}` : undefined}
+        className={cn(
+          'inline-flex items-center gap-1 uppercase transition-colors hover:text-foreground',
+          active && 'text-foreground',
+          col.align === 'end' && 'flex-row-reverse',
+        )}
+      >
+        {col.header}
+        <ArrowUp
+          aria-hidden
+          className={cn(
+            'size-3.5 transition-all',
+            active ? 'opacity-100' : 'opacity-0',
+            order === 'desc' && 'rotate-180',
+          )}
+        />
+      </button>
+    </TableHead>
+  )
+}
+
+function HintHeader<Row>({ col, base }: { col: Column<Row>; base: string }) {
+  const label = typeof col.header === 'string' ? col.header : undefined
+  return (
+    <TableHead className={base}>
+      <span className="inline-flex items-center gap-1">
+        {col.header}
+        <Tooltip content={col.headerHint}>
+          <button
+            type="button"
+            aria-label={label ? `About ${label}` : 'More info'}
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Info aria-hidden className="size-3.5" />
+          </button>
+        </Tooltip>
+      </span>
+    </TableHead>
+  )
 }
 
 // Fallback card when a consumer gives no renderCard: stacked header/value pairs.

@@ -3,6 +3,7 @@
 export type Etf = {
   id: string
   ticker: string
+  matchedTicker: string
   name: string
   isin: string
   domicile: string
@@ -18,8 +19,25 @@ export type Etf = {
   inceptionDate: string
 }
 
+// One venue a fund trades on: the exchange, its local ticker there, and the currency.
+export type Listing = {
+  ticker: string
+  exchange: string
+  currency: string
+  isPrimary: boolean
+}
+
+// A fund plus every venue it trades on (the detail endpoint).
+export type EtfDetail = Etf & { listings: Listing[] }
+
+// A screener row: the fund plus the signals that hint at its other venues.
+export type EtfListItem = Etf & {
+  currencies: string[]
+  exchangeCount: number
+}
+
 export type EtfListResponse = {
-  data: Etf[]
+  data: EtfListItem[]
   meta: { total: number; page: number; limit: number; totalPages: number }
 }
 
@@ -30,6 +48,7 @@ export type EtfListParams = {
   isAccumulating?: boolean
   domicile?: string
   exchange?: string
+  currency?: string
   assetClass?: string
   maxTer?: number
   minFundSize?: string
@@ -42,5 +61,6 @@ export type FilterOption = { value: string; count: number }
 export type EtfFilters = {
   domicile: FilterOption[]
   exchange: FilterOption[]
+  currency: FilterOption[]
   assetClass: FilterOption[]
 }

@@ -1,7 +1,7 @@
 import { Surface } from '@/components/Surface/Surface'
 import { Tag } from '@/components/Tag/Tag'
 import { CopyButton } from '@/components/CopyButton/CopyButton'
-import type { Etf } from '@/lib/api'
+import type { Etf, EtfDetail } from '@/lib/api'
 import {
   assetClassLabel,
   assetTone,
@@ -12,13 +12,20 @@ import {
 } from '@/lib/etf/labels'
 import { BackToResults } from './components/BackToResults/BackToResults'
 import { KeyFacts } from './components/KeyFacts/KeyFacts'
+import { Listings } from './components/Listings/Listings'
 import { RelatedEtfs } from './components/RelatedEtfs/RelatedEtfs'
 
 /*
   Server-rendered; only BackButton and CopyButton are client islands. The
   performance section is a placeholder until the scrapers land.
 */
-export function EtfDetail({ etf, related }: { etf: Etf; related: Etf[] }) {
+export function EtfDetail({
+  etf,
+  related,
+}: {
+  etf: EtfDetail
+  related: Etf[]
+}) {
   return (
     <div className="space-y-8">
       <BackToResults />
@@ -54,6 +61,20 @@ export function EtfDetail({ etf, related }: { etf: Etf; related: Etf[] }) {
         <div className="my-6 border-t border-border/60" />
 
         <KeyFacts etf={etf} />
+      </Surface>
+
+      <Surface className="p-6">
+        <h2 className="font-display text-lg font-semibold text-foreground">
+          Where to buy
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {etf.listings.length === 1
+            ? 'Trades on one exchange.'
+            : `Trades on ${etf.listings.length} exchanges - pick a venue.`}
+        </p>
+        <div className="mt-4">
+          <Listings listings={etf.listings} matchedTicker={etf.matchedTicker} />
+        </div>
       </Surface>
 
       <Surface className="p-6">

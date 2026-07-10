@@ -1,11 +1,11 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import {
+  EtfDetailSchema,
   EtfFiltersResponseSchema,
   EtfListQuerySchema,
   EtfListResponseSchema,
   EtfParamsSchema,
-  EtfResponseSchema,
 } from './etf.schema.js'
 import { getEtfByTicker, getEtfFilters, getEtfs } from './etf.service.js'
 
@@ -43,7 +43,7 @@ export async function etfRoutes(fastify: FastifyInstance): Promise<void> {
     {
       schema: {
         params: EtfParamsSchema,
-        response: { 200: EtfResponseSchema },
+        response: { 200: EtfDetailSchema },
         tags: ['etf'],
         summary: 'Get ETF by ticker',
       },

@@ -11,6 +11,7 @@ export const EtfListQuerySchema = z.object({
   isAccumulating: z.enum(['true', 'false']).optional(),
   domicile: z.string().optional(),
   exchange: z.string().optional(),
+  currency: z.string().optional(),
   assetClass: z.string().optional(),
   maxTer: z.coerce.number().positive().optional(),
   minFundSize: z.coerce.bigint().optional(),
@@ -18,9 +19,20 @@ export const EtfListQuerySchema = z.object({
   order: z.enum(['asc', 'desc']).default('asc'),
 })
 
+// One venue the fund trades on. `ticker` is the local ticker there (e.g. EUNL on Xetra).
+export const ListingSchema = z.object({
+  ticker: z.string(),
+  exchange: z.string(),
+  currency: z.string(),
+  isPrimary: z.boolean(),
+})
+
+// Fund-level facts, identical across venues. `ticker`/`exchange`/`currency` are the primary
+// listing's; `matchedTicker` is the listing the request resolved to (the searched or routed ticker).
 export const EtfResponseSchema = z.object({
   id: z.string(),
   ticker: z.string(),
+  matchedTicker: z.string(),
   name: z.string(),
   isin: z.string(),
   domicile: z.string(),
@@ -36,8 +48,19 @@ export const EtfResponseSchema = z.object({
   inceptionDate: z.string().nullable(),
 })
 
+// Screener row: the fund plus the signals that hint at its other venues.
+export const EtfListItemSchema = EtfResponseSchema.extend({
+  currencies: z.array(z.string()),
+  exchangeCount: z.number().int(),
+})
+
+// Detail: the fund plus every venue it trades on.
+export const EtfDetailSchema = EtfResponseSchema.extend({
+  listings: z.array(ListingSchema),
+})
+
 export const EtfListResponseSchema = z.object({
-  data: z.array(EtfResponseSchema),
+  data: z.array(EtfListItemSchema),
   meta: z.object({
     total: z.number(),
     page: z.number(),
@@ -55,11 +78,14 @@ const FilterOptionSchema = z.object({
 export const EtfFiltersResponseSchema = z.object({
   domicile: z.array(FilterOptionSchema),
   exchange: z.array(FilterOptionSchema),
+  currency: z.array(FilterOptionSchema),
   assetClass: z.array(FilterOptionSchema),
 })
 
 export type EtfParams = z.infer<typeof EtfParamsSchema>
 export type EtfListQuery = z.infer<typeof EtfListQuerySchema>
 export type EtfResponse = z.infer<typeof EtfResponseSchema>
+export type EtfListItem = z.infer<typeof EtfListItemSchema>
+export type EtfDetail = z.infer<typeof EtfDetailSchema>
 export type EtfListResponse = z.infer<typeof EtfListResponseSchema>
 export type EtfFiltersResponse = z.infer<typeof EtfFiltersResponseSchema>

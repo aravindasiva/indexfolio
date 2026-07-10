@@ -19,7 +19,7 @@ export function RelatedEtfs({ etfs }: { etfs: Etf[] }) {
         {etfs.map((etf) => (
           <Link
             key={etf.id}
-            href={`/etf/${etf.ticker}`}
+            href={`/etf/${encodeURIComponent(etf.ticker)}`}
             className="group no-underline"
           >
             <Surface className="flex h-full flex-col p-4 transition-colors hover:border-primary/40">

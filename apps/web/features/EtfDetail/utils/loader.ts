@@ -1,4 +1,4 @@
-import { getEtfByTicker, getEtfs, type Etf } from '@/lib/api'
+import { getEtfByTicker, getEtfs, type Etf, type EtfDetail } from '@/lib/api'
 import { selectRelated } from './relatedEtfs'
 
 // ISR window (seconds) for the surfaces that still cache - the sitemap and the
@@ -9,7 +9,7 @@ const RELATED_LIMIT = 6
 const POOL_LIMIT = 100
 
 // The API uppercases the ticker, so /etf/iwda resolves to IWDA.
-export async function loadEtf(ticker: string): Promise<Etf | null> {
+export async function loadEtf(ticker: string): Promise<EtfDetail | null> {
   try {
     return await getEtfByTicker(ticker)
   } catch {

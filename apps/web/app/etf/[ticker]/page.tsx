@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return pageMetadata({
     title: `${etf.name} (${etf.ticker})`,
     description: `${type} UCITS ETF tracking ${etf.indexTracked}. TER ${formatTer(etf.ter)}, ${domicileLabel(etf.domicile)}-domiciled. Key facts and costs for EU investors.`,
-    path: `/etf/${etf.ticker}`,
+    path: `/etf/${encodeURIComponent(etf.ticker)}`,
   })
 }
 

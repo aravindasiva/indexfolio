@@ -1,6 +1,3 @@
-'use client'
-
-import { useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { ArrowLeft, RotateCw } from 'lucide-react'
@@ -10,17 +7,11 @@ import { springSoft, tactile } from '@/lib/motion'
 const MotionLink = motion.create(Link)
 
 export type ErrorPageProps = {
-  error: Error & { digest?: string }
   reset: () => void
 }
 
-// The route error UI. Kept here (not in app/error.tsx) so it is easy to restyle
-// in one place. `reset` retries the segment; the link is the escape hatch.
-export function ErrorPage({ error, reset }: ErrorPageProps) {
-  useEffect(() => {
-    console.error(error)
-  }, [error])
-
+// `reset` retries the segment; the link is the escape hatch.
+export function ErrorPage({ reset }: ErrorPageProps) {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center px-6 py-28 text-center">
       <AmbientBackground />

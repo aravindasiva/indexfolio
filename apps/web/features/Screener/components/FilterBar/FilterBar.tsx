@@ -1,23 +1,24 @@
-import { useState } from 'react'
-import type { ReactNode } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { SlidersHorizontal } from 'lucide-react'
 import type { EtfFilters } from '@/lib/api'
 import { Surface } from '@/components/Surface/Surface'
 import { Chip } from '@/components/Chip/Chip'
 import { SearchField } from '@/components/SearchField/SearchField'
-import { fadeUpItem, staggerContainer, tactile } from '@/lib/motion'
-import type { ScreenerFilters, SetScreenerFilters } from '../../utils/filters'
+import { FilterSelect } from '@/components/FilterSelect/FilterSelect'
+import { SegmentedControl } from '@/components/SegmentedControl/SegmentedControl'
 import { assetClassLabel } from '@/lib/etf/labels'
+import type { ScreenerFilters, SetScreenerFilters } from '../../utils/filters'
 import { FUND_SIZE_PRESETS, TER_PRESETS } from '../../utils/options'
 
 type ActivePill = { key: string; label: string; clear: () => void }
 
-/*
-  The screener's filter toolbar: a frosted control panel with search + chip
-  groups + animated active-filter pills. On mobile the chip groups collapse
-  behind a "Filters" toggle so they do not dominate the screen.
-*/
+// "All" is a real option, mapped to null at the call site (SegmentedControl never emits null).
+const TYPE_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'acc', label: 'Acc' },
+  { value: 'dist', label: 'Dist' },
+] as const
+
+// Search, dropdown filters, and a segmented Type; active filters read back as removable pills.
 export function FilterBar({
   filters,
   setFilters,
@@ -27,183 +28,99 @@ export function FilterBar({
   setFilters: SetScreenerFilters
   options: EtfFilters | undefined
 }) {
-  const [open, setOpen] = useState(false)
-
-  // Any filter change resets to page 1.
   const update = (patch: Partial<ScreenerFilters>) =>
     setFilters({ ...patch, page: 1 })
 
-  const toggle = (list: string[], value: string) =>
-    list.includes(value) ? list.filter((v) => v !== value) : [...list, value]
-
   const pills = buildPills(filters, update)
-
-  const groups = (
-    <>
-      {options && options.assetClass.length > 0 && (
-        <ChipGroup label="Asset">
-          <Chip
-            active={!filters.assetClass}
-            onClick={() => update({ assetClass: '' })}
-          >
-            All
-          </Chip>
-          {options.assetClass.map((option) => (
-            <Chip
-              key={option.value}
-              active={filters.assetClass === option.value}
-              onClick={() => update({ assetClass: option.value })}
-            >
-              {assetClassLabel(option.value)} <Count n={option.count} />
-            </Chip>
-          ))}
-        </ChipGroup>
-      )}
-
-      <ChipGroup label="Type">
-        <Chip active={!filters.type} onClick={() => update({ type: null })}>
-          All
-        </Chip>
-        <Chip
-          active={filters.type === 'acc'}
-          onClick={() => update({ type: 'acc' })}
-        >
-          Acc
-        </Chip>
-        <Chip
-          active={filters.type === 'dist'}
-          onClick={() => update({ type: 'dist' })}
-        >
-          Dist
-        </Chip>
-      </ChipGroup>
-
-      {options && options.domicile.length > 0 && (
-        <ChipGroup label="Domicile">
-          {options.domicile.map((option) => (
-            <Chip
-              key={option.value}
-              active={filters.domicile.includes(option.value)}
-              onClick={() =>
-                update({ domicile: toggle(filters.domicile, option.value) })
-              }
-            >
-              {option.value} <Count n={option.count} />
-            </Chip>
-          ))}
-        </ChipGroup>
-      )}
-
-      {options && options.exchange.length > 0 && (
-        <ChipGroup label="Exchange">
-          {options.exchange.map((option) => (
-            <Chip
-              key={option.value}
-              active={filters.exchange.includes(option.value)}
-              onClick={() =>
-                update({ exchange: toggle(filters.exchange, option.value) })
-              }
-            >
-              {option.value} <Count n={option.count} />
-            </Chip>
-          ))}
-        </ChipGroup>
-      )}
-
-      <ChipGroup label="TER">
-        <Chip
-          active={filters.maxTer == null}
-          onClick={() => update({ maxTer: null })}
-        >
-          Any
-        </Chip>
-        {TER_PRESETS.map((preset) => (
-          <Chip
-            key={preset.value}
-            active={filters.maxTer === preset.value}
-            onClick={() => update({ maxTer: preset.value })}
-          >
-            {preset.label}
-          </Chip>
-        ))}
-      </ChipGroup>
-
-      <ChipGroup label="Fund size">
-        <Chip
-          active={filters.minFundSize == null}
-          onClick={() => update({ minFundSize: null })}
-        >
-          Any
-        </Chip>
-        {FUND_SIZE_PRESETS.map((preset) => (
-          <Chip
-            key={preset.value}
-            active={filters.minFundSize === preset.value}
-            onClick={() => update({ minFundSize: preset.value })}
-          >
-            {preset.label}
-          </Chip>
-        ))}
-      </ChipGroup>
-    </>
-  )
 
   return (
     <Surface className="space-y-4 p-4 sm:p-5">
-      <div className="flex items-center gap-3">
-        <SearchField
-          value={filters.search}
-          onChange={(search) => update({ search })}
-          placeholder="Search name, ticker or ISIN"
-          className="flex-1 sm:max-w-sm"
-        />
-        <motion.button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          {...tactile}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full border border-border px-3.5 py-2 text-sm font-medium md:hidden"
-        >
-          <SlidersHorizontal className="size-4" />
-          Filters
-          {pills.length > 0 && (
-            <span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
-              {pills.length}
-            </span>
-          )}
-        </motion.button>
-      </div>
+      <SearchField
+        value={filters.search}
+        onChange={(search) => update({ search })}
+        placeholder="Search name, ticker or ISIN"
+        className="w-full sm:max-w-sm"
+      />
 
-      {/* Desktop: always visible, cascading in on load */}
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="show"
-        className="hidden flex-wrap gap-x-6 gap-y-4 md:flex"
-      >
-        {groups}
-      </motion.div>
-
-      {/* Mobile: collapsible, cascading in when opened */}
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            className="overflow-hidden md:hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="show"
-              className="flex flex-wrap gap-x-6 gap-y-4 pt-1"
-            >
-              {groups}
-            </motion.div>
-          </motion.div>
+      <div className="flex flex-wrap items-center gap-2">
+        {options && options.assetClass.length > 0 && (
+          <FilterSelect
+            mode="single"
+            label="Asset"
+            searchable={false}
+            options={options.assetClass.map((o) => ({
+              value: o.value,
+              label: assetClassLabel(o.value),
+              count: o.count,
+            }))}
+            value={filters.assetClass || null}
+            onChange={(v) => update({ assetClass: v ?? '' })}
+          />
         )}
-      </AnimatePresence>
+        {options && options.domicile.length > 0 && (
+          <FilterSelect
+            mode="multi"
+            label="Domicile"
+            options={options.domicile}
+            value={filters.domicile}
+            onChange={(domicile) => update({ domicile })}
+          />
+        )}
+        {options && options.exchange.length > 0 && (
+          <FilterSelect
+            mode="multi"
+            label="Exchange"
+            options={options.exchange}
+            value={filters.exchange}
+            onChange={(exchange) => update({ exchange })}
+          />
+        )}
+        {options && options.currency.length > 0 && (
+          <FilterSelect
+            mode="multi"
+            label="Currency"
+            options={options.currency}
+            value={filters.currency}
+            onChange={(currency) => update({ currency })}
+          />
+        )}
+        <FilterSelect
+          mode="single"
+          label="TER"
+          searchable={false}
+          anyLabel="Any TER"
+          options={TER_PRESETS.map((p) => ({
+            value: String(p.value),
+            label: p.label,
+          }))}
+          value={filters.maxTer != null ? String(filters.maxTer) : null}
+          onChange={(v) => update({ maxTer: v == null ? null : Number(v) })}
+        />
+        <FilterSelect
+          mode="single"
+          label="Fund size"
+          searchable={false}
+          anyLabel="Any size"
+          options={FUND_SIZE_PRESETS.map((p) => ({
+            value: String(p.value),
+            label: p.label,
+          }))}
+          value={
+            filters.minFundSize != null ? String(filters.minFundSize) : null
+          }
+          onChange={(v) =>
+            update({ minFundSize: v == null ? null : Number(v) })
+          }
+        />
+
+        <SegmentedControl
+          ariaLabel="Distribution type"
+          size="lg"
+          options={TYPE_OPTIONS}
+          value={filters.type ?? 'all'}
+          onChange={(v) => update({ type: v === 'all' ? null : v })}
+        />
+      </div>
 
       {pills.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
@@ -279,6 +196,14 @@ function buildPills(
         update({ exchange: filters.exchange.filter((v) => v !== value) }),
     })
   }
+  for (const value of filters.currency) {
+    pills.push({
+      key: `cur-${value}`,
+      label: value,
+      clear: () =>
+        update({ currency: filters.currency.filter((v) => v !== value) }),
+    })
+  }
   if (filters.maxTer != null) {
     pills.push({
       key: 'ter',
@@ -298,23 +223,4 @@ function buildPills(
   }
 
   return pills
-}
-
-function ChipGroup({
-  label,
-  children,
-}: {
-  label: string
-  children: ReactNode
-}) {
-  return (
-    <motion.div variants={fadeUpItem} className="space-y-2">
-      <span className="text-xs font-semibold text-foreground">{label}</span>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
-    </motion.div>
-  )
-}
-
-function Count({ n }: { n: number }) {
-  return <span className="text-xs opacity-50">{n}</span>
 }

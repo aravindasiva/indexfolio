@@ -10,6 +10,7 @@ const base: ScreenerFilters = {
   type: null,
   domicile: [],
   exchange: [],
+  currency: [],
   maxTer: null,
   minFundSize: null,
   sort: 'fundSizeEur',
@@ -26,6 +27,7 @@ describe('filtersToParams', () => {
       isAccumulating: undefined,
       domicile: undefined,
       exchange: undefined,
+      currency: undefined,
       maxTer: undefined,
       minFundSize: undefined,
       sort: 'fundSizeEur',
@@ -49,9 +51,11 @@ describe('filtersToParams', () => {
       ...base,
       domicile: ['IE', 'LU'],
       exchange: ['XETRA'],
+      currency: ['EUR', 'USD'],
     })
     expect(params.domicile).toBe('IE,LU')
     expect(params.exchange).toBe('XETRA')
+    expect(params.currency).toBe('EUR,USD')
   })
 
   it('trims search and drops it when blank', () => {

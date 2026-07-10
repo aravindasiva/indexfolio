@@ -25,8 +25,6 @@ export function KeyFacts({ etf }: { etf: Etf }) {
       label: 'Domicile',
       value: `${domicileLabel(etf.domicile)} (${etf.domicile})`,
     },
-    { label: 'Exchange', value: etf.exchange },
-    { label: 'Currency', value: etf.currency },
     {
       label: 'Type',
       value: etf.isAccumulating ? 'Accumulating' : 'Distributing',

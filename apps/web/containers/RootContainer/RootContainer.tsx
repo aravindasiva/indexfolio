@@ -8,6 +8,7 @@ import { MotionConfig } from 'framer-motion'
 import { Analytics } from '@vercel/analytics/next'
 import { Nav } from '@/components/Nav/Nav'
 import { Disclaimer } from '@/components/Disclaimer/Disclaimer'
+import { KonamiCat } from '@/components/KonamiCat/KonamiCat'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 /*
@@ -33,6 +34,7 @@ export function RootContainer({ children }: { children: ReactNode }) {
               <Nav />
               {children}
               <Disclaimer />
+              <KonamiCat />
             </MotionConfig>
             {/* Cookieless, GDPR-friendly page analytics (no consent banner). */}
             <Analytics />

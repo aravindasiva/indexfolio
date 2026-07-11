@@ -10,7 +10,8 @@ const TONES: Record<TagTone, string> = {
   amber: 'bg-warning/10 text-warning',
   emerald: 'bg-positive/10 text-positive',
   sky: 'bg-info/10 text-info',
-  neutral: 'bg-muted text-muted-foreground',
+  neutral:
+    'bg-foreground/5 text-muted-foreground ring-1 ring-inset ring-border',
 }
 
 export function Tag({

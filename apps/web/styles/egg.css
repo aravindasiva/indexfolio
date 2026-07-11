@@ -1,0 +1,78 @@
+/* Cat egg (see KonamiCat): while the cat is loose the whole UI swaps to retro dot-matrix fonts. The
+   woff2s are referenced only under html.egg-loose, so the browser fetches them on trigger, never at
+   load. Swap the leaf next/font vars, not the semantic tokens - everything resolves through them. */
+
+@font-face {
+  font-family: 'Bitcount Grid Double';
+  src: url('/fonts/bitcount-grid-double.woff2') format('woff2');
+  font-weight: 200 350;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Doto';
+  src: url('/fonts/doto.woff2') format('woff2');
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+html.egg-loose {
+  --font-syne: 'Bitcount Grid Double', system-ui, sans-serif;
+  --font-dm-sans: 'Doto', system-ui, sans-serif;
+  --font-mono: 'Doto', ui-monospace, monospace;
+}
+
+/* Dot-grid backdrop -> a crosshair (+) grid. Uniform (no vignette) for a blueprint feel; the colour
+   still tracks the theme through the mask over --dot-grid-color. */
+html.egg-loose .dot-grid {
+  background-image: none;
+  background-color: color-mix(in oklab, var(--dot-grid-color) 80%, transparent);
+  -webkit-mask-image: url('/egg/plus.svg');
+  mask-image: url('/egg/plus.svg');
+  -webkit-mask-size: 22px 22px;
+  mask-size: 22px 22px;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+}
+
+/* Spotlight -> the same + marks in primary, still tracking the pointer. Two masks (the + tile and the
+   cursor circle) intersect, so only pluses inside the circle light up. */
+html.egg-loose .dot-grid-spotlight {
+  background-image: none;
+  background-color: var(--dot-grid-spotlight-color);
+  -webkit-mask-image:
+    url('/egg/plus.svg'),
+    radial-gradient(
+      circle 170px at var(--spot-x, 50%) var(--spot-y, 50%),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 42%,
+      transparent 92%
+    );
+  mask-image:
+    url('/egg/plus.svg'),
+    radial-gradient(
+      circle 170px at var(--spot-x, 50%) var(--spot-y, 50%),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 42%,
+      transparent 92%
+    );
+  -webkit-mask-size:
+    22px 22px,
+    cover;
+  mask-size:
+    22px 22px,
+    cover;
+  -webkit-mask-repeat: repeat, no-repeat;
+  mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+/* Blocky corners: one scoped hammer instead of editing every rounded component. */
+html.egg-loose *,
+html.egg-loose *::before,
+html.egg-loose *::after {
+  border-radius: 0 !important;
+}

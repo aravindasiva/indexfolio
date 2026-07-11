@@ -84,36 +84,50 @@ export function DataTable<Row>({
   const cellPad = density === 'compact' ? 'px-3 py-2.5' : 'px-4 py-3.5'
   const visible = columns.filter((col) => !hiddenColumnIds.includes(col.id))
 
-  const cards = (
-    <div className="space-y-3">
-      {rows.map((row) => {
-        const href = getRowHref?.(row)
-        const body = renderCard ? (
-          renderCard(row)
-        ) : (
-          <AutoCard columns={visible} row={row} />
-        )
-        const surface = (
-          <Surface className="p-4 transition-colors hover:border-primary/40">
-            {body}
-          </Surface>
-        )
-        return href ? (
-          <Link key={getRowKey(row)} href={href} className="block no-underline">
-            {surface}
-          </Link>
-        ) : (
-          <div key={getRowKey(row)}>{surface}</div>
-        )
-      })}
-    </div>
-  )
+  const cardItems = rows.map((row) => {
+    const href = getRowHref?.(row)
+    const body = renderCard ? (
+      renderCard(row)
+    ) : (
+      <AutoCard columns={visible} row={row} />
+    )
+    const surface = (
+      <Surface className="h-full p-4 transition-colors hover:border-primary/40">
+        {body}
+      </Surface>
+    )
+    return href ? (
+      <Link
+        key={getRowKey(row)}
+        href={href}
+        className="block min-w-0 no-underline"
+      >
+        {surface}
+      </Link>
+    ) : (
+      <div key={getRowKey(row)} className="min-w-0">
+        {surface}
+      </div>
+    )
+  })
 
-  if (view === 'cards') return <div className={className}>{cards}</div>
+  // Card view fills a responsive grid on wider screens; the below-md table fallback stays a stack.
+  if (view === 'cards') {
+    return (
+      <div
+        className={cn(
+          'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3',
+          className,
+        )}
+      >
+        {cardItems}
+      </div>
+    )
+  }
 
   return (
     <div className={className}>
-      <div className="md:hidden">{cards}</div>
+      <div className="space-y-3 md:hidden">{cardItems}</div>
       <Surface className="hidden overflow-hidden md:block">
         <Table>
           <TableHeader>

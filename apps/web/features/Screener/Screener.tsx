@@ -11,6 +11,7 @@ import { Pagination } from '@/components/Pagination/Pagination'
 import { FilterSelect } from '@/components/FilterSelect/FilterSelect'
 import { ViewToggle } from '@/components/ViewToggle/ViewToggle'
 import { DensityToggle } from '@/components/DensityToggle/DensityToggle'
+import { CatTap } from '@/components/CatTap/CatTap'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { useTablePrefs } from '@/hooks/useTablePrefs'
@@ -101,9 +102,9 @@ export function Screener() {
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">
+            <CatTap className="font-medium text-foreground">
               {list.data.meta.total}
-            </span>{' '}
+            </CatTap>{' '}
             {list.data.meta.total === 1 ? 'ETF' : 'ETFs'}
           </p>
           {/* Table-only controls: hidden on mobile (always cards) and in card view. */}

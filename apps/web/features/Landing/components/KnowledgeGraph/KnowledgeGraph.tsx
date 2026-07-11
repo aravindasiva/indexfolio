@@ -6,11 +6,9 @@ import { motion } from 'framer-motion'
 import { nodes as graphNodes } from '@indexfolio/knowledge-graph'
 import { KnowledgeGraph2D } from './KnowledgeGraph2D'
 import { useGraphMode } from './utils/useGraphMode'
-import { useKonamiCode } from './utils/useKonamiCode'
-import { useLooseCat, setLooseCat } from './utils/looseCat'
+import { useLooseCat, setLooseCat } from '@/lib/looseCat'
 import { SUPERNOVA_EVENT, SUPERNOVA_DURATION_MS } from './utils/supernova'
 import { ParticleBurst } from './components/ParticleBurst/ParticleBurst'
-import { FloatingCat } from '@/components/FloatingCat/FloatingCat'
 
 // The 3D graph pulls in three.js, so it is lazy-loaded (and client-only). It is
 // only fetched when the device can actually use it - the 2D fallback ships in
@@ -30,48 +28,29 @@ const HOME_TAP_WINDOW = 2000
 export function KnowledgeGraph({ mode }: KnowledgeGraphProps) {
   const graphMode = useGraphMode()
 
-  // The easter egg lives here (not in either graph) so it fires the same way for
-  // 3D, 2D, desktop, and mobile. The graphs just report the secret trigger via
-  // onHomeActivate and (on 3D) explode in response to the supernova event.
+  // The cat egg is app-wide now (KonamiCat in RootContainer owns the code + the cat). The landing
+  // keeps its flourish: when the cat is unlocked while on this page - by the Konami code or the
+  // home-node taps below - the graph flashes a supernova and the 3D graph blasts apart.
   const looseCat = useLooseCat()
   const [burst, setBurst] = useState(false)
-
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [dims, setDims] = useState({ width: 0, height: 0 })
+  const prevLoose = useRef(looseCat)
 
   // Tap counting is kept in refs so each tap doesn't re-render the graph.
   const tapCount = useRef(0)
   const lastTap = useRef(0)
 
   useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const obs = new ResizeObserver((entries) => {
-      const rect = entries[0]?.contentRect
-      if (rect)
-        setDims({
-          width: Math.floor(rect.width),
-          height: Math.floor(rect.height),
-        })
-    })
-    obs.observe(el)
-    return () => obs.disconnect()
-  }, [])
-
-  const fireEgg = useCallback(() => {
-    // Already loose: do nothing until the user clicks the cat away.
-    if (looseCat) return
-    setBurst(true)
-    setLooseCat(true)
-    // Keep the burst mounted until the graph has eased back into place.
-    globalThis.setTimeout(() => setBurst(false), SUPERNOVA_DURATION_MS)
-    // The 3D graph listens for this and blasts itself apart (2D just ignores it).
-    globalThis.dispatchEvent(new Event(SUPERNOVA_EVENT))
+    if (looseCat && !prevLoose.current) {
+      setBurst(true)
+      // Keep the burst mounted until the graph has eased back into place.
+      globalThis.setTimeout(() => setBurst(false), SUPERNOVA_DURATION_MS)
+      // The 3D graph listens for this and blasts itself apart (2D just ignores it).
+      globalThis.dispatchEvent(new Event(SUPERNOVA_EVENT))
+    }
+    prevLoose.current = looseCat
   }, [looseCat])
 
-  useKonamiCode(fireEgg)
-
-  // Five quick taps on the home node = the same secret, for touch devices.
+  // Five quick taps on the home node = unlock, for touch devices (no keyboard for the Konami code).
   const handleHomeActivate = useCallback(() => {
     const now = Date.now()
     tapCount.current =
@@ -79,12 +58,8 @@ export function KnowledgeGraph({ mode }: KnowledgeGraphProps) {
     lastTap.current = now
     if (tapCount.current >= HOME_TAP_TARGET) {
       tapCount.current = 0
-      fireEgg()
+      setLooseCat(true)
     }
-  }, [fireEgg])
-
-  const handleCatLeave = useCallback(() => {
-    setLooseCat(false)
   }, [])
 
   return (
@@ -101,7 +76,7 @@ export function KnowledgeGraph({ mode }: KnowledgeGraphProps) {
         </ul>
       </nav>
 
-      <div ref={containerRef} className="relative">
+      <div className="relative">
         {graphMode === '3d' && (
           <KnowledgeGraph3D mode={mode} onHomeActivate={handleHomeActivate} />
         )}
@@ -131,14 +106,6 @@ export function KnowledgeGraph({ mode }: KnowledgeGraphProps) {
             />
             <ParticleBurst />
           </>
-        )}
-
-        {/* The cat drifts in, wanders the screen, and stays (across refreshes)
-            until you click it away. */}
-        {looseCat && dims.width > 0 && (
-          <div className="pointer-events-none absolute inset-0 z-30">
-            <FloatingCat size={80} area={dims} onLeave={handleCatLeave} />
-          </div>
         )}
       </div>
     </>

@@ -1,0 +1,89 @@
+/*
+  The blueprint dot-grid backdrop, the cursor spotlight that tracks the pointer, and the hero fade.
+  Dot colours switch per theme here; the utilities below consume them.
+*/
+:root {
+  /* Light needs more strength than dark to read on the near-white background. */
+  --dot-grid-color: color-mix(in oklab, var(--foreground) 19%, transparent);
+  --dot-grid-spotlight-color: color-mix(
+    in oklab,
+    var(--primary) 78%,
+    transparent
+  );
+}
+
+.dark {
+  /* Dark dots can be lighter than light mode's and still read. */
+  --dot-grid-color: color-mix(in oklab, var(--foreground) 14%, transparent);
+  --dot-grid-spotlight-color: color-mix(
+    in oklab,
+    var(--primary) 88%,
+    transparent
+  );
+}
+
+@keyframes indexfolio-pulse {
+  0%,
+  100% {
+    opacity: 0.06;
+  }
+  50% {
+    opacity: 0.14;
+  }
+}
+
+@layer utilities {
+  /* Fades the hero's starfield out toward the bottom so it dissolves into the page. Masking (not an
+     opaque band) lets the shared ambient background show through, so hero and tools read as one. */
+  .hero-fade-mask {
+    -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 96%);
+    mask-image: linear-gradient(to bottom, #000 70%, transparent 96%);
+  }
+
+  /* Dot grid: a radial-gradient on a 22px lattice, masked to a vignette so it concentrates behind
+     content and fades at the edges. Gives the glass something to frost without colour noise. */
+  .dot-grid {
+    background-image: radial-gradient(
+      var(--dot-grid-color) 1px,
+      transparent 1.5px
+    );
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      #000 45%,
+      transparent 100%
+    );
+    mask-image: radial-gradient(
+      ellipse 120% 100% at 50% 50%,
+      #000 45%,
+      transparent 100%
+    );
+  }
+
+  /* Cursor spotlight: primary dots revealed in a soft circle that tracks the pointer. */
+  .dot-grid-spotlight {
+    background-image: radial-gradient(
+      var(--dot-grid-spotlight-color) 1.5px,
+      transparent 2.2px
+    );
+    background-size: 22px 22px;
+    opacity: 0;
+    transition: opacity 300ms ease;
+    -webkit-mask-image: radial-gradient(
+      circle 170px at var(--spot-x, 50%) var(--spot-y, 50%),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 42%,
+      transparent 92%
+    );
+    mask-image: radial-gradient(
+      circle 170px at var(--spot-x, 50%) var(--spot-y, 50%),
+      #000 0%,
+      rgba(0, 0, 0, 0.5) 42%,
+      transparent 92%
+    );
+  }
+
+  .dot-grid-spotlight.is-active {
+    opacity: 1;
+  }
+}

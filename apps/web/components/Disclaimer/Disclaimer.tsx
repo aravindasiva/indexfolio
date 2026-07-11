@@ -4,6 +4,7 @@ import { useRef, useState, useSyncExternalStore } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Info, X } from 'lucide-react'
 import { Tooltip } from '@/components/Tooltip/Tooltip'
+import { ScrambleHint } from '@/components/ScrambleHint/ScrambleHint'
 
 const SESSION_KEY = 'indexfolio-disclaimer-dismissed'
 const UNLOCK_DURATION_S = 2.5
@@ -83,7 +84,11 @@ export function Disclaimer() {
           <div className="glass-surface pointer-events-auto inline-flex items-center gap-3 rounded-full px-4 py-2">
             <Info size={13} className="shrink-0 text-primary" />
             <p className="max-w-[54ch] text-xs italic leading-5 text-foreground/75">
-              Nothing here is financial advice. Always do your own research.
+              Nothing here is financial advice. Always do your{' '}
+              <ScrambleHint hint="you're onto something…">
+                own research
+              </ScrambleHint>
+              .
             </p>
 
             <Tooltip content="Yes, I understand 💜">

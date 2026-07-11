@@ -1,4 +1,6 @@
-import { Surface } from '@/components/Surface/Surface'
+import { PieChart, TrendingUp } from 'lucide-react'
+import { Reveal } from '@/components/Reveal/Reveal'
+import { CatTap } from '@/components/CatTap/CatTap'
 import { Tag } from '@/components/Tag/Tag'
 import { CopyButton } from '@/components/CopyButton/CopyButton'
 import type { Etf, EtfDetail } from '@/lib/api'
@@ -6,18 +8,20 @@ import {
   assetClassLabel,
   assetTone,
   domicileLabel,
-  DOMICILE_HINT,
   providerLabel,
-  TYPE_HINT,
 } from '@/lib/etf/labels'
 import { BackToResults } from './components/BackToResults/BackToResults'
 import { KeyFacts } from './components/KeyFacts/KeyFacts'
-import { Listings } from './components/Listings/Listings'
+import { QuickTake } from './components/QuickTake/QuickTake'
+import { WhereToBuy } from './components/WhereToBuy/WhereToBuy'
+import { Placeholder } from './components/Placeholder/Placeholder'
+import { GoodToKnow } from './components/GoodToKnow/GoodToKnow'
 import { RelatedEtfs } from './components/RelatedEtfs/RelatedEtfs'
 
 /*
-  Server-rendered; only BackButton and CopyButton are client islands. The
-  performance section is a placeholder until the scrapers land.
+  Fully server-rendered (BackButton + CopyButton are the only client islands). The story runs down
+  the left; key facts + tax pin to the right. Prices and holdings are laid-out slots that say
+  "coming soon" until their scrapers land. Every card is a Panel so the page reads as one system.
 */
 export function EtfDetail({
   etf,
@@ -27,74 +31,67 @@ export function EtfDetail({
   related: Etf[]
 }) {
   return (
-    <div className="space-y-8">
+    <Reveal className="space-y-6">
       <BackToResults />
+      <DetailHero etf={etf} />
+      <QuickTake etf={etf} />
 
-      <Surface className="p-6 sm:p-8">
-        <div className="flex flex-wrap items-center gap-2">
-          <Tag tone={assetTone(etf.assetClass)}>
-            {assetClassLabel(etf.assetClass)}
-          </Tag>
-          <Tag tone={etf.isAccumulating ? 'emerald' : 'sky'}>
-            {etf.isAccumulating ? 'Accumulating' : 'Distributing'}
-          </Tag>
-          {etf.isUcits && <Tag tone="neutral">UCITS</Tag>}
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-foreground/4 px-2 py-0.5 text-xs">
-            <span className="font-mono text-foreground">{etf.isin}</span>
-            <CopyButton
-              value={etf.isin}
-              label={`Copy ISIN ${etf.isin}`}
-              size="sm"
-            />
-          </span>
+      <div className="grid grid-cols-1 items-start gap-x-6 gap-y-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="space-y-4">
+          <WhereToBuy
+            listings={etf.listings}
+            matchedTicker={etf.matchedTicker}
+          />
+          <Placeholder icon={<TrendingUp />} title="Performance">
+            The latest quote, daily move, and a 1M / 1Y / 5Y / Max return chart
+            land with the price data.
+          </Placeholder>
+          <Placeholder icon={<PieChart />} title="Holdings">
+            Top holdings, and the split by sector, region and country, land with
+            the holdings data.
+          </Placeholder>
         </div>
 
-        <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          {etf.name}
-        </h1>
-
-        <p className="mt-2 text-muted-foreground">
-          <span className="font-semibold text-foreground">{etf.ticker}</span>
-          {` · ${providerLabel(etf.provider)} · ${domicileLabel(etf.domicile)} (${etf.domicile})`}
-        </p>
-
-        <div className="my-6 border-t border-border/60" />
-
-        <KeyFacts etf={etf} />
-      </Surface>
-
-      <Surface className="p-6">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Where to buy
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {etf.listings.length === 1
-            ? 'Trades on one exchange.'
-            : `Trades on ${etf.listings.length} exchanges - pick a venue.`}
-        </p>
-        <div className="mt-4">
-          <Listings listings={etf.listings} matchedTicker={etf.matchedTicker} />
-        </div>
-      </Surface>
-
-      <Surface className="p-6">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Performance
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Price and return history is on the way.
-        </p>
-      </Surface>
-
-      <Surface className="p-6">
-        <h2 className="font-display text-lg font-semibold text-foreground">
-          Tax and domicile
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">{DOMICILE_HINT}</p>
-        <p className="mt-2 text-sm text-muted-foreground">{TYPE_HINT}</p>
-      </Surface>
+        <aside className="order-first space-y-4 lg:order-0 lg:sticky lg:top-6">
+          <KeyFacts etf={etf} />
+          <GoodToKnow etf={etf} />
+        </aside>
+      </div>
 
       <RelatedEtfs etfs={related} />
+    </Reveal>
+  )
+}
+
+function DetailHero({ etf }: { etf: Etf }) {
+  return (
+    <div className="border-b border-border pb-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <Tag tone={assetTone(etf.assetClass)}>
+          {assetClassLabel(etf.assetClass)}
+        </Tag>
+        <Tag tone={etf.isAccumulating ? 'emerald' : 'sky'}>
+          {etf.isAccumulating ? 'Accumulating' : 'Distributing'}
+        </Tag>
+        {etf.isUcits && <Tag tone="neutral">UCITS</Tag>}
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-foreground/4 px-2 py-0.5 text-xs">
+          <span className="font-mono text-foreground">{etf.isin}</span>
+          <CopyButton
+            value={etf.isin}
+            label={`Copy ISIN ${etf.isin}`}
+            size="sm"
+          />
+        </span>
+      </div>
+
+      <h1 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        {etf.name}
+      </h1>
+
+      <p className="mt-2 text-muted-foreground">
+        <CatTap className="font-semibold text-foreground">{etf.ticker}</CatTap>
+        {` · ${providerLabel(etf.provider)} · ${domicileLabel(etf.domicile)} (${etf.domicile})`}
+      </p>
     </div>
   )
 }

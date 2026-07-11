@@ -1,0 +1,111 @@
+/*
+  Colour + type tokens - the design system palette.
+
+  @theme is what Tailwind turns into utilities (bg-primary, text-foreground, border-border, ...).
+  Values are LITERAL so the editor shows a colour swatch next to the class. Dark mode overrides the
+  same variables in one place (.dark, below). Never use @theme inline here - it would bake the value
+  into the utility and break theming.
+
+  Tints are opacity of a base colour, on a disciplined ladder: reach for /5 /10 /15 /20 /30 /40
+  (e.g. bg-primary/10 for a soft fill, border-positive/30). We do not define per-shade tokens.
+
+  --token aliases (in :root) let hand-written CSS, arbitrary values and inline styles use the same
+  colours via var(--primary) etc. - shadcn/Base-UI primitives and a few SVGs rely on them. They point
+  at --color-*, so they follow the theme automatically.
+*/
+@theme {
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-syne), system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+
+  /* Surfaces (light defaults; .dark overrides) */
+  --color-background: hsl(240 20% 98%);
+  --color-foreground: hsl(240 10% 4%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(240 10% 4%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(240 10% 4%);
+  --color-secondary: hsl(240 5% 96%);
+  --color-secondary-foreground: hsl(240 10% 4%);
+  --color-muted: hsl(240 5% 96%);
+  --color-muted-foreground: hsl(240 4% 46%);
+  --color-accent: hsl(240 5% 96%);
+  --color-accent-foreground: hsl(240 10% 4%);
+  --color-border: hsl(240 6% 90%);
+  --color-input: hsl(240 6% 90%);
+
+  /* Brand */
+  --color-primary: #635bff;
+  --color-primary-foreground: #ffffff;
+  --color-positive: #0e8a16;
+  --color-negative: #a32d2d;
+  --color-warning: #ba7517;
+  --color-info: #2f6fed;
+  --color-neutral: #888780;
+
+  /* Derived (reference a base colour; no swatch, rarely typed) */
+  --color-destructive: var(--color-negative);
+  --color-ring: var(--color-primary);
+  --color-chart-1: var(--color-primary);
+  --color-chart-2: var(--color-positive);
+  --color-chart-3: var(--color-warning);
+  --color-chart-4: var(--color-negative);
+  --color-chart-5: var(--color-neutral);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* Raw aliases (see file header). Defined once - they follow --color-* across themes. */
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --card: var(--color-card);
+  --card-foreground: var(--color-card-foreground);
+  --popover: var(--color-popover);
+  --popover-foreground: var(--color-popover-foreground);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--color-secondary);
+  --secondary-foreground: var(--color-secondary-foreground);
+  --muted: var(--color-muted);
+  --muted-foreground: var(--color-muted-foreground);
+  --accent: var(--color-accent);
+  --accent-foreground: var(--color-accent-foreground);
+  --border: var(--color-border);
+  --input: var(--color-input);
+  --ring: var(--color-ring);
+  --destructive: var(--color-destructive);
+  --positive: var(--color-positive);
+  --negative: var(--color-negative);
+  --warning: var(--color-warning);
+  --info: var(--color-info);
+  --neutral: var(--color-neutral);
+}
+
+/* Dark mode - the one place surface + brand colours switch. */
+.dark {
+  --color-background: hsl(240 10% 4%);
+  --color-foreground: hsl(0 0% 98%);
+  --color-card: hsl(240 8% 8%);
+  --color-card-foreground: hsl(0 0% 98%);
+  --color-popover: hsl(240 8% 8%);
+  --color-popover-foreground: hsl(0 0% 98%);
+  --color-secondary: hsl(240 6% 14%);
+  --color-secondary-foreground: hsl(0 0% 98%);
+  --color-muted: hsl(240 6% 14%);
+  --color-muted-foreground: hsl(240 5% 65%);
+  --color-accent: hsl(240 6% 14%);
+  --color-accent-foreground: hsl(0 0% 98%);
+  --color-border: hsl(0 0% 100% / 10%);
+  --color-input: hsl(0 0% 100% / 15%);
+
+  /* Brand, lightened for contrast on the dark surface */
+  --color-positive: #34d399;
+  --color-warning: #fbbf24;
+  --color-info: #60a5fa;
+  --color-neutral: #a1a1aa;
+}

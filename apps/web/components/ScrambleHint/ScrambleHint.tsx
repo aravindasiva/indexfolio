@@ -10,6 +10,32 @@ const SCRAMBLE_MS = 900
 const COOLDOWN_MS = 15000
 const TEASE_MS = 3000
 
+// Reveals text left-to-right; each not-yet-revealed, non-space char flips to a random glyph.
+function scrambleText(text: string, revealed: number) {
+  return text
+    .split('')
+    .map((ch, i) => (i < revealed || ch === ' ' ? ch : pick(GLYPHS)))
+    .join('')
+}
+
+// Runs the scramble-to-reveal over SCRAMBLE_MS via rAF; returns a cancel function.
+function runScramble(text: string, onFrame: (value: string | null) => void) {
+  const start = Date.now()
+  let raf = 0
+  const step = () => {
+    const elapsed = Date.now() - start
+    if (elapsed >= SCRAMBLE_MS) {
+      onFrame(null)
+      return
+    }
+    const revealed = Math.floor((elapsed / SCRAMBLE_MS) * text.length)
+    onFrame(scrambleText(text, revealed))
+    raf = requestAnimationFrame(step)
+  }
+  raf = requestAnimationFrame(step)
+  return () => cancelAnimationFrame(raf)
+}
+
 // A desktop decoy: on hover the text scrambles and a tooltip teases a secret - a breadcrumb, not the
 // real trigger. Hover-only; reduced-motion skips the scramble.
 export function ScrambleHint({
@@ -31,7 +57,7 @@ export function ScrambleHint({
     const el = ref.current
     if (!el) return
     let lastFired = 0
-    let raf = 0
+    let cancelScramble = () => {}
     let hideTimer: ReturnType<typeof setTimeout> | undefined
 
     const onEnter = () => {
@@ -41,30 +67,13 @@ export function ScrambleHint({
       setTeasing(true)
       hideTimer = globalThis.setTimeout(() => setTeasing(false), TEASE_MS)
       if (reduced) return
-
-      const start = now
-      const step = () => {
-        const elapsed = Date.now() - start
-        if (elapsed >= SCRAMBLE_MS) {
-          setScramble(null)
-          return
-        }
-        const revealed = Math.floor((elapsed / SCRAMBLE_MS) * children.length)
-        setScramble(
-          children
-            .split('')
-            .map((ch, i) => (i < revealed || ch === ' ' ? ch : pick(GLYPHS)))
-            .join(''),
-        )
-        raf = requestAnimationFrame(step)
-      }
-      raf = requestAnimationFrame(step)
+      cancelScramble = runScramble(children, setScramble)
     }
 
     el.addEventListener('mouseenter', onEnter)
     return () => {
       el.removeEventListener('mouseenter', onEnter)
-      cancelAnimationFrame(raf)
+      cancelScramble()
       clearTimeout(hideTimer)
     }
   }, [children, reduced])

@@ -3,7 +3,11 @@ import type { TagTone } from '@/components/Tag/Tag'
 const ASSET_CLASS_LABELS: Record<string, string> = {
   EQUITY: 'Equity',
   BOND: 'Bond',
+  COMMODITY: 'Commodity',
   REAL_ESTATE: 'Real estate',
+  MULTI_ASSET: 'Multi-asset',
+  MONEY_MARKET: 'Money market',
+  CRYPTO: 'Crypto',
 }
 
 export function assetClassLabel(value: string): string {
@@ -13,7 +17,9 @@ export function assetClassLabel(value: string): string {
 const ASSET_TONES: Record<string, TagTone> = {
   EQUITY: 'indigo',
   BOND: 'amber',
+  COMMODITY: 'sky',
   REAL_ESTATE: 'emerald',
+  CRYPTO: 'sky',
 }
 
 export function assetTone(value: string): TagTone {

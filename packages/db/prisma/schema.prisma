@@ -43,18 +43,19 @@ model ETF {
 // One row per exchange a fund trades on. The same fund lists on many venues with
 // different tickers and currencies (IE00B4L5Y983 = EUNL@Xetra = SWDA@London).
 model Listing {
-  id          String    @id @default(cuid())
-  etfId       String
-  etf         ETF       @relation(fields: [etfId], references: [id])
-  exchangeMic String
-  exchange    Exchange  @relation(fields: [exchangeMic], references: [mic])
-  ticker      String
-  currency    String
-  isPrimary   Boolean   @default(false)
-  yahooSymbol String?
-  source      String?
-  fetchedAt   DateTime?
-  prices      Price[]
+  id                 String    @id @default(cuid())
+  etfId              String
+  etf                ETF       @relation(fields: [etfId], references: [id])
+  exchangeMic        String
+  exchange           Exchange  @relation(fields: [exchangeMic], references: [mic])
+  ticker             String
+  currency           String
+  isPrimary          Boolean   @default(false)
+  yahooSymbol        String?
+  source             String?
+  fetchedAt          DateTime?
+  pricesBackfilledAt DateTime?
+  prices             Price[]
 
   @@unique([etfId, exchangeMic, currency])
   @@unique([exchangeMic, ticker])
@@ -94,10 +95,13 @@ model Holding {
 model Price {
   id        String   @id @default(cuid())
   listingId String
-  listing   Listing  @relation(fields: [listingId], references: [id])
-  date      DateTime
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
   close     Decimal
+  adjClose  Decimal
   currency  String
+  source    String?
+  fetchedAt DateTime @default(now())
 
   @@unique([listingId, date])
 }

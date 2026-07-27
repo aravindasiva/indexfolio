@@ -13,6 +13,7 @@ const mockPrimaryListing = {
   yahooSymbol: null,
   source: 'seed',
   fetchedAt: null,
+  pricesBackfilledAt: null,
   exchange: mockExchange,
 }
 
@@ -56,6 +57,7 @@ const parisListing = {
   yahooSymbol: null,
   source: 'seed',
   fetchedAt: null,
+  pricesBackfilledAt: null,
   exchange: { mic: 'XPAR', name: 'Euronext Paris', aliases: [] },
 }
 const xetraListing = {

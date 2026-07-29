@@ -55,6 +55,8 @@ model Listing {
   source             String?
   fetchedAt          DateTime?
   pricesBackfilledAt DateTime?
+  // The venue whose full history powers the chart; stable + decoupled from isPrimary (display).
+  isPriceAnchor      Boolean   @default(false)
   prices             Price[]
 
   @@unique([etfId, exchangeMic, currency])
@@ -93,7 +95,6 @@ model Holding {
 }
 
 model Price {
-  id        String   @id @default(cuid())
   listingId String
   listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
   date      DateTime @db.Date
@@ -103,7 +104,8 @@ model Price {
   source    String?
   fetchedAt DateTime @default(now())
 
-  @@unique([listingId, date])
+  // No surrogate id: (listingId, date) is the natural key and the time-series index.
+  @@id([listingId, date])
 }
 
 model ExchangeRate {

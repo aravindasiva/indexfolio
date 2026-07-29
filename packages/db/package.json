@@ -1,6 +1,6 @@
 {
   "name": "@indexfolio/db",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Prisma schema, migrations, and typed client for Indexfolio - open-source ETF tools for European passive investors.",
   "keywords": [
     "indexfolio",

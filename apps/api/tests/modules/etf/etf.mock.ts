@@ -14,6 +14,7 @@ const mockPrimaryListing = {
   source: 'seed',
   fetchedAt: null,
   pricesBackfilledAt: null,
+  isPriceAnchor: false,
   exchange: mockExchange,
 }
 
@@ -58,6 +59,7 @@ const parisListing = {
   source: 'seed',
   fetchedAt: null,
   pricesBackfilledAt: null,
+  isPriceAnchor: false,
   exchange: { mic: 'XPAR', name: 'Euronext Paris', aliases: [] },
 }
 const xetraListing = {

@@ -5,5 +5,6 @@ export default defineConfig({
   format: ['cjs'],
   clean: true,
   sourcemap: true,
-  external: ['@prisma/client'],
+  // @sentry/node stays external; the SDK relies on OpenTelemetry and misbehaves when bundled.
+  external: ['@prisma/client', '@sentry/node'],
 })

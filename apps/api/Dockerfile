@@ -60,4 +60,4 @@ ENV NODE_ENV=production
 EXPOSE 3001
 
 # Run pending migrations (schema lives in the @indexfolio/db package) then start.
-CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --schema node_modules/@indexfolio/db/prisma/schema.prisma && node dist/server.js"]
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy --schema node_modules/@indexfolio/db/prisma/schema.prisma && node --enable-source-maps dist/server.js"]

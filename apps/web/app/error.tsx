@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { ErrorPage } from '@/components/Error/ErrorPage'
 
-// Next's error boundary: log the error, then render the styled ErrorPage.
+// Next's error boundary: log the error, then render the styled ErrorPage
 type ErrorBoundaryProps = {
   error: Error & { digest?: string }
   reset: () => void

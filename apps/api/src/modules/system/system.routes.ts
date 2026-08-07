@@ -35,4 +35,17 @@ export async function systemRoutes(fastify: FastifyInstance): Promise<void> {
       return result
     },
   )
+
+  // Guarded smoke test: throws on demand so you can confirm errors reach Sentry.
+  // 404 unless the correct SENTRY_DEBUG_TOKEN is passed, so it is safe in production.
+  fastify.get('/debug-sentry', async (request, reply) => {
+    const token = (request.query as { token?: string }).token
+    if (
+      !process.env.SENTRY_DEBUG_TOKEN ||
+      token !== process.env.SENTRY_DEBUG_TOKEN
+    ) {
+      return reply.callNotFound()
+    }
+    throw new Error('Sentry smoke test (API)')
+  })
 }

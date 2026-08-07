@@ -1,16 +1,21 @@
 import Fastify, { type FastifyError } from 'fastify'
+import * as Sentry from '@sentry/node'
 import {
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
 import { env } from './shared/config/env.js'
 import { AppError, ErrorCode } from './shared/error.js'
+import { initSentry } from './shared/sentry.js'
 import dbPlugin from './plugins/db.js'
 import redisPlugin from './plugins/redis.js'
 import securityPlugin from './plugins/security.js'
 import swaggerPlugin from './plugins/swagger.js'
 import { systemRoutes } from './modules/system/system.routes.js'
 import { etfRoutes } from './modules/etf/etf.routes.js'
+
+// Start error reporting before anything else runs.
+initSentry()
 
 const server = Fastify({
   logger:
@@ -21,6 +26,8 @@ const server = Fastify({
 
 server.setValidatorCompiler(validatorCompiler)
 server.setSerializerCompiler(serializerCompiler)
+
+Sentry.setupFastifyErrorHandler(server)
 
 server.setErrorHandler<FastifyError>((error, _request, reply) => {
   if (error instanceof AppError) {
@@ -35,6 +42,8 @@ server.setErrorHandler<FastifyError>((error, _request, reply) => {
     })
   }
 
+  // Only unexpected errors reach here; AppError and validation are handled above.
+  Sentry.captureException(error)
   server.log.error(error)
   return reply.status(500).send({
     error: {

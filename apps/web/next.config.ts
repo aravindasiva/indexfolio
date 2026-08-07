@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next'
+import { withSentryConfig } from '@sentry/nextjs'
 
 // Security headers applied to every route. Set here rather than in vercel.json so
 // they are portable: they apply in local dev, on Vercel, and anywhere we might
@@ -46,4 +47,17 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default nextConfig
+// Wraps the config to upload source maps at build time and instrument the app.
+// Source maps only upload when SENTRY_AUTH_TOKEN is present (CI), so local builds are unaffected.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Quiet unless in CI, and don't send build telemetry to Sentry.
+  silent: !process.env.CI,
+  telemetry: false,
+  // Wider client map upload for prettier browser stack traces.
+  widenClientFileUpload: true,
+  // Proxy browser events through our own origin so ad-blockers don't drop them.
+  tunnelRoute: '/monitoring',
+})

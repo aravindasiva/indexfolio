@@ -39,6 +39,12 @@ jobs:
         run: pnpm exec vercel pull --yes --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build project
+        # Sentry source-map upload runs inside `next build` (via withSentryConfig).
+        # It only uploads when SENTRY_AUTH_TOKEN is present, so this is a no-op until set.
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
         run: pnpm exec vercel build ${{ inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy

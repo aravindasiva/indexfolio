@@ -10,6 +10,11 @@ const envSchema = z.object({
   NODE_ENV: z
     .enum(['development', 'test', 'production'])
     .default('development'),
+  // Sentry (optional): instrument.ts reads these before this module loads, so they
+  // are declared here only for validation and documentation. No DSN = Sentry is off.
+  SENTRY_DSN: z.string().url().optional(),
+  SENTRY_ENVIRONMENT: z.string().optional(),
+  SENTRY_RELEASE: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)

@@ -115,3 +115,54 @@ jobs:
     with:
       environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
     secrets: inherit
+
+  notify-digest:
+    name: '📮 Posting to #platform-digest'
+    needs: [deploy-api, deploy-web]
+    # Production only, and only when a service actually shipped (not skipped), so the muted
+    # digest stays a high-signal record of prod releases. Isolated job, so it never blocks a deploy.
+    if: |
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      (needs.deploy-api.result != 'skipped' || needs.deploy-web.result != 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post deploy summary to Discord
+        env:
+          WEBHOOK: ${{ secrets.DISCORD_PLATFORM_DIGEST_WEBHOOK }}
+          API_RESULT: ${{ needs.deploy-api.result }}
+          WEB_RESULT: ${{ needs.deploy-web.result }}
+          SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          # No webhook yet? Skip quietly rather than fail a good deploy.
+          if [ -z "$WEBHOOK" ]; then
+            echo "::warning::DISCORD_PLATFORM_DIGEST_WEBHOOK not set - skipping digest post"
+            exit 0
+          fi
+          mark() {
+            case "$1" in
+              success) printf '✅' ;;
+              failure) printf '❌' ;;
+              cancelled) printf '🚫' ;;
+              *) printf '•' ;;
+            esac
+          }
+          lines=""
+          append() { lines="${lines}$1"$'\n'; }
+          if [ "$API_RESULT" != "skipped" ]; then
+            append "$(mark "$API_RESULT") **API** → https://api.indexfolio.dev"
+          fi
+          if [ "$WEB_RESULT" != "skipped" ]; then
+            append "$(mark "$WEB_RESULT") **Web** → https://www.indexfolio.dev"
+          fi
+          color=5763719
+          case "$API_RESULT $WEB_RESULT" in
+            *failure*|*cancelled*) color=15548997 ;;
+          esac
+          desc="${lines}"$'\n'"by \`${ACTOR}\` | [run](${RUN_URL}) | \`${SHA:0:7}\`"
+          jq -n --arg t '🚀 Platform deployed to production' --arg d "$desc" --argjson c "$color" \
+            '{embeds:[{title:$t, description:$d, color:$c}]}' \
+            | curl -sS -H 'Content-Type: application/json' -d @- "$WEBHOOK" -o /dev/null -w 'discord: %{http_code}\n' \
+            || echo "::warning::failed to post to #platform-digest"

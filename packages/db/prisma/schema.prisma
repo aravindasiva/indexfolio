@@ -16,28 +16,47 @@ generator client {
 // A fund, identified by its ISIN. Accumulating and distributing share classes have
 // different ISINs, so they are separate rows. Exchange-specific data lives in Listing.
 model ETF {
-  id               String    @id @default(cuid())
-  isin             String    @unique
-  name             String
-  domicile         String
-  ter              Decimal
-  fundSize         BigInt
-  fundSizeCurrency String
-  fundSizeEur      BigInt
-  isAccumulating   Boolean
-  isUcits          Boolean
-  indexTracked     String?
-  assetClass       String?
-  provider         String
-  inceptionDate    DateTime?
-  kiidUrl          String?
-  source           String?
-  fetchedAt        DateTime?
-  lastMetadataSync DateTime?
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  listings         Listing[]
-  holdings         Holding[]
+  id                String             @id @default(cuid())
+  isin              String             @unique
+  name              String
+  domicile          String
+  // The fund's own Legal Entity Identifier, from FIRDS (joins to GLEIF for name + domicile).
+  lei               String?
+  // Nullable: FIRDS carries no TER; the figure is parsed from the PRIIPs KID later.
+  ter               Decimal?
+  // Nullable: no free redistributable AUM source, so this is display-only via issuer deep-link.
+  fundSize          BigInt?
+  fundSizeCurrency  String?
+  fundSizeEur       BigInt?
+  isAccumulating    Boolean
+  isUcits           Boolean
+  indexTracked      String?
+  assetClass        String?
+  // How the fund tracks its index; classified from the KID, so it lands after the spine.
+  replicationMethod ReplicationMethod?
+  replicationAsOf   DateTime?
+  provider          String
+  inceptionDate     DateTime?
+  kiidUrl           String?
+  // The PRIIPs KID (source of the TER + replication facts); supersedes the legacy kiidUrl.
+  kidUrl            String?
+  terAsOf           DateTime?
+  terSourceUrl      String?
+  source            String?
+  fetchedAt         DateTime?
+  lastMetadataSync  DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  listings          Listing[]
+  holdings          Holding[]
+}
+
+// How a fund replicates its index. First Prisma enum in the schema; three stable,
+// well-defined values classified from the PRIIPs KID.
+enum ReplicationMethod {
+  PHYSICAL_FULL
+  PHYSICAL_SAMPLING
+  SYNTHETIC
 }
 
 // One row per exchange a fund trades on. The same fund lists on many venues with
